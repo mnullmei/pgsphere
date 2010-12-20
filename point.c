@@ -214,7 +214,11 @@
     dret[0] = Float8GetDatumFast(v.x);
     dret[1] = Float8GetDatumFast(v.y);
     dret[2] = Float8GetDatumFast(v.z);
-    result = construct_array ( dret , 3, FLOAT8OID, sizeof(float8), false /* float8 byval */ , 'd' );
+	#ifdef FLOAT8PASSBYVAL
+		result = construct_array ( dret , 3, FLOAT8OID, sizeof(float8), FLOAT8PASSBYVAL, 'd');
+	#else
+        result = construct_array ( dret , 3, FLOAT8OID, sizeof(float8), false /* float8 byval */ , 'd' );
+	#endif
     PG_RETURN_ARRAYTYPE_P(result);                                                                                                          
   }
 

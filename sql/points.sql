@@ -164,6 +164,10 @@ SELECT lat('(24h 2m 30s ,90d 0m 0s)'::spoint);
 
 SELECT lat('(24h 2m 30s ,-90d 0m 0s)'::spoint);
 
+-- xyz(spoint)
+
+SELECT array_dims( xyz ( spoint '(0d,-90d)' ) ); -- bug 1010841
+
 -- operators for points -------------
 
 -- = operator -----------------------
