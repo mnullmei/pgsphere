@@ -1,3 +1,6 @@
+#ifndef __PGS_KEY_H__
+#define __PGS_KEY_H__
+
 #include "types.h"
 
 /*!
@@ -14,6 +17,33 @@
 */
 #define MAXCVALUE ( ( 1 << ( 8*BPCKSIZE - 2 ) ) - 1 )
 
+typedef struct
+{
+	int32		vl_len_;
+	union
+	{
+		struct
+		{
+			float4 lat, lng;
+		};
+		struct
+		{
+			int32 k[6];
+		};
+	};
+} GiSTSPointKey;
+
+#define INTERNAL_KEY_SIZE (VARHDRSZ + sizeof(int32) * 6)
+#define LEAF_KEY_SIZE (VARHDRSZ + sizeof(float4) * 2)
+#define IS_LEAF(key) (VARSIZE(key) == LEAF_KEY_SIZE)
+#define ALLOC_LEAF_KEY(key) do { \
+	key = (GiSTSPointKey *)palloc0(LEAF_KEY_SIZE); \
+	SET_VARSIZE(key, LEAF_KEY_SIZE); \
+} while (0) ;
+#define ALLOC_INTERNAL_KEY(key) do { \
+	key = (GiSTSPointKey *)palloc0(INTERNAL_KEY_SIZE); \
+	SET_VARSIZE(key, INTERNAL_KEY_SIZE); \
+} while (0) ;
 
   /*!
     \brief Union the both keys and returns it.
@@ -195,3 +225,5 @@
     \see skey_cmp( const int32 *, const int32 * )
   */
   Datum  spherebox_cmp(PG_FUNCTION_ARGS);
+
+#endif

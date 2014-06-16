@@ -1131,7 +1131,7 @@
 
     size = offsetof(SPOLY, p[0]) + sizeof(SPoint) * ( poly->npts + 1 );
     poly_new = palloc( size );
-    memcpy( (void*) poly , (void*) poly_new, VARSIZE(poly) );
+    memcpy( (void*) poly_new , (void*) poly, VARSIZE(poly) );
     poly_new->npts++;
 
 #if PG_VERSION_NUM < 80300

@@ -1,8 +1,8 @@
-
 MODULE_big = pg_sphere
 OBJS       = sscan.o sparse.o sbuffer.o vector3d.o point.o \
              euler.o circle.o line.o ellipse.o polygon.o \
-             path.o box.o output.o gq_cache.o gist.o key.o
+             path.o box.o output.o gq_cache.o gist.o key.o \
+             crossmatch.o
 
 DATA_built  = pg_sphere.sql
 DOCS        = README.pg_sphere COPYRIGHT.pg_sphere
@@ -14,7 +14,7 @@ CRUSH_TESTS  = init_extended circle_extended
 # order of sql files is important
 PGS_SQL    =  pgs_types.sql pgs_point.sql pgs_euler.sql pgs_circle.sql \
    pgs_line.sql pgs_ellipse.sql pgs_polygon.sql pgs_path.sql \
-   pgs_box.sql pgs_gist.sql
+   pgs_box.sql pgs_gist.sql pgs_crossmatch.sql
 
 ifdef USE_PGXS
   ifndef PG_CONFIG
@@ -30,7 +30,7 @@ else
   include $(top_srcdir)/contrib/contrib-global.mk
 endif
 
-PGVERSION += $(shell $(PG_CONFIG) --version | sed 's,^PostgreSQL[[:space:]]\+\([0-9]\+\.[0-9]\+\.[0-9]\+\),\1,g' | awk '{ split($$1,a,"."); printf( "v%d%02d%02d" ,a[1], a[2], a[3]); }' )
+PGVERSION += $(shell $(PG_CONFIG) --version | sed 's,^PostgreSQL[[:space:]][[:space:]]*,,' | awk '{ split($$1,a,"."); printf( "v%02d%02d%02d" ,a[1], a[2], a[3]); }' )
 
 crushtest: REGRESS += $(CRUSH_TESTS)
 crushtest: installcheck

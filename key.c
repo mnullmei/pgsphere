@@ -314,15 +314,13 @@
 
   int32 * spherepoly_gen_key ( int32 * key , const SPOLY * sp )
   {
-      static int32   i,k,r;
-      static SLine       l;
+      static int32   i;
+      static SLine   l;
       static int32   tk[6];
       bool   start = TRUE;
 
       for ( i=0; i<sp->npts; i++ ){
-        for ( k=i+1; i<sp->npts; i++ ){
-          r=((k==sp->npts)?(0):(k));
-          sline_from_points ( &l, &sp->p[i], &sp->p[r] );
+          sline_from_points ( &l, &sp->p[i], &sp->p[(i+1) % sp->npts] );
           sphereline_gen_key ( &tk[0] , &l );
           if ( start ){   
             start = FALSE;
@@ -335,7 +333,6 @@
             key[4] = max(key[4],tk[4]);
             key[5] = max(key[5],tk[5]);
           }
-        }
       }
 
       return key;

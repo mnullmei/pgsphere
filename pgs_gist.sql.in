@@ -22,32 +22,71 @@ CREATE TYPE spherekey (
 );
 
 
+CREATE FUNCTION pointkey_in(CSTRING)
+   RETURNS pointkey
+   AS 'MODULE_PATHNAME', 'pointkey_in'
+   LANGUAGE 'c'     
+   WITH (isstrict,iscachable);
+
+
+CREATE FUNCTION pointkey_out(pointkey)
+   RETURNS CSTRING
+   AS 'MODULE_PATHNAME', 'pointkey_out'
+   LANGUAGE 'c'   
+   WITH (isstrict,iscachable);
+
+CREATE FUNCTION pointkey_volume(pointkey)
+   RETURNS float8
+   AS 'MODULE_PATHNAME', 'pointkey_volume'
+   LANGUAGE 'c'   
+   WITH (isstrict,iscachable);
+
+CREATE FUNCTION pointkey_area(pointkey)
+   RETURNS float8
+   AS 'MODULE_PATHNAME', 'pointkey_area'
+   LANGUAGE 'c'   
+   WITH (isstrict,iscachable);
+
+CREATE FUNCTION pointkey_perimeter(pointkey)
+   RETURNS float8
+   AS 'MODULE_PATHNAME', 'pointkey_perimeter'
+   LANGUAGE 'c'   
+   WITH (isstrict,iscachable);
+
+CREATE TYPE pointkey (
+   input = pointkey_in,
+   output = pointkey_out,
+   internallength = -1,
+   ALIGNMENT = int4,
+   STORAGE = PLAIN
+);
+
 -- GIST common
 
 CREATE FUNCTION g_spherekey_decompress(internal)
    RETURNS internal
    AS 'MODULE_PATHNAME' , 'g_spherekey_decompress'
-   LANGUAGE 'C';   
+   LANGUAGE 'c';   
 
 CREATE FUNCTION g_spherekey_union(bytea, internal)
    RETURNS spherekey
    AS 'MODULE_PATHNAME' , 'g_spherekey_union'
-   LANGUAGE 'C';   
+   LANGUAGE 'c';   
 
 CREATE FUNCTION g_spherekey_penalty (internal,internal,internal)
    RETURNS internal
    AS 'MODULE_PATHNAME' , 'g_spherekey_penalty'
-   LANGUAGE 'C' with (isstrict);
+   LANGUAGE 'c' with (isstrict);
 
 CREATE FUNCTION g_spherekey_picksplit(internal, internal)
    RETURNS internal
    AS 'MODULE_PATHNAME' , 'g_spherekey_picksplit'
-   LANGUAGE 'C';
+   LANGUAGE 'c';
 
 CREATE FUNCTION g_spherekey_same (spherekey,spherekey,internal)
    RETURNS internal
    AS 'MODULE_PATHNAME' , 'g_spherekey_same'
-   LANGUAGE 'C';
+   LANGUAGE 'c';
 
 
 
@@ -56,22 +95,22 @@ CREATE FUNCTION g_spherekey_same (spherekey,spherekey,internal)
 CREATE FUNCTION g_spoint_compress(internal)
    RETURNS internal
    AS 'MODULE_PATHNAME' , 'g_spoint_compress'
-   LANGUAGE 'C';   
+   LANGUAGE 'c';   
 
 
---ifversion < v80400
+--ifversion < v080400
 CREATE FUNCTION g_spoint_consistent(internal, internal, int4)
 --elseversion
 CREATE FUNCTION g_spoint_consistent(internal, internal, int4, oid, internal)
 --endifversion
    RETURNS internal
    AS 'MODULE_PATHNAME' , 'g_spoint_consistent'
-   LANGUAGE 'C';   
+   LANGUAGE 'c';   
 
 
 CREATE OPERATOR CLASS spoint
    DEFAULT FOR TYPE spoint USING gist AS
---ifversion < v80400
+--ifversion < v080400
    OPERATOR   1 = (spoint, spoint) RECHECK,
    OPERATOR  11 @ (spoint, scircle) RECHECK,
    OPERATOR  12 @ (spoint, sline) RECHECK,
@@ -98,28 +137,83 @@ CREATE OPERATOR CLASS spoint
    FUNCTION  7 g_spherekey_same (spherekey, spherekey, internal),
    STORAGE   spherekey;
 
+-- create the next generation operator class for spherical points
 
+CREATE FUNCTION g_spoint2_union(bytea, internal)
+   RETURNS spherekey
+   AS 'MODULE_PATHNAME' , 'g_spoint2_union'
+   LANGUAGE 'c';   
+
+CREATE FUNCTION g_spoint2_penalty (internal, internal, internal)
+   RETURNS internal
+   AS 'MODULE_PATHNAME' , 'g_spoint2_penalty'
+   LANGUAGE 'c' with (isstrict);
+
+CREATE FUNCTION g_spoint2_picksplit(internal, internal)
+   RETURNS internal
+   AS 'MODULE_PATHNAME' , 'g_spoint2_picksplit'
+   LANGUAGE 'c';
+
+CREATE FUNCTION g_spoint2_same (bytea, bytea, internal)
+   RETURNS internal
+   AS 'MODULE_PATHNAME' , 'g_spoint2_same'
+   LANGUAGE 'c';
+
+CREATE FUNCTION g_spoint2_compress(internal)
+   RETURNS internal
+   AS 'MODULE_PATHNAME' , 'g_spoint2_compress'
+   LANGUAGE 'c';   
+
+CREATE FUNCTION g_spoint2_consistent(internal, internal, int4, oid, internal)
+   RETURNS internal
+   AS 'MODULE_PATHNAME' , 'g_spoint2_consistent'
+   LANGUAGE 'c';   
+
+CREATE FUNCTION g_spoint2_distance(internal, internal, int4, oid)
+   RETURNS float8
+   AS 'MODULE_PATHNAME' , 'g_spoint2_distance'
+   LANGUAGE 'c';   
+
+CREATE OPERATOR CLASS spoint2
+   FOR TYPE spoint USING gist AS
+   OPERATOR   1 = (spoint, spoint),
+   OPERATOR  11 @ (spoint, scircle),
+   OPERATOR  12 @ (spoint, sline),
+   OPERATOR  13 @ (spoint, spath),
+   OPERATOR  14 @ (spoint, spoly),
+   OPERATOR  15 @ (spoint, sellipse),
+   OPERATOR  16 @ (spoint, sbox),
+   OPERATOR  100 <-> (spoint, spoint) FOR ORDER BY float_ops,
+   FUNCTION  1 g_spoint2_consistent (internal, internal, int4, oid, internal),
+   FUNCTION  2 g_spoint2_union (bytea, internal),
+   FUNCTION  3 g_spoint2_compress (internal),
+   FUNCTION  4 g_spherekey_decompress (internal),
+   FUNCTION  5 g_spoint2_penalty (internal, internal, internal),
+   FUNCTION  6 g_spoint2_picksplit (internal, internal),
+   FUNCTION  7 g_spoint2_same (bytea, bytea, internal),
+   FUNCTION  8 g_spoint2_distance (internal, internal, int4, oid),
+   STORAGE   pointkey;
 
 -- create the operator class for spherical circle
 
 CREATE FUNCTION g_scircle_compress(internal)
    RETURNS internal
    AS 'MODULE_PATHNAME' , 'g_scircle_compress'
-   LANGUAGE 'C';   
+   LANGUAGE 'c';   
 
 
---ifversion < v80400
+--ifversion < v080400
 CREATE FUNCTION g_scircle_consistent(internal, internal, int4)
 --elseversion
 CREATE FUNCTION g_scircle_consistent(internal, internal, int4, oid, internal)
 --endifversion
    RETURNS internal
    AS 'MODULE_PATHNAME' , 'g_scircle_consistent'
-   LANGUAGE 'C';   
+   LANGUAGE 'c';   
 
 CREATE OPERATOR CLASS scircle
    DEFAULT FOR TYPE scircle USING gist AS
---ifversion < v80400
+--ifversion < v080400
    OPERATOR   1 =  (scircle, scircle) RECHECK,
    OPERATOR  11 @  (scircle, scircle) RECHECK,
    OPERATOR  12 @  (scircle, spoly) RECHECK,
@@ -175,21 +269,21 @@ CREATE OPERATOR CLASS scircle
 CREATE FUNCTION g_sline_compress(internal)
    RETURNS internal
    AS 'MODULE_PATHNAME' , 'g_sline_compress'
-   LANGUAGE 'C';   
+   LANGUAGE 'c';   
 
---ifversion < v80400
+--ifversion < v080400
 CREATE FUNCTION g_sline_consistent(internal, internal, int4)
 --elseversion
 CREATE FUNCTION g_sline_consistent(internal, internal, int4, oid, internal)
 --endifversion
    RETURNS internal
    AS 'MODULE_PATHNAME' , 'g_sline_consistent'
-   LANGUAGE 'C';
+   LANGUAGE 'c';
 
 
 CREATE OPERATOR CLASS sline
    DEFAULT FOR TYPE sline USING gist AS
---ifversion < v80400
+--ifversion < v080400
    OPERATOR   1 =  (sline, sline) RECHECK,
    OPERATOR   2 #  (sline, sline) RECHECK,
    OPERATOR  11 @  (sline, scircle) RECHECK,
@@ -233,20 +327,20 @@ CREATE OPERATOR CLASS sline
 CREATE FUNCTION g_sellipse_compress(internal)
    RETURNS internal
    AS 'MODULE_PATHNAME' , 'g_sellipse_compress'
-   LANGUAGE 'C';   
+   LANGUAGE 'c';   
  
---ifversion < v80400
+--ifversion < v080400
  CREATE FUNCTION g_sellipse_consistent(internal, internal, int4)
 --elseversion
  CREATE FUNCTION g_sellipse_consistent(internal, internal, int4, oid, internal)
 --endifversion
    RETURNS internal
    AS 'MODULE_PATHNAME' , 'g_sellipse_consistent'
-   LANGUAGE 'C';
+   LANGUAGE 'c';
  
 CREATE OPERATOR CLASS sellipse
    DEFAULT FOR TYPE sellipse USING gist AS
---ifversion < v80400
+--ifversion < v080400
    OPERATOR   1 =  (sellipse, sellipse) RECHECK,
    OPERATOR  11 @  (sellipse, scircle) RECHECK,
    OPERATOR  12 @  (sellipse, spoly) RECHECK,
@@ -300,21 +394,21 @@ CREATE OPERATOR CLASS sellipse
 CREATE FUNCTION g_spoly_compress(internal)
    RETURNS internal
    AS 'MODULE_PATHNAME' , 'g_spoly_compress'
-   LANGUAGE 'C';   
+   LANGUAGE 'c';   
  
---ifversion < v80400
+--ifversion < v080400
 CREATE FUNCTION g_spoly_consistent(internal, internal, int4)
 --elseversion
 CREATE FUNCTION g_spoly_consistent(internal, internal, int4, oid, internal)
 --endifversion
    RETURNS internal
    AS 'MODULE_PATHNAME' , 'g_spoly_consistent'
-   LANGUAGE 'C';
+   LANGUAGE 'c';
  
  
 CREATE OPERATOR CLASS spoly
    DEFAULT FOR TYPE spoly USING gist AS
---ifversion < v80400
+--ifversion < v080400
    OPERATOR   1 =  (spoly, spoly) RECHECK,
    OPERATOR  11 @  (spoly, scircle) RECHECK,
    OPERATOR  12 @  (spoly, spoly) RECHECK,
@@ -369,21 +463,21 @@ CREATE OPERATOR CLASS spoly
 CREATE FUNCTION g_spath_compress(internal)
    RETURNS internal
    AS 'MODULE_PATHNAME' , 'g_spath_compress'
-   LANGUAGE 'C';   
+   LANGUAGE 'c';   
  
---ifversion < v80400
+--ifversion < v080400
 CREATE FUNCTION g_spath_consistent(internal, internal, int4)
 --elseversion
 CREATE FUNCTION g_spath_consistent(internal, internal, int4, oid, internal)
 --endifversion
    RETURNS internal
    AS 'MODULE_PATHNAME' , 'g_spath_consistent'
-   LANGUAGE 'C';
+   LANGUAGE 'c';
  
  
 CREATE OPERATOR CLASS spath
    DEFAULT FOR TYPE spath USING gist AS
---ifversion < v80400
+--ifversion < v080400
    OPERATOR   1 =  (spath, spath) RECHECK,
    OPERATOR  11 @  (spath, scircle) RECHECK,
    OPERATOR  12 @  (spath, spoly) RECHECK,
@@ -426,20 +520,20 @@ CREATE OPERATOR CLASS spath
 CREATE FUNCTION g_sbox_compress(internal)
    RETURNS internal
    AS 'MODULE_PATHNAME' , 'g_sbox_compress'
-   LANGUAGE 'C';
+   LANGUAGE 'c';
  
---ifversion < v80400
+--ifversion < v080400
 CREATE FUNCTION g_sbox_consistent(internal, internal, int4)
 --elseversion
 CREATE FUNCTION g_sbox_consistent(internal, internal, int4, oid, internal)
 --endifversion
    RETURNS internal
    AS 'MODULE_PATHNAME' , 'g_sbox_consistent'
-   LANGUAGE 'C';
+   LANGUAGE 'c';
  
 CREATE OPERATOR CLASS sbox
    DEFAULT FOR TYPE sbox USING gist AS
---ifversion < v80400
+--ifversion < v080400
    OPERATOR   1 =  (sbox, sbox) RECHECK,
    OPERATOR  11 @  (sbox, scircle) RECHECK,
    OPERATOR  12 @  (sbox, spoly) RECHECK,

@@ -9,6 +9,19 @@
 */
 
 
+  /*! \defgroup PGS_KEY_REL Key relationships */
+  /*!
+    \addtogroup PGS_KEY_REL
+    @{
+  */
+  #define SCKEY_DISJ    0 //!< two keys are disjunct
+  #define SCKEY_OVERLAP 1 //!< two keys are overlapping
+  #define SCKEY_IN      2 //!< first key contains second key
+  #define SCKEY_SAME    3 //!< keys are equal
+  /* @} */
+
+  uchar  spherekey_interleave ( const int32 * k1 ,  const int32 * k2 );
+
   /*!
     \brief returns the key of cached query
     \param pgstype \link PGS_DATA_TYPES type \endlink of query
@@ -196,5 +209,17 @@
   */
   Datum g_spherekey_picksplit(PG_FUNCTION_ARGS);
 
+  Datum pointkey_in(PG_FUNCTION_ARGS);
+  Datum pointkey_out(PG_FUNCTION_ARGS);
+  Datum pointkey_volume(PG_FUNCTION_ARGS);
+  Datum pointkey_area(PG_FUNCTION_ARGS);
+  Datum pointkey_perimeter(PG_FUNCTION_ARGS);
+  Datum g_spoint2_compress(PG_FUNCTION_ARGS);
+  Datum g_spoint2_union(PG_FUNCTION_ARGS);
+  Datum g_spoint2_same(PG_FUNCTION_ARGS);
+  Datum g_spoint2_consistent(PG_FUNCTION_ARGS);
+  Datum g_spoint2_penalty(PG_FUNCTION_ARGS);
+  Datum g_spoint2_picksplit(PG_FUNCTION_ARGS);
+  Datum g_spoint2_distance(PG_FUNCTION_ARGS);
 
 #endif

@@ -226,11 +226,11 @@
     }
   }
 
-  int4 sphereline_latitude_points ( const SLine * sl, float8 lat, SPoint *p1, SPoint *p2 )
+  int32 sphereline_latitude_points ( const SLine * sl, float8 lat, SPoint *p1, SPoint *p2 )
   {
 
     float8 inc = sl->theta - floor ( sl->theta / PID ) * PID ;
-    int4   ret = 0;
+    int32   ret = 0;
 
     if ( FPgt( lat, PIH ) ) return 0;
     if ( FPlt( lat,-PIH ) ) return 0;
