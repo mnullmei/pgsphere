@@ -7,7 +7,7 @@ OBJS       = sscan.o sparse.o sbuffer.o vector3d.o point.o \
 DATA_built  = pg_sphere.sql
 DOCS        = README.pg_sphere COPYRIGHT.pg_sphere
 REGRESS_SQL = tables points euler circle line ellipse poly path box index \
-              contains_ops contains_ops_compat
+              contains_ops contains_ops_compat bounding_box_gist
 REGRESS     = init $(REGRESS_SQL)
 TESTS       = init_test $(REGRESS_SQL)
 EXTRA_CLEAN = pg_sphere.sql pg_sphere.sql.in $(PGS_SQL) pg_sphere.test.sql

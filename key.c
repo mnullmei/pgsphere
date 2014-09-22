@@ -163,7 +163,7 @@
 
     r[0] = sin( e->rad[0] ) ;
     r[1] = sin( e->rad[1] ) ;
-    d    = cos( e->rad[1] ) ;
+    d    = cos( e->rad[0] ) ;
 
     v[0].x = d   ; v[0].y = -r[0]  ; v[0].z = -r[1] ;  
     v[1].x = d   ; v[1].y = +r[0]  ; v[1].z = -r[1] ;  
@@ -279,19 +279,19 @@
 
       for ( i=0; i<4; i++ ){
         euler_vector_trans(&vt,&v[i],&se);
-        if ( vt.x >= -1.0 && vt.x <= 1.0 ){
-          vr[0].x = min ( vr[0].x , vt.x );
-          vr[1].x = max ( vr[1].x , vt.x );
-        }
-        if ( vt.y >= -1.0 && vt.y <= 1.0 ){
-          vr[0].y = min ( vr[0].y , vt.y );
-          vr[1].y = max ( vr[1].y , vt.y );
-        }
-        if ( vt.z >= -1.0 && vt.z <= 1.0 ){
-          vr[0].z = min ( vr[0].z , vt.z );
-          vr[1].z = max ( vr[1].z , vt.z );
-        }
-      }  
+        if ( vt.x < -1.0 ) vt.x = -1.0;
+        if ( vt.y < -1.0 ) vt.y = -1.0;
+        if ( vt.z < -1.0 ) vt.z = -1.0;
+        if ( vt.x >  1.0 ) vt.x =  1.0;
+        if ( vt.y >  1.0 ) vt.y =  1.0;
+        if ( vt.z >  1.0 ) vt.z =  1.0;
+        vr[0].x = min ( vr[0].x , vt.x );
+        vr[1].x = max ( vr[1].x , vt.x );
+        vr[0].y = min ( vr[0].y , vt.y );
+        vr[1].y = max ( vr[1].y , vt.y );
+        vr[0].z = min ( vr[0].z , vt.z );
+        vr[1].z = max ( vr[1].z , vt.z );
+      }
 
       k[0] = vr[0].x * ks;
       k[1] = vr[0].y * ks;
@@ -314,57 +314,77 @@
 
   int32 * spherepoly_gen_key ( int32 * key , const SPOLY * sp )
   {
-      static int32   i,k,r;
-      static SLine       l;
-      static int32   tk[6];
+      static int32   i,r;
+      static SLine     l;
+      static SPoint    p;
+      static int32 tk[6];
       bool   start = TRUE;
 
       for ( i=0; i<sp->npts; i++ ){
-        for ( k=i+1; i<sp->npts; i++ ){
-          r=((k==sp->npts)?(0):(k));
-          sline_from_points ( &l, &sp->p[i], &sp->p[r] );
-          sphereline_gen_key ( &tk[0] , &l );
-          if ( start ){   
-            start = FALSE;
-            memcpy( (void*) key, (void*) &tk[0], KEYSIZE);
-          } else {
-            key[0] = min(key[0],tk[0]);
-            key[1] = min(key[1],tk[1]);
-            key[2] = min(key[2],tk[2]);
-            key[3] = max(key[3],tk[3]);
-            key[4] = max(key[4],tk[4]);
-            key[5] = max(key[5],tk[5]);
-          }
+        r=((i+1==sp->npts)?(0):(i+1));
+        sline_from_points ( &l, &sp->p[i], &sp->p[r] );
+        sphereline_gen_key ( &tk[0] , &l );
+        if ( start ){   
+          start = FALSE;
+          memcpy( (void*) key, (void*) &tk[0], KEYSIZE);
+        } else {
+          key[0] = min(key[0],tk[0]);
+          key[1] = min(key[1],tk[1]);
+          key[2] = min(key[2],tk[2]);
+          key[3] = max(key[3],tk[3]);
+          key[4] = max(key[4],tk[4]);
+          key[5] = max(key[5],tk[5]);
         }
       }
-
+      p.lng = 0.0;
+      p.lat = PIH;
+      if (spoly_contains_point(sp, &p)) {
+        key[5] = MAXCVALUE;
+      }
+      p.lat = -PIH;
+      if (spoly_contains_point(sp, &p)) {
+        key[2] = -MAXCVALUE;
+      }
+      p.lat = 0.0;
+      if (spoly_contains_point(sp, &p)) {
+        key[3] = MAXCVALUE;
+      }
+      p.lng = PI;
+      if (spoly_contains_point(sp, &p)) {
+        key[0] = -MAXCVALUE;
+      }
+      p.lng = PIH;
+      if (spoly_contains_point(sp, &p)) {
+        key[4] = MAXCVALUE;
+      }
+      p.lng = PI + PIH;
+      if (spoly_contains_point(sp, &p)) {
+        key[1] = -MAXCVALUE;
+      }
       return key;
   }
 
 
   int32 * spherepath_gen_key ( int32 * key , const SPATH * sp )
   {
-      static  int32   i,k,r;
-      static  SLine       l;
-      static  int32   tk[6];
-      bool    start = TRUE;
+      static int32     i;
+      static SLine     l;
+      static int32 tk[6];
+      bool   start = TRUE;
 
-      for ( i=0; i<sp->npts; i++ ){
-        for ( k=i+1; i<sp->npts; i++ ){
-          r=((k==sp->npts)?(0):(k));
-          sline_from_points ( &l, &sp->p[i], &sp->p[r] );
-          sphereline_gen_key ( &tk[0] , &l );
-          if ( start ){
-            start = FALSE;
-            memcpy( (void*) key, (void*) &tk[0], KEYSIZE);
-          } else {
-            key[0] = min(key[0],tk[0]);
-            key[1] = min(key[1],tk[1]); 
-            key[2] = min(key[2],tk[2]);
-            key[3] = max(key[3],tk[3]);
-            key[4] = max(key[4],tk[4]);
-            key[5] = max(key[5],tk[5]);
-          }
+      for ( i=0; i<sp->npts-1; i++ ){
+        sline_from_points ( &l, &sp->p[i], &sp->p[i+1] );
+        sphereline_gen_key ( &tk[0] , &l );
+        if ( start ){
+          start = FALSE;
+          memcpy( (void*) key, (void*) &tk[0], KEYSIZE);
+        } else {
+          key[0] = min(key[0],tk[0]);
+          key[1] = min(key[1],tk[1]); 
+          key[2] = min(key[2],tk[2]);
+          key[3] = max(key[3],tk[3]);
+          key[4] = max(key[4],tk[4]);
+          key[5] = max(key[5],tk[5]);
         }
       }
 
