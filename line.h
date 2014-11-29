@@ -97,7 +97,7 @@ typedef struct {
     \param p2 second returned spherical point
     \return count of found points or <0 if undefined
   */
-  int4 sphereline_latitude_points ( const SLine * sl, float8 lat, SPoint *p1, SPoint *p2 );
+  int32 sphereline_latitude_points ( const SLine * sl, float8 lat, SPoint *p1, SPoint *p2 );
 
   /*!
     \brief Returns true, if the two lines are equal
