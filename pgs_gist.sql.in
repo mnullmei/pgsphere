@@ -27,27 +27,27 @@ CREATE TYPE spherekey (
 CREATE FUNCTION g_spherekey_decompress(internal)
    RETURNS internal
    AS 'MODULE_PATHNAME' , 'g_spherekey_decompress'
-   LANGUAGE 'C';   
+   LANGUAGE 'c';   
 
 CREATE FUNCTION g_spherekey_union(bytea, internal)
    RETURNS spherekey
    AS 'MODULE_PATHNAME' , 'g_spherekey_union'
-   LANGUAGE 'C';   
+   LANGUAGE 'c';   
 
 CREATE FUNCTION g_spherekey_penalty (internal,internal,internal)
    RETURNS internal
    AS 'MODULE_PATHNAME' , 'g_spherekey_penalty'
-   LANGUAGE 'C' with (isstrict);
+   LANGUAGE 'c' with (isstrict);
 
 CREATE FUNCTION g_spherekey_picksplit(internal, internal)
    RETURNS internal
    AS 'MODULE_PATHNAME' , 'g_spherekey_picksplit'
-   LANGUAGE 'C';
+   LANGUAGE 'c';
 
 CREATE FUNCTION g_spherekey_same (spherekey,spherekey,internal)
    RETURNS internal
    AS 'MODULE_PATHNAME' , 'g_spherekey_same'
-   LANGUAGE 'C';
+   LANGUAGE 'c';
 
 
 
@@ -56,7 +56,7 @@ CREATE FUNCTION g_spherekey_same (spherekey,spherekey,internal)
 CREATE FUNCTION g_spoint_compress(internal)
    RETURNS internal
    AS 'MODULE_PATHNAME' , 'g_spoint_compress'
-   LANGUAGE 'C';   
+   LANGUAGE 'c';   
 
 
 --ifversion < v80400
@@ -66,7 +66,7 @@ CREATE FUNCTION g_spoint_consistent(internal, internal, int4, oid, internal)
 --endifversion
    RETURNS internal
    AS 'MODULE_PATHNAME' , 'g_spoint_consistent'
-   LANGUAGE 'C';   
+   LANGUAGE 'c';   
 
 
 CREATE OPERATOR CLASS spoint
@@ -105,7 +105,7 @@ CREATE OPERATOR CLASS spoint
 CREATE FUNCTION g_scircle_compress(internal)
    RETURNS internal
    AS 'MODULE_PATHNAME' , 'g_scircle_compress'
-   LANGUAGE 'C';   
+   LANGUAGE 'c';   
 
 
 --ifversion < v80400
@@ -115,7 +115,7 @@ CREATE FUNCTION g_scircle_consistent(internal, internal, int4, oid, internal)
 --endifversion
    RETURNS internal
    AS 'MODULE_PATHNAME' , 'g_scircle_consistent'
-   LANGUAGE 'C';   
+   LANGUAGE 'c';   
 
 CREATE OPERATOR CLASS scircle
    DEFAULT FOR TYPE scircle USING gist AS
@@ -175,7 +175,7 @@ CREATE OPERATOR CLASS scircle
 CREATE FUNCTION g_sline_compress(internal)
    RETURNS internal
    AS 'MODULE_PATHNAME' , 'g_sline_compress'
-   LANGUAGE 'C';   
+   LANGUAGE 'c';   
 
 --ifversion < v80400
 CREATE FUNCTION g_sline_consistent(internal, internal, int4)
@@ -184,7 +184,7 @@ CREATE FUNCTION g_sline_consistent(internal, internal, int4, oid, internal)
 --endifversion
    RETURNS internal
    AS 'MODULE_PATHNAME' , 'g_sline_consistent'
-   LANGUAGE 'C';
+   LANGUAGE 'c';
 
 
 CREATE OPERATOR CLASS sline
@@ -233,7 +233,7 @@ CREATE OPERATOR CLASS sline
 CREATE FUNCTION g_sellipse_compress(internal)
    RETURNS internal
    AS 'MODULE_PATHNAME' , 'g_sellipse_compress'
-   LANGUAGE 'C';   
+   LANGUAGE 'c';   
  
 --ifversion < v80400
  CREATE FUNCTION g_sellipse_consistent(internal, internal, int4)
@@ -242,7 +242,7 @@ CREATE FUNCTION g_sellipse_compress(internal)
 --endifversion
    RETURNS internal
    AS 'MODULE_PATHNAME' , 'g_sellipse_consistent'
-   LANGUAGE 'C';
+   LANGUAGE 'c';
  
 CREATE OPERATOR CLASS sellipse
    DEFAULT FOR TYPE sellipse USING gist AS
@@ -300,7 +300,7 @@ CREATE OPERATOR CLASS sellipse
 CREATE FUNCTION g_spoly_compress(internal)
    RETURNS internal
    AS 'MODULE_PATHNAME' , 'g_spoly_compress'
-   LANGUAGE 'C';   
+   LANGUAGE 'c';   
  
 --ifversion < v80400
 CREATE FUNCTION g_spoly_consistent(internal, internal, int4)
@@ -309,7 +309,7 @@ CREATE FUNCTION g_spoly_consistent(internal, internal, int4, oid, internal)
 --endifversion
    RETURNS internal
    AS 'MODULE_PATHNAME' , 'g_spoly_consistent'
-   LANGUAGE 'C';
+   LANGUAGE 'c';
  
  
 CREATE OPERATOR CLASS spoly
@@ -369,7 +369,7 @@ CREATE OPERATOR CLASS spoly
 CREATE FUNCTION g_spath_compress(internal)
    RETURNS internal
    AS 'MODULE_PATHNAME' , 'g_spath_compress'
-   LANGUAGE 'C';   
+   LANGUAGE 'c';   
  
 --ifversion < v80400
 CREATE FUNCTION g_spath_consistent(internal, internal, int4)
@@ -378,7 +378,7 @@ CREATE FUNCTION g_spath_consistent(internal, internal, int4, oid, internal)
 --endifversion
    RETURNS internal
    AS 'MODULE_PATHNAME' , 'g_spath_consistent'
-   LANGUAGE 'C';
+   LANGUAGE 'c';
  
  
 CREATE OPERATOR CLASS spath
@@ -426,7 +426,7 @@ CREATE OPERATOR CLASS spath
 CREATE FUNCTION g_sbox_compress(internal)
    RETURNS internal
    AS 'MODULE_PATHNAME' , 'g_sbox_compress'
-   LANGUAGE 'C';
+   LANGUAGE 'c';
  
 --ifversion < v80400
 CREATE FUNCTION g_sbox_consistent(internal, internal, int4)
@@ -435,7 +435,7 @@ CREATE FUNCTION g_sbox_consistent(internal, internal, int4, oid, internal)
 --endifversion
    RETURNS internal
    AS 'MODULE_PATHNAME' , 'g_sbox_consistent'
-   LANGUAGE 'C';
+   LANGUAGE 'c';
  
 CREATE OPERATOR CLASS sbox
    DEFAULT FOR TYPE sbox USING gist AS
