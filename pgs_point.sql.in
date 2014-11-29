@@ -124,7 +124,7 @@ COMMENT ON OPERATOR = ( spoint, spoint ) IS
 CREATE FUNCTION spoint_equal_neg (spoint,spoint)
    RETURNS BOOL
    AS 'SELECT NOT spoint_equal($1,$2);'
-   LANGUAGE 'SQL'
+   LANGUAGE 'sql'
    IMMUTABLE STRICT ;
 
 COMMENT ON FUNCTION spoint_equal_neg (spoint,spoint) IS
