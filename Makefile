@@ -6,8 +6,10 @@ OBJS       = sscan.o sparse.o sbuffer.o vector3d.o point.o \
 
 DATA_built  = pg_sphere.sql
 DOCS        = README.pg_sphere COPYRIGHT.pg_sphere
-REGRESS     = init tables points euler circle line ellipse poly path box index
-EXTRA_CLEAN = pg_sphere.sql pg_sphere.sql.in $(PGS_SQL) pg_sphere.checks.sql
+REGRESS_SQL = tables points euler circle line ellipse poly path box index
+REGRESS     = init $(REGRESS_SQL)
+TESTS       = init_test $(REGRESS_SQL)
+EXTRA_CLEAN = pg_sphere.sql pg_sphere.sql.in $(PGS_SQL) pg_sphere.test.sql
 
 CRUSH_TESTS  = init_extended circle_extended 
 
@@ -33,19 +35,22 @@ endif
 PGVERSION += $(shell $(PG_CONFIG) --version | sed 's,^PostgreSQL[[:space:]]\+\([0-9]\+\.[0-9]\+\.[0-9]\+\),\1,g' | awk '{ split($$1,a,"."); printf( "v%d%02d%02d" ,a[1], a[2], a[3]); }' )
 
 crushtest: REGRESS += $(CRUSH_TESTS)
-crushtest: test
+crushtest: installcheck
 
-test: pg_sphere.checks.sql
+test_extended: TESTS += $(CRUSH_TESTS)
+test_extended: test
+
+test: pg_sphere.test.sql
 	$(pg_regress_installcheck) --temp-install=tmp_check \
-					--top-builddir=checks_top_build_dir \
-					$(REGRESS_OPTS) $(REGRESS)
+					--top-builddir=test_top_build_dir \
+					$(REGRESS_OPTS) $(TESTS)
 
 pg_sphere.sql.in : $(addsuffix .in, $(PGS_SQL))
 	echo 'BEGIN;' > $@
 	for i in $+ ; do $(AWK) -v pg_version=$(PGVERSION) -f sql.awk < $$i >> $@ ; done
 	echo 'COMMIT;' >> $@
 
-pg_sphere.checks.sql : pg_sphere.sql.in pg_sphere.so
+pg_sphere.test.sql : pg_sphere.sql.in pg_sphere.so
 	sed 's,MODULE_PATHNAME,$(basename $(realpath pg_sphere.so)),g' $< >$@
 
 sscan.o : sparse.c
