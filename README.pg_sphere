@@ -8,18 +8,23 @@ NOTICE:
 
 INSTALLATION:
 
-  gmake
-  gmake install
+  gmake USE_PGXS=1
+  gmake USE_PGXS=1 install
   -- load functions
   psql <database> < pg_sphere.sql
 
 REGRESSION TEST:
 
-   gmake installcheck
+   gmake USE_PGXS=1 installcheck
 
 LONG REGRESSION TEST:
 
-   gmake crushtest
+   gmake USE_PGXS=1 crushtest
+
+REGRESSION TESTS WITHIN THE SOURCE/BUILD DIRECTORY:
+
+   gmake USE_PGXS=1 test
+   gmake USE_PGXS=1 test_extented  # long test
 
 For more informations have a look at http://pgsphere.projects.postgresql.org/
 
