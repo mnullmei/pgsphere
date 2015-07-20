@@ -51,7 +51,7 @@ pg_sphere.sql.in : $(addsuffix .in, $(PGS_SQL))
 	echo 'COMMIT;' >> $@
 
 pg_sphere.test.sql : pg_sphere.sql.in pg_sphere.so
-	sed 's,MODULE_PATHNAME,$(basename $(realpath pg_sphere.so)),g' $< >$@
+	sed 's,MODULE_PATHNAME,$(realpath pg_sphere.so),g' $< >$@
 
 sscan.o : sparse.c
 
