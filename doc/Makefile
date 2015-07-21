@@ -55,12 +55,6 @@ html  : pg_sphere.xml $(ALLSGML) pg_sphere.dsl
 pg_sphere.tex : pg_sphere.xml $(ALLSGML) pg_sphere.dsl
 	$(JADE) $(JADEFLAGS) $(SGMLINCLUDE) $(CATALOG) -d pg_sphere.dsl -i print -t tex -o $@ $(XMLDCL) $<
 
-pg_sphere.dvi: pg_sphere.tex
-	@rm -f $*.aux $*.log
-	make -C img
-	jadetex $<
-	jadetex $<
-
 pdf : jadetex.cfg pg_sphere.pdf
 
 pg_sphere.pdf: pg_sphere.tex
@@ -71,8 +65,8 @@ pg_sphere.pdf: pg_sphere.tex
 
 ps : pg_sphere.ps
 
-pg_sphere.ps: jadetex.cfg pg_sphere.dvi
-	dvips -o $@ $<
+pg_sphere.ps: pg_sphere.pdf
+	pdftops $< $@
 
 pg_sphere.dsl : pg_sphere.dsl-dist
 	cp $< $@
