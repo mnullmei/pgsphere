@@ -88,8 +88,8 @@ jadetex.cfg : jadetex.cfg-dist
 
 clean distclean maintainer-clean:
 # HTML
-	rm -rf html
+	rm -rf html pg_sphere.dsl
 # print
-	rm -f *.rtf *.tex *.dvi *.aux *.log *.ps *.pdf *.out *.fot
+	rm -f *.rtf *.tex *.dvi *.aux *.log *.ps *.pdf *.out *.fot jadetex.cfg
 # img
 	make clean -C img
