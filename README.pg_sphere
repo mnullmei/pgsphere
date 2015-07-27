@@ -28,7 +28,7 @@ REGRESSION TESTS WITHIN THE SOURCE/BUILD DIRECTORY:
 
 The 'make' program must be compatible with GNU make.
 
-For more informations have a look at http://pgsphere.projects.postgresql.org/
+For more information have a look at http://pgsphere.projects.postgresql.org/
 
 Have a lot of fun! 
 
