@@ -6,8 +6,10 @@ OBJS       = sscan.o sparse.o sbuffer.o vector3d.o point.o \
 
 DATA_built  = pg_sphere.sql
 DOCS        = README.pg_sphere COPYRIGHT.pg_sphere
-REGRESS     = init tables points euler circle line ellipse poly path box index
-EXTRA_CLEAN = pg_sphere.sql pg_sphere.sql.in $(PGS_SQL) 
+REGRESS_SQL = tables points euler circle line ellipse poly path box index
+REGRESS     = init $(REGRESS_SQL)
+TESTS       = init_test $(REGRESS_SQL)
+EXTRA_CLEAN = pg_sphere.sql pg_sphere.sql.in $(PGS_SQL) pg_sphere.test.sql
 
 CRUSH_TESTS  = init_extended circle_extended 
 
@@ -30,15 +32,26 @@ else
   include $(top_srcdir)/contrib/contrib-global.mk
 endif
 
-PGVERSION += $(shell $(PG_CONFIG) --version | sed 's,^PostgreSQL[[:space:]]\+\([0-9]\+\.[0-9]\+\.[0-9]\+\),\1,g' | awk '{ split($$2,a,"."); printf( "v%d%02d%02d" ,a[1], a[2], a[3]); }' )
+PGVERSION += $(shell $(PG_CONFIG) --version | sed 's,^PostgreSQL[[:space:]]\+\([0-9]\+\.[0-9]\+\.[0-9]\+\),\1,g' | awk '{ split($$1,a,"."); printf( "v%d%02d%02d" ,a[1], a[2], a[3]); }' )
 
 crushtest: REGRESS += $(CRUSH_TESTS)
 crushtest: installcheck
+
+test_extended: TESTS += $(CRUSH_TESTS)
+test_extended: test
+
+test: pg_sphere.test.sql
+	$(pg_regress_installcheck) --temp-install=tmp_check \
+					--top-builddir=test_top_build_dir \
+					$(REGRESS_OPTS) $(TESTS)
 
 pg_sphere.sql.in : $(addsuffix .in, $(PGS_SQL))
 	echo 'BEGIN;' > $@
 	for i in $+ ; do $(AWK) -v pg_version=$(PGVERSION) -f sql.awk < $$i >> $@ ; done
 	echo 'COMMIT;' >> $@
+
+pg_sphere.test.sql : pg_sphere.sql.in $(shlib)
+	sed 's,MODULE_PATHNAME,$(realpath $(shlib)),g' $< >$@
 
 sscan.o : sparse.c
 
@@ -59,4 +72,3 @@ endif
 dist : clean sparse.c sscan.c
 	find . -name '*~' -type f -exec rm {} \;
 	cd .. && tar  --exclude CVS -czf pg_sphere.tar.gz pg_sphere && cd -
- 	
