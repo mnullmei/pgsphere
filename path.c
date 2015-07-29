@@ -860,8 +860,8 @@
     }
 
     size = offsetof(SPATH, p[0]) + sizeof(SPoint) * ( path->npts + 1 );
-    path_new = palloc( size );
-    memcpy( (void*) path , (void*) path_new, VARSIZE(path) );
+    path_new = MALLOC(size);
+    memcpy(path_new, path, VARSIZE(path));
     path_new->npts++;
 
 #if PG_VERSION_NUM < 80300
