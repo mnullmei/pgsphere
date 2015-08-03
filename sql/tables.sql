@@ -21,11 +21,13 @@ CREATE TABLE spheretmp4 AS
   SELECT sline ( p , p - strans '-15d,-15d,-15d,ZXZ' ) AS l
   FROM spheretmp1;
 
+SET client_min_messages TO WARNING;
 CREATE TABLE spheretmp5 (id int PRIMARY KEY , p spoly );
 \copy spheretmp5 from 'data/test_spherepolygon.data'
 
 CREATE TABLE spheretmp6 (id int PRIMARY KEY , p spath );
 \copy spheretmp6 from 'data/test_spherepath.data'
+SET client_min_messages TO NOTICE;
 
 -- Aggregate data from tables
 
