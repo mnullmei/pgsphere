@@ -14,7 +14,7 @@
   */
   static int32 * key_add_point ( int32 * key , const SPoint * p )
   {
-      static int32  k[3] ;
+      int32 k[6];
       spherepoint_gen_key ( &k[0], p ) ;
       spherekey_union_two ( key , &k[0] );
       return key;
