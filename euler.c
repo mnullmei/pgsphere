@@ -217,11 +217,7 @@
       }
     }
     ret[3] = '\0';
-#if PG_VERSION_NUM < 80300
-    VARATT_SIZEP(result) = 3 + VARHDRSZ;
-#else
     SET_VARSIZE(result, 3 + VARHDRSZ);
-#endif    
     memcpy((void*)VARDATA(result), (void*)&ret[0], 3 );
 
     PG_RETURN_BPCHAR_P(result);

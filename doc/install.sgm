@@ -19,7 +19,7 @@
             </title>
             <para>
                 You will need <application>PostgreSQL
-                8.0</application> or above. We assume that you have
+                8.4</application> or above. We assume that you have
                 <application>PostgreSQL</application> already compiled and
                 installed. Please note: Depending on your system configuration mostly you have to be logged in as the system
                 superuser.

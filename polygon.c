@@ -200,11 +200,7 @@
 
       size       = offsetof(SPOLY, p[0]) + sizeof(SPoint) * nelem;
       poly       = (SPOLY *) MALLOC ( size ) ;
-#if PG_VERSION_NUM < 80300
-      poly->size = size;
-#else
       SET_VARSIZE(poly, size);
-#endif
       poly->npts = nelem;
       for ( i=0; i<nelem ; i++ ){
         if ( i==0 ){
@@ -1107,11 +1103,7 @@
       size = offsetof(SPOLY, p[0]) + sizeof(SPoint) ;
       poly = ( SPOLY * ) MALLOC ( size );
       memcpy( (void*) &poly->p[0] , (void*) p, sizeof(SPoint) );
-#if PG_VERSION_NUM < 80300
-      poly->size = size;
-#else
       SET_VARSIZE(poly, size);
-#endif
       poly->npts = 1;
       PG_RETURN_POINTER ( poly );
     }
@@ -1134,11 +1126,7 @@
     memcpy(poly_new, poly, VARSIZE(poly));
     poly_new->npts++;
 
-#if PG_VERSION_NUM < 80300
-    poly_new->size = size ;
-#else
     SET_VARSIZE( poly_new, size );
-#endif
 
     memcpy( (void*) &poly_new->p[poly->npts] , (void*) p, sizeof(SPoint) );
     PG_RETURN_POINTER ( poly_new );

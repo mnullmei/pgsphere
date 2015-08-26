@@ -4,7 +4,7 @@ useful functions and operators.
 
 
 NOTICE:
-     This version will work only with postgresql version 8.0 and above.
+     This version will work only with postgresql version 8.4 and above.
 
 INSTALLATION:
 

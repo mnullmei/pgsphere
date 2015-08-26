@@ -103,11 +103,7 @@
 
       size       = offsetof(SPATH, p[0]) + sizeof(path->p[0]) * nelem;
       path       = (SPATH *) MALLOC ( size ) ;
-#if PG_VERSION_NUM < 80300
-      path->size = size;
-#else
       SET_VARSIZE(path, size);
-#endif
       path->npts = nelem;
       for ( i=0; i<nelem ; i++ ){
         if ( i>0 ){
@@ -837,11 +833,7 @@
       size = offsetof(SPATH, p[0]) + sizeof(SPoint) ;
       path = ( SPATH * ) MALLOC ( size );
       memcpy( (void*) &path->p[0] , (void*) p, sizeof(SPoint) );
-#if PG_VERSION_NUM < 80300
-      path->size = size;
-#else
       SET_VARSIZE(path, size);
-#endif
       path->npts = 1;
       PG_RETURN_POINTER ( path );
     }
@@ -864,11 +856,7 @@
     memcpy(path_new, path, VARSIZE(path));
     path_new->npts++;
 
-#if PG_VERSION_NUM < 80300
-    path_new->size = size ;
-#else
     SET_VARSIZE( path_new, size );
-#endif
 
     memcpy( (void*) &path_new->p[path->npts] , (void*) p, sizeof(SPoint) );
     PG_RETURN_POINTER ( path_new );

@@ -47,7 +47,7 @@ test: pg_sphere.test.sql
 
 pg_sphere.sql.in : $(addsuffix .in, $(PGS_SQL))
 	echo 'BEGIN;' > $@
-	for i in $+ ; do $(AWK) -v pg_version=$(PGVERSION) -f sql.awk < $$i >> $@ ; done
+	for i in $+ ; do cat $$i >> $@ ; done
 	echo 'COMMIT;' >> $@
 
 pg_sphere.test.sql : pg_sphere.sql.in $(shlib)

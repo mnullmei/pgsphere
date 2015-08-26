@@ -140,35 +140,6 @@
   \param genkey function to generate the key value
   \see key.c
 */
-#if PG_VERSION_NUM < 80200
-#define PGS_COMPRESS( type, genkey, detoast )  do { \
-    GISTENTRY  *entry = (GISTENTRY *) PG_GETARG_POINTER(0); \
-    GISTENTRY  *retval; \
-    if (entry->leafkey) \
-    { \
-      retval  =  MALLOC ( sizeof ( GISTENTRY ) ); \
-      if ( DatumGetPointer(entry->key) != NULL ){ \
-        int32 * k = ( int32 * ) MALLOC ( KEYSIZE ) ; \
-        if( detoast ) \
-        { \
-          genkey ( k , ( type * )  DatumGetPointer( PG_DETOAST_DATUM( entry->key ) ) ) ; \
-        } else { \
-          genkey ( k , ( type * )  DatumGetPointer( entry->key ) ) ; \
-        } \
-        gistentryinit(*retval, PointerGetDatum(k) , \
-          entry->rel, entry->page, \
-          entry->offset, KEYSIZE , FALSE ); \
-      } else { \
-        gistentryinit(*retval, (Datum) 0, \
-          entry->rel, entry->page, \
-          entry->offset, 0, FALSE ); \
-      } \
-    } else { \
-      retval = entry; \
-    } \
-    PG_RETURN_POINTER(retval); \
-  } while (0) ;
-#else
 
 #define PGS_COMPRESS( type, genkey, detoast )  do { \
     GISTENTRY  *entry = (GISTENTRY *) PG_GETARG_POINTER(0); \
@@ -197,7 +168,6 @@
     } \
     PG_RETURN_POINTER(retval); \
   } while (0) ;
-#endif
 
   Datum g_scircle_compress(PG_FUNCTION_ARGS)
   {
@@ -236,30 +206,17 @@
 
   Datum g_spherekey_union (PG_FUNCTION_ARGS)
   {
-    #ifdef GEVHDRSZ
       GistEntryVector    *entryvec = ( GistEntryVector *) PG_GETARG_POINTER(0);
-    #else
-      bytea              *entryvec = (bytea *) PG_GETARG_POINTER(0);
-    #endif
     int                   *sizep = (int *)   PG_GETARG_POINTER(1);
     int             numranges, i;
     int32                 * ret  = ( int32 * ) MALLOC ( KEYSIZE ) ;
 
-    #ifdef GEVHDRSZ
       numranges = entryvec->n;
       memcpy( (void *) ret , (void *) DatumGetPointer(entryvec->vector[0].key) , KEYSIZE );
-    #else
-      numranges = (VARSIZE(entryvec) - VARHDRSZ) / sizeof(GISTENTRY);
-      memcpy( (void *) ret , (void *) DatumGetPointer(((GISTENTRY *) VARDATA(entryvec))[0].key) , KEYSIZE );
-    #endif
 
     for (i = 1; i < numranges; i++)
     {
-      #ifdef GEVHDRSZ
         spherekey_union_two ( ret , ( int32 *) DatumGetPointer(entryvec->vector[i].key) );
-      #else
-        spherekey_union_two ( ret , ( int32 *) DatumGetPointer(((GISTENTRY *) VARDATA(entryvec))[i].key) );
-      #endif
     }
     *sizep = KEYSIZE;
     PG_RETURN_POINTER( ret );
@@ -323,14 +280,10 @@
       PG_RETURN_BOOL(FALSE);
     } else {
 
-#if PG_VERSION_NUM >= 80400
       bool           *recheck = (bool *) PG_GETARG_POINTER(4);
-#endif
       int32            *ent   = ( int32 * ) DatumGetPointer( entry->key ) ;
       int i = SCKEY_DISJ ;
-#if PG_VERSION_NUM >= 80400
       *recheck = true;
-#endif
 
       switch ( strategy ) {
         case  1 : SCK_INTERLEAVE ( SPoint   , spherepoint_gen_key   , 1 ); break;
@@ -374,14 +327,10 @@
       PG_RETURN_BOOL(FALSE);
     } else {
 
-#if PG_VERSION_NUM >= 80400
       bool           *recheck = (bool *) PG_GETARG_POINTER(4);
-#endif
       int32            *ent   = ( int32 * ) DatumGetPointer( entry->key ) ;
       int i = SCKEY_DISJ ;
-#if PG_VERSION_NUM >= 80400
       *recheck = true;
-#endif
 
       switch ( strategy ) {
         case  1 : SCK_INTERLEAVE ( SCIRCLE  , spherecircle_gen_key  , 1 ); break;
@@ -434,14 +383,10 @@
       PG_RETURN_BOOL(FALSE);
     } else {
 
-#if PG_VERSION_NUM >= 80400
       bool           *recheck = (bool *) PG_GETARG_POINTER(4);
-#endif
       int32            *ent   = ( int32 * ) DatumGetPointer( entry->key ) ;
       int i = SCKEY_DISJ ;
-#if PG_VERSION_NUM >= 80400
       *recheck = true;
-#endif
 
       switch ( strategy ) {
         case  1 : 
@@ -489,14 +434,10 @@
       PG_RETURN_BOOL(FALSE);
     } else {
 
-#if PG_VERSION_NUM >= 80400
       bool           *recheck = (bool *) PG_GETARG_POINTER(4);
-#endif
       int32            *ent   = ( int32 * ) DatumGetPointer( entry->key ) ;
       int i = SCKEY_DISJ ;
-#if PG_VERSION_NUM >= 80400
       *recheck = true;
-#endif
 
       switch ( strategy ) {
         case  1 : SCK_INTERLEAVE ( SPATH    , spherepath_gen_key    , 1 ); break;
@@ -542,14 +483,10 @@
       PG_RETURN_BOOL(FALSE);
     } else {
 
-#if PG_VERSION_NUM >= 80400
       bool           *recheck = (bool *) PG_GETARG_POINTER(4);
-#endif
       int32            *ent   = ( int32 * ) DatumGetPointer( entry->key ) ;
       int i = SCKEY_DISJ ;
-#if PG_VERSION_NUM >= 80400
       *recheck = true;
-#endif
 
       switch ( strategy ) {
         case  1 : SCK_INTERLEAVE ( SPATH    , spherepath_gen_key    , 1 ); break;
@@ -600,14 +537,10 @@
       PG_RETURN_BOOL(FALSE);
     } else {
 
-#if PG_VERSION_NUM >= 80400
       bool           *recheck = (bool *) PG_GETARG_POINTER(4);
-#endif
       int32            *ent   = ( int32 * ) DatumGetPointer( entry->key ) ;
       int i = SCKEY_DISJ ;
-#if PG_VERSION_NUM >= 80400
       *recheck = true;
-#endif
 
       switch ( strategy ) {
         case  1 : SCK_INTERLEAVE ( SELLIPSE , sphereellipse_gen_key , 1 ); break;
@@ -658,14 +591,10 @@
       PG_RETURN_BOOL(FALSE);
     } else {
 
-#if PG_VERSION_NUM >= 80400
       bool           *recheck = (bool *) PG_GETARG_POINTER(4);
-#endif
       int32            *ent   = ( int32 * ) DatumGetPointer( entry->key ) ;
       int i = SCKEY_DISJ ;
-#if PG_VERSION_NUM >= 80400
       *recheck = true;
-#endif
 
       switch ( strategy ) {
         case  1 : SCK_INTERLEAVE ( SBOX     , spherebox_gen_key     , 1 ); break;
@@ -757,11 +686,7 @@
 
   Datum g_spherekey_picksplit(PG_FUNCTION_ARGS)
   {
-    #ifdef GEVHDRSZ
       GistEntryVector    *entryvec = ( GistEntryVector *) PG_GETARG_POINTER(0);
-    #else
-      bytea              *entryvec = (bytea *) PG_GETARG_POINTER(0);
-    #endif
     GIST_SPLITVEC  *v = (GIST_SPLITVEC *) PG_GETARG_POINTER(1);
     OffsetNumber  i,j;
     int32	*datum_alpha, *datum_beta;
@@ -777,27 +702,15 @@
     OffsetNumber maxoff;
     SPLITCOST  *costvector;
 
-    #ifdef GEVHDRSZ
      maxoff  = entryvec->n - 1;
-    #else
-      maxoff = ((VARSIZE(entryvec) - VARHDRSZ) / sizeof(GISTENTRY)) - 1;
-    #endif
     nbytes = (maxoff + 2) * sizeof(OffsetNumber);
     v->spl_left  = (OffsetNumber *) MALLOC(nbytes);
     v->spl_right = (OffsetNumber *) MALLOC(nbytes);
 
     for (i = FirstOffsetNumber; i < maxoff; i = OffsetNumberNext(i)) {
-	#ifdef GEVHDRSZ
 	 	datum_alpha = (int32 *) DatumGetPointer(entryvec->vector[i].key);
-	#else
-	 	datum_alpha = (int32 *) DatumGetPointer(((GISTENTRY *) VARDATA(entryvec))[i].key);
-	#endif
 	for (j = OffsetNumberNext(i); j <= maxoff; j = OffsetNumberNext(j)) {
-		#ifdef GEVHDRSZ
 		 	datum_beta = (int32 *) DatumGetPointer(entryvec->vector[j].key);
-		#else
-	 		datum_beta = (int32 *) DatumGetPointer(((GISTENTRY *) VARDATA(entryvec))[j].key);
-		#endif
 		memcpy( (void*)union_d, (void*)datum_alpha, KEYSIZE );
 		memcpy( (void*)inter_d, (void*)datum_alpha, KEYSIZE );
 		size_waste = spherekey_size( spherekey_union_two(union_d, datum_beta) ) - 
@@ -819,24 +732,15 @@
 	seed_2 = 2;
    }
 
-   #ifdef GEVHDRSZ
      memcpy( (void*)datum_l, (void *) DatumGetPointer(entryvec->vector[seed_1].key), KEYSIZE );
      memcpy( (void*)datum_r, (void *) DatumGetPointer(entryvec->vector[seed_2].key), KEYSIZE );
-   #else
-     memcpy( (void*)datum_l, (void *) DatumGetPointer(((GISTENTRY *) VARDATA(entryvec))[seed_1].key), KEYSIZE );
-     memcpy( (void*)datum_r, (void *) DatumGetPointer(((GISTENTRY *) VARDATA(entryvec))[seed_2].key), KEYSIZE );
-   #endif
    size_l = spherekey_size(datum_l);
    size_r = spherekey_size(datum_r);
 
    costvector = (SPLITCOST *) MALLOC(sizeof(SPLITCOST) * maxoff);
    for (i = FirstOffsetNumber; i <= maxoff; i = OffsetNumberNext(i)) {
 	costvector[i - 1].pos = i;
-	#ifdef GEVHDRSZ
 	 	datum_alpha = (int32 *) DatumGetPointer(entryvec->vector[i].key);
-	#else
-	 	datum_alpha = (int32 *) DatumGetPointer(((GISTENTRY *) VARDATA(entryvec))[i].key);
-	#endif
 	memcpy( (void*)union_dl, (void*)datum_l, KEYSIZE );
 	spherekey_union_two(union_dl, datum_alpha );
 	memcpy( (void*)union_dr, (void*)datum_r, KEYSIZE );
@@ -858,11 +762,7 @@
 		continue;
 	}
 
-	#ifdef GEVHDRSZ
 	 	datum_alpha = (int32 *) DatumGetPointer(entryvec->vector[i].key);
-	#else
-	 	datum_alpha = (int32 *) DatumGetPointer(((GISTENTRY *) VARDATA(entryvec))[i].key);
-	#endif
 	memcpy( (void*)union_dl, (void*)datum_l, KEYSIZE );
 	memcpy( (void*)union_dr, (void*)datum_r, KEYSIZE );
 
