@@ -27,6 +27,6 @@ psql:pg_sphere.test.sql:160: NOTICE:  argument type spath is only a shell
 psql:pg_sphere.test.sql:179: NOTICE:  type "sbox" is not yet defined
 DETAIL:  Creating a shell type definition.
 psql:pg_sphere.test.sql:186: NOTICE:  argument type sbox is only a shell
-psql:pg_sphere.test.sql:7235: NOTICE:  type "spherekey" is not yet defined
+psql:pg_sphere.test.sql:8542: NOTICE:  type "spherekey" is not yet defined
 DETAIL:  Creating a shell type definition.
-psql:pg_sphere.test.sql:7242: NOTICE:  argument type spherekey is only a shell
+psql:pg_sphere.test.sql:8549: NOTICE:  argument type spherekey is only a shell
