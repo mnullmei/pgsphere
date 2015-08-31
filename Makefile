@@ -33,7 +33,16 @@ else
   include $(top_srcdir)/contrib/contrib-global.mk
 endif
 
-PGVERSION += $(shell $(PG_CONFIG) --version | awk '{ split($$2,a,"."); printf( "v%d%02d%02d" ,a[1], a[2], a[3]); }' )
+PGVERSION95PLUS=$(shell $(PG_CONFIG) --version |                   \
+                  awk '{ split($$2, a, /[^0-9]+/);                 \
+                         if (a[1] > 9 || a[1] == 9 && a[2] >= 5) { \
+                                 print "y"; } }')
+
+ifeq ($(PGVERSION95PLUS), y)
+        PGS_TMP_DIR = --temp-instance=tmp_check
+else
+        PGS_TMP_DIR = --temp-install=tmp_check --top-builddir=test_top_build_dir
+endif
 
 crushtest: REGRESS += $(CRUSH_TESTS)
 crushtest: installcheck
@@ -42,9 +51,7 @@ test_extended: TESTS += $(CRUSH_TESTS)
 test_extended: test
 
 test: pg_sphere.test.sql
-	$(pg_regress_installcheck) --temp-install=tmp_check \
-					--top-builddir=test_top_build_dir \
-					$(REGRESS_OPTS) $(TESTS)
+	$(pg_regress_installcheck) $(PGS_TMP_DIR) $(REGRESS_OPTS) $(TESTS)
 
 pg_sphere.sql.in : $(addsuffix .in, $(PGS_SQL))
 	echo 'BEGIN;' > $@
