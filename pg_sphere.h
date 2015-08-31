@@ -62,14 +62,13 @@
 #include "utils/elog.h"
 #include "utils/builtins.h"
 #include "catalog/pg_type.h"
-#include "access/skey.h"
 #include "access/gist.h"
 #include "access/itup.h"
 
-/* PGSQL up to 8.1 use access/rtree.h for defining StrategyNumbers */
-#ifndef RTLeftStrategyNumber
-#include "access/rtree.h"
-#endif
+/* PostgreSQL 9.5+ moved pre-defined strategy numbers from access/gist.h
+   to access/stratnum.h, which is now in turn included by access/skey.h
+*/
+#include "access/skey.h"
 
 #ifdef EPSILON
 #undef EPSILON
