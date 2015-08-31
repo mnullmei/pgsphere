@@ -419,7 +419,6 @@
         case 34 : SCK_INTERLEAVE ( SPOLY    , spherepoly_gen_key    , 1 ); break;
         case 35 : SCK_INTERLEAVE ( SELLIPSE , sphereellipse_gen_key , 1 ); break;
         case 36 : SCK_INTERLEAVE ( SBOX     , spherebox_gen_key     , 1 ); break;
-
         case 37 : SCK_INTERLEAVE ( SCIRCLE  , spherecircle_gen_key  , 0 ); break;
         case 38 : SCK_INTERLEAVE ( SPOLY    , spherepoly_gen_key    , 0 ); break;
         case 39 : SCK_INTERLEAVE ( SELLIPSE , sphereellipse_gen_key , 0 ); break;
@@ -474,7 +473,6 @@
         case 34 : SCK_INTERLEAVE ( SPOLY    , spherepoly_gen_key    , 1 ); break;
         case 35 : SCK_INTERLEAVE ( SELLIPSE , sphereellipse_gen_key , 1 ); break;
         case 36 : SCK_INTERLEAVE ( SBOX     , spherebox_gen_key     , 1 ); break;
-
         case 37 : SCK_INTERLEAVE ( SCIRCLE  , spherecircle_gen_key  , 0 ); break;
         case 38 : SCK_INTERLEAVE ( SPOLY    , spherepoly_gen_key    , 0 ); break;
         case 39 : SCK_INTERLEAVE ( SELLIPSE , sphereellipse_gen_key , 0 ); break;
