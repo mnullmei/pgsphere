@@ -51,6 +51,10 @@
             <para>
               The project is hosted at <ulink url="http://pgfoundry.org/projects/pgsphere/"><citetitle>pgfoundry.org</citetitle></ulink>
             </para>
+            <para>
+              This particular version of <application>pgSphere</application> 
+	      is hosted at <ulink url="https://github.com/mnullmei/pgsphere"><citetitle>github.com/mnullmei</citetitle></ulink>
+            </para>
             <para>    
                 This document
                 describes installation and usage of this module.
