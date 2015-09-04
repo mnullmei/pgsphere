@@ -2,7 +2,7 @@
 MODULE_big = pg_sphere
 OBJS       = sscan.o sparse.o sbuffer.o vector3d.o point.o \
              euler.o circle.o line.o ellipse.o polygon.o \
-             path.o box.o output.o gq_cache.o gist.o key.o
+             path.o box.o output.o gq_cache.o gist.o key.o crossmatch.o
 
 DATA_built  = pg_sphere.sql
 DOCS        = README.pg_sphere COPYRIGHT.pg_sphere
@@ -17,8 +17,9 @@ CRUSH_TESTS  = init_extended circle_extended
 # order of sql files is important
 PGS_SQL    =  pgs_types.sql pgs_point.sql pgs_euler.sql pgs_circle.sql \
    pgs_line.sql pgs_ellipse.sql pgs_polygon.sql pgs_path.sql \
-   pgs_box.sql pgs_contains_ops.sql pgs_contains_ops_compat.sql pgs_gist.sql
-
+   pgs_box.sql pgs_contains_ops.sql pgs_contains_ops_compat.sql pgs_gist.sql \
+   pgs_crossmatch.sql
+   
 ifdef USE_PGXS
   ifndef PG_CONFIG
     PG_CONFIG := pg_config

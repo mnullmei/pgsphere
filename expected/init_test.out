@@ -30,3 +30,9 @@ psql:pg_sphere.test.sql:186: NOTICE:  argument type sbox is only a shell
 psql:pg_sphere.test.sql:8542: NOTICE:  type "spherekey" is not yet defined
 DETAIL:  Creating a shell type definition.
 psql:pg_sphere.test.sql:8549: NOTICE:  argument type spherekey is only a shell
+psql:pg_sphere.test.sql:8563: NOTICE:  type "pointkey" is not yet defined
+DETAIL:  Creating a shell type definition.
+psql:pg_sphere.test.sql:8570: NOTICE:  argument type pointkey is only a shell
+psql:pg_sphere.test.sql:8576: NOTICE:  argument type pointkey is only a shell
+psql:pg_sphere.test.sql:8582: NOTICE:  argument type pointkey is only a shell
+psql:pg_sphere.test.sql:8588: NOTICE:  argument type pointkey is only a shell

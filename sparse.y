@@ -19,9 +19,9 @@ static double human2dec ( double d , double m, double s ){
     return 0;
   } else {
     if ( d<0 ){
-      return  ( d - m/60.0 - s/3600.0 ) ;
+      return  ( (-s/3600.0 - m/60.0) + d) ;
     } else {
-      return  ( d + m/60.0 + s/3600.0 ) ;
+      return  ( (s/3600.0 + m/60.0) + d) ;
     }
   }
 }
