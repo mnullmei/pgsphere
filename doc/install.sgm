@@ -19,7 +19,7 @@
             </title>
             <para>
                 You will need <application>PostgreSQL
-                8.4</application> or above. We assume that you have
+                9.1</application> or above. We assume that you have
                 <application>PostgreSQL</application> already compiled and
                 installed. Please note: Depending on your system configuration mostly you have to be logged in as the system
                 superuser.
@@ -84,7 +84,7 @@
             <para>
                 The check status will be displayed. Please note, the check gives different results with 
 		different <application>PostgreSQL</application>-versions. Currently, the check should
-		run without errors with <application>PostgreSQL</application>-version 8.4. Otherwise check
+		run without errors with <application>PostgreSQL</application> versions from 9.1 to 9.5. Otherwise check
 		the file <filename>regression.diff</filename>.
             </para>
             
