@@ -988,7 +988,7 @@ crossmatch(PG_FUNCTION_ARGS)
 		nulls[0] = false;
 		nulls[1] = false;
 
-		htuple = heap_formtuple(funcctx->attinmeta->tupdesc, datums, nulls);
+		htuple = heap_form_tuple(funcctx->attinmeta->tupdesc, datums, nulls);
 		result = TupleGetDatum(funcctx->slot, htuple);
 		SRF_RETURN_NEXT(funcctx, result);
 	}
