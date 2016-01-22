@@ -49,6 +49,7 @@
 #define PIH 1.57079632679489661923          //!< pi/2
 #define PID 6.2831853071795864769           //!< 2*pi
 #define RADIANS 57.295779513082320877       //!< 180/pi
+#define PI_EPS 4.4408920985006261617e-16 /* 2 ** -51 */
 
 #define sqr(a)   ( ( a ) * ( a ) )          //!< the square functionas macro
 #define max(a,b) ( (a>b)?(a):(b) )          //!< maximum of two values
