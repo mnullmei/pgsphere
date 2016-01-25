@@ -1,24 +1,26 @@
+EXTENSION     = pg_sphere
+EXT_VERSION   = 1.0
+EXT_VERSIONED = $(EXTENSION)--$(EXT_VERSION)
+MODULE_big    = $(EXTENSION)
+OBJS          = sscan.o sparse.o sbuffer.o vector3d.o point.o \
+                euler.o circle.o line.o ellipse.o polygon.o \
+                path.o box.o output.o gq_cache.o gist.o key.o crossmatch.o
+DATA_built    = $(EXT_VERSIONED).sql $(EXTENSION).control
+REGRESS_SQL   = tables points euler circle line ellipse poly path box index \
+                contains_ops contains_ops_compat bounding_box_gist
+REGRESS       = init $(REGRESS_SQL)
+TESTS         = init_test $(REGRESS_SQL)
+DOCS          = README.$(EXTENSION) COPYRIGHT.$(EXTENSION)
+                # order of sql files is important
+EXT_SQL       = pgs_types pgs_point pgs_euler pgs_circle pgs_line pgs_ellipse \
+                pgs_polygon pgs_path pgs_box pgs_contains_ops \
+                pgs_contains_ops_compat pgs_gist pgs_crossmatch
 
-MODULE_big = pg_sphere
-OBJS       = sscan.o sparse.o sbuffer.o vector3d.o point.o \
-             euler.o circle.o line.o ellipse.o polygon.o \
-             path.o box.o output.o gq_cache.o gist.o key.o crossmatch.o
+EXTRA_CLEAN   = $(EXT_VERSIONED).sql $(EXT_VERSIONED).sql.in \
+                $(EXTENSION).test.sql $(EXTENSION).control logfile
 
-DATA_built  = pg_sphere.sql
-DOCS        = README.pg_sphere COPYRIGHT.pg_sphere
-REGRESS_SQL = tables points euler circle line ellipse poly path box index \
-              contains_ops contains_ops_compat bounding_box_gist
-REGRESS     = init $(REGRESS_SQL)
-TESTS       = init_test $(REGRESS_SQL)
-EXTRA_CLEAN = pg_sphere.sql pg_sphere.sql.in $(PGS_SQL) pg_sphere.test.sql
+CRUSH_TESTS   = init_extended circle_extended 
 
-CRUSH_TESTS  = init_extended circle_extended 
-
-# order of sql files is important
-PGS_SQL    =  pgs_types.sql pgs_point.sql pgs_euler.sql pgs_circle.sql \
-   pgs_line.sql pgs_ellipse.sql pgs_polygon.sql pgs_path.sql \
-   pgs_box.sql pgs_contains_ops.sql pgs_contains_ops_compat.sql pgs_gist.sql \
-   pgs_crossmatch.sql
    
 ifdef USE_PGXS
   ifndef PG_CONFIG
@@ -51,16 +53,28 @@ crushtest: installcheck
 test_extended: TESTS += $(CRUSH_TESTS)
 test_extended: test
 
-test: pg_sphere.test.sql
+test: $(EXTENSION).test.sql sql/init_test.sql
 	$(pg_regress_installcheck) $(PGS_TMP_DIR) $(REGRESS_OPTS) $(TESTS)
 
-pg_sphere.sql.in : $(addsuffix .in, $(PGS_SQL))
-	echo 'BEGIN;' > $@
-	for i in $+ ; do cat $$i >> $@ ; done
-	echo 'COMMIT;' >> $@
+$(EXT_VERSIONED).sql.in: $(addsuffix .sql.in, $(EXT_SQL))
+	cat $^ > $@
 
-pg_sphere.test.sql : pg_sphere.sql.in $(shlib)
+$(EXT_VERSIONED).sql: $(EXT_VERSIONED).sql.in
+	echo "-- prevent sourcing this file inadvertently" > $@
+	echo '\\echo Please type "CREATE EXTENSION $(EXTENSION);" to activate' \
+				'the $(EXTENSION) extension. \\quit' >> $@
+	echo >> $@
+	cat $< >> $@
+
+$(EXTENSION).test.sql: $(EXT_VERSIONED).sql.in $(shlib)
 	sed 's,MODULE_PATHNAME,$(realpath $(shlib)),g' $< >$@
+
+$(EXTENSION).control: $(EXTENSION).control.in
+	echo '# '$(EXTENSION)' extension' > $@
+	cat $< >> $@
+	echo "default_version = '$(EXT_VERSION)'" >> $@
+	echo "module_pathname = '"'$$libdir/'$(EXTENSION)"'" >> $@
+	echo "relocatable = true" >> $@
 
 sscan.o : sparse.c
 
@@ -80,4 +94,4 @@ endif
 
 dist : clean sparse.c sscan.c
 	find . -name '*~' -type f -exec rm {} \;
-	cd .. && tar  --exclude CVS -czf pg_sphere.tar.gz pg_sphere && cd -
+	cd .. && tar  --exclude .git -czf pg_sphere.tar.gz pg_sphere && cd -
