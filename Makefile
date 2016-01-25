@@ -4,17 +4,18 @@ EXT_VERSIONED = $(EXTENSION)--$(EXT_VERSION)
 MODULE_big    = $(EXTENSION)
 OBJS          = sscan.o sparse.o sbuffer.o vector3d.o point.o \
                 euler.o circle.o line.o ellipse.o polygon.o \
-                path.o box.o output.o gq_cache.o gist.o key.o crossmatch.o
+                path.o box.o output.o gq_cache.o gist.o key.o crossmatch.o \
+		gnomo.o
 DATA_built    = $(EXT_VERSIONED).sql $(EXTENSION).control
 REGRESS_SQL   = tables points euler circle line ellipse poly path box index \
-                contains_ops contains_ops_compat bounding_box_gist
+                contains_ops contains_ops_compat bounding_box_gist gnomo
 REGRESS       = init $(REGRESS_SQL)
 TESTS         = init_test $(REGRESS_SQL)
 DOCS          = README.$(EXTENSION) COPYRIGHT.$(EXTENSION)
                 # order of sql files is important
 EXT_SQL       = pgs_types pgs_point pgs_euler pgs_circle pgs_line pgs_ellipse \
                 pgs_polygon pgs_path pgs_box pgs_contains_ops \
-                pgs_contains_ops_compat pgs_gist pgs_crossmatch
+                pgs_contains_ops_compat pgs_gist pgs_crossmatch gnomo
 
 EXTRA_CLEAN   = $(EXT_VERSIONED).sql $(EXT_VERSIONED).sql.in \
                 $(EXTENSION).test.sql $(EXTENSION).control logfile
