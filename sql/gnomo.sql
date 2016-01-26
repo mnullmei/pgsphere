@@ -1,4 +1,4 @@
-SET extra_float_digits TO -2;
+SET extra_float_digits TO -3;
 SELECT set_sphere_output_precision(12);
 
 select gnomonic_proj(spoint '(0.95, -0.455)', spoint '(1, -0.45)');
