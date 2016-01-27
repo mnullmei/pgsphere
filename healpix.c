@@ -36,7 +36,7 @@ static int nside_invalid(hpint64 nside)
 static hpint64 c_nside(int order)
 {
 	hpint64 one_bit = 1;
-	PG_RETURN_INT64(one_bit << order);
+	return one_bit << order;
 }
 
 PG_FUNCTION_INFO_V1(pg_nside2order);
