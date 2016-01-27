@@ -54,11 +54,6 @@ Datum pg_order2nside(PG_FUNCTION_ARGS)
 	int32 order = PG_GETARG_INT32(0);
 	if (order_invalid(order))
 		PG_RETURN_NULL();
-
-elog(LOG, "order = %d", order);
-hpint64 goof = c_nside(order);
-elog(LOG, "goof = %lld", goof);
-
 	PG_RETURN_INT64(c_nside(order));
 }
 
@@ -85,7 +80,7 @@ Datum pg_npix2nside(PG_FUNCTION_ARGS)
 }
 
 static double conv_theta(double x) {
-	if (fabs(x) < PI_EPS / 2)
+	if (fabs(x) <= PI_EPS / 2)
 		return PIH;
 	return PIH - x;
 }
