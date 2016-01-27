@@ -84,6 +84,11 @@ Datum pg_npix2nside(PG_FUNCTION_ARGS)
 	PG_RETURN_INT64(nside);
 }
 
+static double conv_theta(double x) {
+	if (fabs(x) < PI_EPS / 2)
+		return PIH;
+	return PIH - x;
+}
 
 PG_FUNCTION_INFO_V1(healpix_nest);
 Datum healpix_nest(PG_FUNCTION_ARGS)
@@ -93,7 +98,7 @@ Datum healpix_nest(PG_FUNCTION_ARGS)
 	hpint64 i;
 	if (order_invalid(order))
 		PG_RETURN_NULL();
-	ang2pix_nest64(c_nside(order), PIH - p->lat, p->lng, &i);
+	ang2pix_nest64(c_nside(order), conv_theta(p->lat), p->lng, &i);
 	PG_RETURN_INT64(i);
 }
 
@@ -105,7 +110,7 @@ Datum healpix_ring(PG_FUNCTION_ARGS)
 	hpint64 i;
 	if (order_invalid(order))
 		PG_RETURN_NULL();
-	ang2pix_ring64(c_nside(order), PIH - p->lat, p->lng, &i);
+	ang2pix_ring64(c_nside(order), conv_theta(p->lat), p->lng, &i);
 	PG_RETURN_INT64(i);
 }
 
@@ -120,7 +125,7 @@ Datum inv_healpix_nest(PG_FUNCTION_ARGS)
 	if (order_invalid(order))
 		PG_RETURN_NULL();
 	pix2ang_nest64(c_nside(order), i, &theta, &p->lng);
-	p->lat = PIH - theta;
+	p->lat = conv_theta(theta);
 	PG_RETURN_POINTER(p);
 }
 
@@ -134,6 +139,6 @@ Datum inv_healpix_ring(PG_FUNCTION_ARGS)
 	if (order_invalid(order))
 		PG_RETURN_NULL();
 	pix2ang_ring64(c_nside(order), i, &theta, &p->lng);
-	p->lat = PIH - theta;
+	p->lat = conv_theta(theta);
 	PG_RETURN_POINTER(p);
 }
