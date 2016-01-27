@@ -5,23 +5,24 @@ MODULE_big    = $(EXTENSION)
 OBJS          = sscan.o sparse.o sbuffer.o vector3d.o point.o \
                 euler.o circle.o line.o ellipse.o polygon.o \
                 path.o box.o output.o gq_cache.o gist.o key.o crossmatch.o \
-		gnomo.o
+		gnomo.o healpix.o
 DATA_built    = $(EXT_VERSIONED).sql $(EXTENSION).control
 REGRESS_SQL   = tables points euler circle line ellipse poly path box index \
-                contains_ops contains_ops_compat bounding_box_gist gnomo
+                contains_ops contains_ops_compat bounding_box_gist gnomo healpix
 REGRESS       = init $(REGRESS_SQL)
 TESTS         = init_test $(REGRESS_SQL)
 DOCS          = README.$(EXTENSION) COPYRIGHT.$(EXTENSION)
                 # order of sql files is important
 EXT_SQL       = pgs_types pgs_point pgs_euler pgs_circle pgs_line pgs_ellipse \
                 pgs_polygon pgs_path pgs_box pgs_contains_ops \
-                pgs_contains_ops_compat pgs_gist pgs_crossmatch gnomo
+                pgs_contains_ops_compat pgs_gist pgs_crossmatch gnomo healpix
 
 EXTRA_CLEAN   = $(EXT_VERSIONED).sql $(EXT_VERSIONED).sql.in \
                 $(EXTENSION).test.sql $(EXTENSION).control logfile
 
 CRUSH_TESTS   = init_extended circle_extended 
 
+SHLIB_LINK += -lchealpix
    
 ifdef USE_PGXS
   ifndef PG_CONFIG
