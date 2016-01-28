@@ -4,6 +4,726 @@ SELECT set_sphere_output_precision(9);
  SET 9
 (1 row)
 
+select nside2order(1);
+ nside2order 
+-------------
+           0
+(1 row)
+
+select nside2order(2);
+ nside2order 
+-------------
+           1
+(1 row)
+
+select nside2order(4);
+ nside2order 
+-------------
+           2
+(1 row)
+
+select nside2order(8);
+ nside2order 
+-------------
+           3
+(1 row)
+
+select nside2order(16);
+ nside2order 
+-------------
+           4
+(1 row)
+
+select nside2order(32);
+ nside2order 
+-------------
+           5
+(1 row)
+
+select nside2order(64);
+ nside2order 
+-------------
+           6
+(1 row)
+
+select nside2order(128);
+ nside2order 
+-------------
+           7
+(1 row)
+
+select nside2order(256);
+ nside2order 
+-------------
+           8
+(1 row)
+
+select nside2order(512);
+ nside2order 
+-------------
+           9
+(1 row)
+
+select nside2order(1024);
+ nside2order 
+-------------
+          10
+(1 row)
+
+select nside2order(2048);
+ nside2order 
+-------------
+          11
+(1 row)
+
+select nside2order(4096);
+ nside2order 
+-------------
+          12
+(1 row)
+
+select nside2order(8192);
+ nside2order 
+-------------
+          13
+(1 row)
+
+select nside2order(16384);
+ nside2order 
+-------------
+          14
+(1 row)
+
+select nside2order(32768);
+ nside2order 
+-------------
+          15
+(1 row)
+
+select nside2order(65536);
+ nside2order 
+-------------
+          16
+(1 row)
+
+select nside2order(131072);
+ nside2order 
+-------------
+          17
+(1 row)
+
+select nside2order(262144);
+ nside2order 
+-------------
+          18
+(1 row)
+
+select nside2order(524288);
+ nside2order 
+-------------
+          19
+(1 row)
+
+select nside2order(1048576);
+ nside2order 
+-------------
+          20
+(1 row)
+
+select nside2order(2097152);
+ nside2order 
+-------------
+          21
+(1 row)
+
+select nside2order(4194304);
+ nside2order 
+-------------
+          22
+(1 row)
+
+select nside2order(8388608);
+ nside2order 
+-------------
+          23
+(1 row)
+
+select nside2order(16777216);
+ nside2order 
+-------------
+          24
+(1 row)
+
+select nside2order(33554432);
+ nside2order 
+-------------
+          25
+(1 row)
+
+select nside2order(67108864);
+ nside2order 
+-------------
+          26
+(1 row)
+
+select nside2order(134217728);
+ nside2order 
+-------------
+          27
+(1 row)
+
+select nside2order(268435456);
+ nside2order 
+-------------
+          28
+(1 row)
+
+select nside2order(536870912);
+ nside2order 
+-------------
+          29
+(1 row)
+
+select order2nside(0);
+ order2nside 
+-------------
+           1
+(1 row)
+
+select order2nside(1);
+ order2nside 
+-------------
+           2
+(1 row)
+
+select order2nside(2);
+ order2nside 
+-------------
+           4
+(1 row)
+
+select order2nside(3);
+ order2nside 
+-------------
+           8
+(1 row)
+
+select order2nside(4);
+ order2nside 
+-------------
+          16
+(1 row)
+
+select order2nside(5);
+ order2nside 
+-------------
+          32
+(1 row)
+
+select order2nside(6);
+ order2nside 
+-------------
+          64
+(1 row)
+
+select order2nside(7);
+ order2nside 
+-------------
+         128
+(1 row)
+
+select order2nside(8);
+ order2nside 
+-------------
+         256
+(1 row)
+
+select order2nside(9);
+ order2nside 
+-------------
+         512
+(1 row)
+
+select order2nside(10);
+ order2nside 
+-------------
+        1024
+(1 row)
+
+select order2nside(11);
+ order2nside 
+-------------
+        2048
+(1 row)
+
+select order2nside(12);
+ order2nside 
+-------------
+        4096
+(1 row)
+
+select order2nside(13);
+ order2nside 
+-------------
+        8192
+(1 row)
+
+select order2nside(14);
+ order2nside 
+-------------
+       16384
+(1 row)
+
+select order2nside(15);
+ order2nside 
+-------------
+       32768
+(1 row)
+
+select order2nside(16);
+ order2nside 
+-------------
+       65536
+(1 row)
+
+select order2nside(17);
+ order2nside 
+-------------
+      131072
+(1 row)
+
+select order2nside(18);
+ order2nside 
+-------------
+      262144
+(1 row)
+
+select order2nside(19);
+ order2nside 
+-------------
+      524288
+(1 row)
+
+select order2nside(20);
+ order2nside 
+-------------
+     1048576
+(1 row)
+
+select order2nside(21);
+ order2nside 
+-------------
+     2097152
+(1 row)
+
+select order2nside(22);
+ order2nside 
+-------------
+     4194304
+(1 row)
+
+select order2nside(23);
+ order2nside 
+-------------
+     8388608
+(1 row)
+
+select order2nside(24);
+ order2nside 
+-------------
+    16777216
+(1 row)
+
+select order2nside(25);
+ order2nside 
+-------------
+    33554432
+(1 row)
+
+select order2nside(26);
+ order2nside 
+-------------
+    67108864
+(1 row)
+
+select order2nside(27);
+ order2nside 
+-------------
+   134217728
+(1 row)
+
+select order2nside(28);
+ order2nside 
+-------------
+   268435456
+(1 row)
+
+select order2nside(29);
+ order2nside 
+-------------
+   536870912
+(1 row)
+
+select nside2npix(1);
+ nside2npix 
+------------
+         12
+(1 row)
+
+select nside2npix(2);
+ nside2npix 
+------------
+         48
+(1 row)
+
+select nside2npix(4);
+ nside2npix 
+------------
+        192
+(1 row)
+
+select nside2npix(8);
+ nside2npix 
+------------
+        768
+(1 row)
+
+select nside2npix(16);
+ nside2npix 
+------------
+       3072
+(1 row)
+
+select nside2npix(32);
+ nside2npix 
+------------
+      12288
+(1 row)
+
+select nside2npix(64);
+ nside2npix 
+------------
+      49152
+(1 row)
+
+select nside2npix(128);
+ nside2npix 
+------------
+     196608
+(1 row)
+
+select nside2npix(256);
+ nside2npix 
+------------
+     786432
+(1 row)
+
+select nside2npix(512);
+ nside2npix 
+------------
+    3145728
+(1 row)
+
+select nside2npix(1024);
+ nside2npix 
+------------
+   12582912
+(1 row)
+
+select nside2npix(2048);
+ nside2npix 
+------------
+   50331648
+(1 row)
+
+select nside2npix(4096);
+ nside2npix 
+------------
+  201326592
+(1 row)
+
+select nside2npix(8192);
+ nside2npix 
+------------
+  805306368
+(1 row)
+
+select nside2npix(16384);
+ nside2npix 
+------------
+ 3221225472
+(1 row)
+
+select nside2npix(32768);
+ nside2npix  
+-------------
+ 12884901888
+(1 row)
+
+select nside2npix(65536);
+ nside2npix  
+-------------
+ 51539607552
+(1 row)
+
+select nside2npix(131072);
+  nside2npix  
+--------------
+ 206158430208
+(1 row)
+
+select nside2npix(262144);
+  nside2npix  
+--------------
+ 824633720832
+(1 row)
+
+select nside2npix(524288);
+  nside2npix   
+---------------
+ 3298534883328
+(1 row)
+
+select nside2npix(1048576);
+   nside2npix   
+----------------
+ 13194139533312
+(1 row)
+
+select nside2npix(2097152);
+   nside2npix   
+----------------
+ 52776558133248
+(1 row)
+
+select nside2npix(4194304);
+   nside2npix    
+-----------------
+ 211106232532992
+(1 row)
+
+select nside2npix(8388608);
+   nside2npix    
+-----------------
+ 844424930131968
+(1 row)
+
+select nside2npix(16777216);
+    nside2npix    
+------------------
+ 3377699720527872
+(1 row)
+
+select nside2npix(33554432);
+    nside2npix     
+-------------------
+ 13510798882111488
+(1 row)
+
+select nside2npix(67108864);
+    nside2npix     
+-------------------
+ 54043195528445952
+(1 row)
+
+select nside2npix(134217728);
+     nside2npix     
+--------------------
+ 216172782113783808
+(1 row)
+
+select nside2npix(268435456);
+     nside2npix     
+--------------------
+ 864691128455135232
+(1 row)
+
+select nside2npix(536870912);
+     nside2npix      
+---------------------
+ 3458764513820540928
+(1 row)
+
+select npix2nside(12);
+ npix2nside 
+------------
+          1
+(1 row)
+
+select npix2nside(48);
+ npix2nside 
+------------
+          2
+(1 row)
+
+select npix2nside(192);
+ npix2nside 
+------------
+          4
+(1 row)
+
+select npix2nside(768);
+ npix2nside 
+------------
+          8
+(1 row)
+
+select npix2nside(3072);
+ npix2nside 
+------------
+         16
+(1 row)
+
+select npix2nside(12288);
+ npix2nside 
+------------
+         32
+(1 row)
+
+select npix2nside(49152);
+ npix2nside 
+------------
+         64
+(1 row)
+
+select npix2nside(196608);
+ npix2nside 
+------------
+        128
+(1 row)
+
+select npix2nside(786432);
+ npix2nside 
+------------
+        256
+(1 row)
+
+select npix2nside(3145728);
+ npix2nside 
+------------
+        512
+(1 row)
+
+select npix2nside(12582912);
+ npix2nside 
+------------
+       1024
+(1 row)
+
+select npix2nside(50331648);
+ npix2nside 
+------------
+       2048
+(1 row)
+
+select npix2nside(201326592);
+ npix2nside 
+------------
+       4096
+(1 row)
+
+select npix2nside(805306368);
+ npix2nside 
+------------
+       8192
+(1 row)
+
+select npix2nside(3221225472);
+ npix2nside 
+------------
+      16384
+(1 row)
+
+select npix2nside(12884901888);
+ npix2nside 
+------------
+      32768
+(1 row)
+
+select npix2nside(51539607552);
+ npix2nside 
+------------
+      65536
+(1 row)
+
+select npix2nside(206158430208);
+ npix2nside 
+------------
+     131072
+(1 row)
+
+select npix2nside(824633720832);
+ npix2nside 
+------------
+     262144
+(1 row)
+
+select npix2nside(3298534883328);
+ npix2nside 
+------------
+     524288
+(1 row)
+
+select npix2nside(13194139533312);
+ npix2nside 
+------------
+    1048576
+(1 row)
+
+select npix2nside(52776558133248);
+ npix2nside 
+------------
+    2097152
+(1 row)
+
+select npix2nside(211106232532992);
+ npix2nside 
+------------
+    4194304
+(1 row)
+
+select npix2nside(844424930131968);
+ npix2nside 
+------------
+    8388608
+(1 row)
+
+select npix2nside(3377699720527872);
+ npix2nside 
+------------
+   16777216
+(1 row)
+
+select npix2nside(13510798882111488);
+ npix2nside 
+------------
+   33554432
+(1 row)
+
+select npix2nside(54043195528445952);
+ npix2nside 
+------------
+   67108864
+(1 row)
+
+select npix2nside(216172782113783808);
+ npix2nside 
+------------
+  134217728
+(1 row)
+
+select npix2nside(864691128455135232);
+ npix2nside 
+------------
+  268435456
+(1 row)
+
+select npix2nside(3458764513820540928);
+ npix2nside 
+------------
+  536870912
+(1 row)
+
 select healpix_nest(0, '(0d, -90d)');
  healpix_nest 
 --------------
@@ -16,7 +736,7 @@ select healpix_ring(0, '(0d, -45d)');
             8
 (1 row)
 
-select healpix_ring(0, '(0d, 0d)');
+select healpix_ring(0, '(0d, 0.0001)');
  healpix_ring 
 --------------
             4
@@ -46,7 +766,7 @@ select healpix_ring(0, '(90d, -45d)');
             9
 (1 row)
 
-select healpix_ring(0, '(90d, 0d)');
+select healpix_ring(0, '(90d, 0.0001)');
  healpix_ring 
 --------------
             5
@@ -76,7 +796,7 @@ select healpix_ring(0, '(180d, -45d)');
            10
 (1 row)
 
-select healpix_ring(0, '(180d, 0d)');
+select healpix_ring(0, '(180d, 0.0001)');
  healpix_ring 
 --------------
             6
@@ -106,7 +826,7 @@ select healpix_nest(0, '(270d, -45d)');
            11
 (1 row)
 
-select healpix_ring(0, '(270d, 0d)');
+select healpix_ring(0, '(270d, 0.0001)');
  healpix_ring 
 --------------
             7
@@ -136,7 +856,7 @@ select healpix_ring(0, '(360d, -45d)');
             8
 (1 row)
 
-select healpix_nest(0, '(360d, 0d)');
+select healpix_nest(0, '(360d, 0.0001)');
  healpix_nest 
 --------------
             4
@@ -178,7 +898,7 @@ select healpix_nest(5, '(0d, -22.5d)');
          4156
 (1 row)
 
-select healpix_nest(5, '(0d, 0d)');
+select healpix_nest(5, '(0d, 0.0001)');
  healpix_nest 
 --------------
          4864
@@ -232,10 +952,10 @@ select healpix_ring(5, '(45d, -22.5d)');
          8528
 (1 row)
 
-select healpix_ring(5, '(45d, 0d)');
+select healpix_ring(5, '(45d, 0.0001)');
  healpix_ring 
 --------------
-         6096
+         5968
 (1 row)
 
 select healpix_nest(5, '(45d, 22.5d)');
@@ -286,10 +1006,10 @@ select healpix_ring(5, '(90d, -22.5d)');
          8544
 (1 row)
 
-select healpix_ring(5, '(90d, 0d)');
+select healpix_ring(5, '(90d, 0.0001)');
  healpix_ring 
 --------------
-         6112
+         5984
 (1 row)
 
 select healpix_ring(5, '(90d, 22.5d)');
@@ -340,10 +1060,10 @@ select healpix_nest(5, '(135d, -22.5d)');
         10044
 (1 row)
 
-select healpix_nest(5, '(135d, 0d)');
+select healpix_nest(5, '(135d, 0.0001)');
  healpix_nest 
 --------------
-         6826
+         1024
 (1 row)
 
 select healpix_ring(5, '(135d, 22.5d)');
@@ -394,10 +1114,10 @@ select healpix_ring(5, '(180d, -22.5d)');
          8576
 (1 row)
 
-select healpix_ring(5, '(180d, 0d)');
+select healpix_ring(5, '(180d, 0.0001)');
  healpix_ring 
 --------------
-         6144
+         6016
 (1 row)
 
 select healpix_nest(5, '(180d, 22.5d)');
@@ -448,10 +1168,10 @@ select healpix_nest(5, '(225d, -22.5d)');
         11068
 (1 row)
 
-select healpix_nest(5, '(225d, 0d)');
+select healpix_nest(5, '(225d, 0.0001)');
  healpix_nest 
 --------------
-         7850
+         2048
 (1 row)
 
 select healpix_nest(5, '(225d, 22.5d)');
@@ -502,10 +1222,10 @@ select healpix_nest(5, '(270d, -22.5d)');
          7228
 (1 row)
 
-select healpix_nest(5, '(270d, 0d)');
+select healpix_nest(5, '(270d, 0.0001)');
  healpix_nest 
 --------------
-         7594
+         7936
 (1 row)
 
 select healpix_nest(5, '(270d, 22.5d)');
@@ -556,10 +1276,10 @@ select healpix_nest(5, '(315d, -22.5d)');
         12092
 (1 row)
 
-select healpix_nest(5, '(315d, 0d)');
+select healpix_nest(5, '(315d, 0.0001)');
  healpix_nest 
 --------------
-         4778
+         3072
 (1 row)
 
 select healpix_nest(5, '(315d, 22.5d)');
@@ -610,7 +1330,7 @@ select healpix_ring(5, '(360d, -22.5d)');
          8512
 (1 row)
 
-select healpix_nest(5, '(360d, 0d)');
+select healpix_nest(5, '(360d, 0.0001)');
  healpix_nest 
 --------------
          4864
@@ -688,7 +1408,7 @@ select healpix_nest(10, '(0d, -11.25d)');
       4406476
 (1 row)
 
-select healpix_ring(10, '(0d, 0d)');
+select healpix_ring(10, '(0d, 0.0001)');
  healpix_ring 
 --------------
       6285312
@@ -790,10 +1510,10 @@ select healpix_ring(10, '(22.5d, -11.25d)');
       7514368
 (1 row)
 
-select healpix_nest(10, '(22.5d, 0d)');
+select healpix_nest(10, '(22.5d, 0.0001)');
  healpix_nest 
 --------------
-      4565674
+      4653056
 (1 row)
 
 select healpix_ring(10, '(22.5d, 11.25d)');
@@ -892,10 +1612,10 @@ select healpix_nest(10, '(45d, -11.25d)');
       9387212
 (1 row)
 
-select healpix_nest(10, '(45d, 0d)');
+select healpix_nest(10, '(45d, 0.0001)');
  healpix_nest 
 --------------
-      5941930
+            0
 (1 row)
 
 select healpix_nest(10, '(45d, 11.25d)');
@@ -994,10 +1714,10 @@ select healpix_nest(10, '(67.5d, -11.25d)');
       5782732
 (1 row)
 
-select healpix_ring(10, '(67.5d, 0d)');
+select healpix_ring(10, '(67.5d, 0.0001)');
  healpix_ring 
 --------------
-      6290176
+      6286080
 (1 row)
 
 select healpix_ring(10, '(67.5d, 11.25d)');
@@ -1096,10 +1816,10 @@ select healpix_nest(10, '(90d, -11.25d)');
       5455052
 (1 row)
 
-select healpix_nest(10, '(90d, 0d)');
+select healpix_nest(10, '(90d, 0.0001)');
  healpix_nest 
 --------------
-      5679786
+      6029312
 (1 row)
 
 select healpix_ring(10, '(90d, 11.25d)');
@@ -1198,10 +1918,10 @@ select healpix_nest(10, '(112.5d, -11.25d)');
       5520588
 (1 row)
 
-select healpix_nest(10, '(112.5d, 0d)');
+select healpix_nest(10, '(112.5d, 0.0001)');
  healpix_nest 
 --------------
-      5614250
+      5701632
 (1 row)
 
 select healpix_nest(10, '(112.5d, 11.25d)');
@@ -1300,10 +2020,10 @@ select healpix_nest(10, '(135d, -11.25d)');
      10435788
 (1 row)
 
-select healpix_nest(10, '(135d, 0d)');
+select healpix_nest(10, '(135d, 0.0001)');
  healpix_nest 
 --------------
-      6990506
+      1048576
 (1 row)
 
 select healpix_nest(10, '(135d, 11.25d)');
@@ -1402,10 +2122,10 @@ select healpix_nest(10, '(157.5d, -11.25d)');
       6831308
 (1 row)
 
-select healpix_nest(10, '(157.5d, 0d)');
+select healpix_nest(10, '(157.5d, 0.0001)');
  healpix_nest 
 --------------
-      6924970
+      7012352
 (1 row)
 
 select healpix_ring(10, '(157.5d, 11.25d)');
@@ -1504,10 +2224,10 @@ select healpix_ring(10, '(180d, -11.25d)');
       7516160
 (1 row)
 
-select healpix_nest(10, '(180d, 0d)');
+select healpix_nest(10, '(180d, 0.0001)');
  healpix_nest 
 --------------
-      6728362
+      7077888
 (1 row)
 
 select healpix_nest(10, '(180d, 11.25d)');
@@ -1606,10 +2326,10 @@ select healpix_nest(10, '(202.5d, -11.25d)');
       6569164
 (1 row)
 
-select healpix_nest(10, '(202.5d, 0d)');
+select healpix_nest(10, '(202.5d, 0.0001)');
  healpix_nest 
 --------------
-      6662826
+      6750208
 (1 row)
 
 select healpix_ring(10, '(202.5d, 11.25d)');
@@ -1708,10 +2428,10 @@ select healpix_ring(10, '(225d, -11.25d)');
       7516672
 (1 row)
 
-select healpix_ring(10, '(225d, 0d)');
+select healpix_ring(10, '(225d, 0.0001)');
  healpix_ring 
 --------------
-      6291968
+      6287872
 (1 row)
 
 select healpix_ring(10, '(225d, 11.25d)');
@@ -1810,10 +2530,10 @@ select healpix_ring(10, '(247.5d, -11.25d)');
       7516928
 (1 row)
 
-select healpix_nest(10, '(247.5d, 0d)');
+select healpix_nest(10, '(247.5d, 0.0001)');
  healpix_nest 
 --------------
-      7973546
+      8060928
 (1 row)
 
 select healpix_nest(10, '(247.5d, 11.25d)');
@@ -1912,10 +2632,10 @@ select healpix_nest(10, '(270d, -11.25d)');
       7552204
 (1 row)
 
-select healpix_nest(10, '(270d, 0d)');
+select healpix_nest(10, '(270d, 0.0001)');
  healpix_nest 
 --------------
-      7776938
+      8126464
 (1 row)
 
 select healpix_nest(10, '(270d, 11.25d)');
@@ -2014,10 +2734,10 @@ select healpix_ring(10, '(292.5d, -11.25d)');
       7517440
 (1 row)
 
-select healpix_nest(10, '(292.5d, 0d)');
+select healpix_nest(10, '(292.5d, 0.0001)');
  healpix_nest 
 --------------
-      7711402
+      7798784
 (1 row)
 
 select healpix_ring(10, '(292.5d, 11.25d)');
@@ -2116,10 +2836,10 @@ select healpix_ring(10, '(315d, -11.25d)');
       7517696
 (1 row)
 
-select healpix_nest(10, '(315d, 0d)');
+select healpix_nest(10, '(315d, 0.0001)');
  healpix_nest 
 --------------
-      4893354
+      3145728
 (1 row)
 
 select healpix_nest(10, '(315d, 11.25d)');
@@ -2218,10 +2938,10 @@ select healpix_ring(10, '(337.5d, -11.25d)');
       7517952
 (1 row)
 
-select healpix_nest(10, '(337.5d, 0d)');
+select healpix_nest(10, '(337.5d, 0.0001)');
  healpix_nest 
 --------------
-      4827818
+      4915200
 (1 row)
 
 select healpix_ring(10, '(337.5d, 11.25d)');
@@ -2320,7 +3040,7 @@ select healpix_ring(10, '(360d, -11.25d)');
       7514112
 (1 row)
 
-select healpix_nest(10, '(360d, 0d)');
+select healpix_nest(10, '(360d, 0.0001)');
  healpix_nest 
 --------------
       4980736
@@ -2470,10 +3190,10 @@ select healpix_nest(15, '(0d, -5.625d)');
    4550607679
 (1 row)
 
-select healpix_ring(15, '(0d, 0d)');
+select healpix_ring(15, '(0d, 0.0001)');
  healpix_ring 
 --------------
-   6442254336
+   6441730048
 (1 row)
 
 select healpix_ring(15, '(0d, 5.625d)');
@@ -2668,10 +3388,10 @@ select healpix_ring(15, '(11.25d, -5.625d)');
    7073763328
 (1 row)
 
-select healpix_ring(15, '(11.25d, 0d)');
+select healpix_ring(15, '(11.25d, 0.0001)');
  healpix_ring 
 --------------
-   6442389504
+   6441734144
 (1 row)
 
 select healpix_nest(15, '(11.25d, 5.625d)');
@@ -2866,10 +3586,10 @@ select healpix_ring(15, '(22.5d, -5.625d)');
    7073767424
 (1 row)
 
-select healpix_ring(15, '(22.5d, 0d)');
+select healpix_ring(15, '(22.5d, 0.0001)');
  healpix_ring 
 --------------
-   6442393600
+   6441738240
 (1 row)
 
 select healpix_ring(15, '(22.5d, 5.625d)');
@@ -3064,10 +3784,10 @@ select healpix_ring(15, '(33.75d, -5.625d)');
    7073771520
 (1 row)
 
-select healpix_nest(15, '(33.75d, 0d)');
+select healpix_nest(15, '(33.75d, 0.0001)');
  healpix_nest 
 --------------
-   4658473642
+   4680843276
 (1 row)
 
 select healpix_nest(15, '(33.75d, 5.625d)');
@@ -3262,10 +3982,10 @@ select healpix_nest(15, '(45d, -5.625d)');
    9650881343
 (1 row)
 
-select healpix_ring(15, '(45d, 0d)');
+select healpix_ring(15, '(45d, 0.0001)');
  healpix_ring 
 --------------
-   6442401792
+   6441746432
 (1 row)
 
 select healpix_nest(15, '(45d, 5.625d)');
@@ -3460,10 +4180,10 @@ select healpix_ring(15, '(56.25d, -5.625d)');
    7073779712
 (1 row)
 
-select healpix_nest(15, '(56.25d, 0d)');
+select healpix_nest(15, '(56.25d, 0.0001)');
  healpix_nest 
 --------------
-   6067759786
+   6090129420
 (1 row)
 
 select healpix_ring(15, '(56.25d, 5.625d)');
@@ -3658,10 +4378,10 @@ select healpix_ring(15, '(67.5d, -5.625d)');
    7073783808
 (1 row)
 
-select healpix_ring(15, '(67.5d, 0d)');
+select healpix_ring(15, '(67.5d, 0.0001)');
  healpix_ring 
 --------------
-   6442409984
+   6441754624
 (1 row)
 
 select healpix_nest(15, '(67.5d, 5.625d)');
@@ -3856,10 +4576,10 @@ select healpix_ring(15, '(78.75d, -5.625d)');
    7073787904
 (1 row)
 
-select healpix_nest(15, '(78.75d, 0d)');
+select healpix_nest(15, '(78.75d, 0.0001)');
  healpix_nest 
 --------------
-   6000650922
+   6023020556
 (1 row)
 
 select healpix_nest(15, '(78.75d, 5.625d)');
@@ -4054,10 +4774,10 @@ select healpix_ring(15, '(90d, -5.625d)');
    7073792000
 (1 row)
 
-select healpix_nest(15, '(90d, 0d)');
+select healpix_nest(15, '(90d, 0.0001)');
  healpix_nest 
 --------------
-   5816101546
+   6174015500
 (1 row)
 
 select healpix_ring(15, '(90d, 5.625d)');
@@ -4252,10 +4972,10 @@ select healpix_nest(15, '(101.25d, -5.625d)');
    5775344447
 (1 row)
 
-select healpix_nest(15, '(101.25d, 0d)');
+select healpix_nest(15, '(101.25d, 0.0001)');
  healpix_nest 
 --------------
-   5799324330
+   5821693964
 (1 row)
 
 select healpix_nest(15, '(101.25d, 5.625d)');
@@ -4450,10 +5170,10 @@ select healpix_nest(15, '(112.5d, -5.625d)');
    5691458367
 (1 row)
 
-select healpix_ring(15, '(112.5d, 0d)');
+select healpix_ring(15, '(112.5d, 0.0001)');
  healpix_ring 
 --------------
-   6442426368
+   6441771008
 (1 row)
 
 select healpix_nest(15, '(112.5d, 5.625d)');
@@ -4648,10 +5368,10 @@ select healpix_ring(15, '(123.75d, -5.625d)');
    7073804288
 (1 row)
 
-select healpix_ring(15, '(123.75d, 0d)');
+select healpix_ring(15, '(123.75d, 0.0001)');
  healpix_ring 
 --------------
-   6442430464
+   6441775104
 (1 row)
 
 select healpix_nest(15, '(123.75d, 5.625d)');
@@ -4846,10 +5566,10 @@ select healpix_ring(15, '(135d, -5.625d)');
    7073808384
 (1 row)
 
-select healpix_ring(15, '(135d, 0d)');
+select healpix_ring(15, '(135d, 0.0001)');
  healpix_ring 
 --------------
-   6442434560
+   6441779200
 (1 row)
 
 select healpix_ring(15, '(135d, 5.625d)');
@@ -5044,10 +5764,10 @@ select healpix_ring(15, '(146.25d, -5.625d)');
    7073812480
 (1 row)
 
-select healpix_ring(15, '(146.25d, 0d)');
+select healpix_ring(15, '(146.25d, 0.0001)');
  healpix_ring 
 --------------
-   6442438656
+   6441783296
 (1 row)
 
 select healpix_ring(15, '(146.25d, 5.625d)');
@@ -5242,10 +5962,10 @@ select healpix_nest(15, '(157.5d, -5.625d)');
    7033635647
 (1 row)
 
-select healpix_ring(15, '(157.5d, 0d)');
+select healpix_ring(15, '(157.5d, 0.0001)');
  healpix_ring 
 --------------
-   6442442752
+   6441787392
 (1 row)
 
 select healpix_nest(15, '(157.5d, 5.625d)');
@@ -5440,10 +6160,10 @@ select healpix_nest(15, '(168.75d, -5.625d)');
    7050412863
 (1 row)
 
-select healpix_nest(15, '(168.75d, 0d)');
+select healpix_nest(15, '(168.75d, 0.0001)');
  healpix_nest 
 --------------
-   7074392746
+   7096762380
 (1 row)
 
 select healpix_ring(15, '(168.75d, 5.625d)');
@@ -5638,10 +6358,10 @@ select healpix_nest(15, '(180d, -5.625d)');
    6698091327
 (1 row)
 
-select healpix_nest(15, '(180d, 0d)');
+select healpix_nest(15, '(180d, 0.0001)');
  healpix_nest 
 --------------
-   6889843370
+   7247757324
 (1 row)
 
 select healpix_ring(15, '(180d, 5.625d)');
@@ -5836,10 +6556,10 @@ select healpix_ring(15, '(191.25d, -5.625d)');
    7073828864
 (1 row)
 
-select healpix_ring(15, '(191.25d, 0d)');
+select healpix_ring(15, '(191.25d, 0.0001)');
  healpix_ring 
 --------------
-   6442455040
+   6441799680
 (1 row)
 
 select healpix_nest(15, '(191.25d, 5.625d)');
@@ -6034,10 +6754,10 @@ select healpix_nest(15, '(202.5d, -5.625d)');
    6765200191
 (1 row)
 
-select healpix_ring(15, '(202.5d, 0d)');
+select healpix_ring(15, '(202.5d, 0.0001)');
  healpix_ring 
 --------------
-   6442459136
+   6441803776
 (1 row)
 
 select healpix_ring(15, '(202.5d, 5.625d)');
@@ -6232,10 +6952,10 @@ select healpix_ring(15, '(213.75d, -5.625d)');
    7073837056
 (1 row)
 
-select healpix_nest(15, '(213.75d, 0d)');
+select healpix_nest(15, '(213.75d, 0.0001)');
  healpix_nest 
 --------------
-   6805957290
+   6828326924
 (1 row)
 
 select healpix_nest(15, '(213.75d, 5.625d)');
@@ -6430,10 +7150,10 @@ select healpix_nest(15, '(225d, -5.625d)');
   11798364991
 (1 row)
 
-select healpix_ring(15, '(225d, 0d)');
+select healpix_ring(15, '(225d, 0.0001)');
  healpix_ring 
 --------------
-   6442467328
+   6441811968
 (1 row)
 
 select healpix_nest(15, '(225d, 5.625d)');
@@ -6628,10 +7348,10 @@ select healpix_ring(15, '(236.25d, -5.625d)');
    7073845248
 (1 row)
 
-select healpix_nest(15, '(236.25d, 0d)');
+select healpix_nest(15, '(236.25d, 0.0001)');
  healpix_nest 
 --------------
-   8215243434
+   8237613068
 (1 row)
 
 select healpix_nest(15, '(236.25d, 5.625d)');
@@ -6826,10 +7546,10 @@ select healpix_nest(15, '(247.5d, -5.625d)');
    8107377471
 (1 row)
 
-select healpix_nest(15, '(247.5d, 0d)');
+select healpix_nest(15, '(247.5d, 0.0001)');
  healpix_nest 
 --------------
-   8164911786
+   8254390284
 (1 row)
 
 select healpix_ring(15, '(247.5d, 5.625d)');
@@ -7024,10 +7744,10 @@ select healpix_nest(15, '(258.75d, -5.625d)');
    8124154687
 (1 row)
 
-select healpix_ring(15, '(258.75d, 0d)');
+select healpix_ring(15, '(258.75d, 0.0001)');
  healpix_ring 
 --------------
-   6442479616
+   6441824256
 (1 row)
 
 select healpix_ring(15, '(258.75d, 5.625d)');
@@ -7222,10 +7942,10 @@ select healpix_nest(15, '(270d, -5.625d)');
    7771833151
 (1 row)
 
-select healpix_ring(15, '(270d, 0d)');
+select healpix_ring(15, '(270d, 0.0001)');
  healpix_ring 
 --------------
-   6442483712
+   6441828352
 (1 row)
 
 select healpix_nest(15, '(270d, 5.625d)');
@@ -7420,10 +8140,10 @@ select healpix_ring(15, '(281.25d, -5.625d)');
    7073861632
 (1 row)
 
-select healpix_nest(15, '(281.25d, 0d)');
+select healpix_nest(15, '(281.25d, 0.0001)');
  healpix_nest 
 --------------
-   7946807978
+   7969177612
 (1 row)
 
 select healpix_ring(15, '(281.25d, 5.625d)');
@@ -7618,10 +8338,10 @@ select healpix_ring(15, '(292.5d, -5.625d)');
    7073865728
 (1 row)
 
-select healpix_nest(15, '(292.5d, 0d)');
+select healpix_nest(15, '(292.5d, 0.0001)');
  healpix_nest 
 --------------
-   7896476330
+   7985954828
 (1 row)
 
 select healpix_ring(15, '(292.5d, 5.625d)');
@@ -7816,10 +8536,10 @@ select healpix_nest(15, '(303.75d, -5.625d)');
    7855719231
 (1 row)
 
-select healpix_nest(15, '(303.75d, 0d)');
+select healpix_nest(15, '(303.75d, 0.0001)');
  healpix_nest 
 --------------
-   7879699114
+   7902068748
 (1 row)
 
 select healpix_ring(15, '(303.75d, 5.625d)');
@@ -8014,10 +8734,10 @@ select healpix_ring(15, '(315d, -5.625d)');
    7073873920
 (1 row)
 
-select healpix_ring(15, '(315d, 0d)');
+select healpix_ring(15, '(315d, 0.0001)');
  healpix_ring 
 --------------
-   6442500096
+   6441844736
 (1 row)
 
 select healpix_nest(15, '(315d, 5.625d)');
@@ -8212,10 +8932,10 @@ select healpix_ring(15, '(326.25d, -5.625d)');
    7073878016
 (1 row)
 
-select healpix_ring(15, '(326.25d, 0d)');
+select healpix_ring(15, '(326.25d, 0.0001)');
  healpix_ring 
 --------------
-   6442504192
+   6441848832
 (1 row)
 
 select healpix_nest(15, '(326.25d, 5.625d)');
@@ -8410,10 +9130,10 @@ select healpix_ring(15, '(337.5d, -5.625d)');
    7073882112
 (1 row)
 
-select healpix_nest(15, '(337.5d, 0d)');
+select healpix_nest(15, '(337.5d, 0.0001)');
  healpix_nest 
 --------------
-   4943686314
+   5033164812
 (1 row)
 
 select healpix_ring(15, '(337.5d, 5.625d)');
@@ -8608,10 +9328,10 @@ select healpix_ring(15, '(348.75d, -5.625d)');
    7073886208
 (1 row)
 
-select healpix_ring(15, '(348.75d, 0d)');
+select healpix_ring(15, '(348.75d, 0.0001)');
  healpix_ring 
 --------------
-   6442512384
+   6441857024
 (1 row)
 
 select healpix_ring(15, '(348.75d, 5.625d)');
@@ -8806,10 +9526,10 @@ select healpix_ring(15, '(360d, -5.625d)');
    7073759232
 (1 row)
 
-select healpix_ring(15, '(360d, 0d)');
+select healpix_ring(15, '(360d, 0.0001)');
  healpix_ring 
 --------------
-   6442254336
+   6441730048
 (1 row)
 
 select healpix_ring(15, '(360d, 5.625d)');

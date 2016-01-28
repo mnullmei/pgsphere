@@ -79,10 +79,14 @@ Datum pg_npix2nside(PG_FUNCTION_ARGS)
 	PG_RETURN_INT64(nside);
 }
 
-static double conv_theta(double x) {
-	if (fabs(x) <= PI_EPS / 2)
+static double conv_theta(double x)
+{
+	double y = PIH - x;
+	if (fabs(x) < PI_EPS / 2)
 		return PIH;
-	return PIH - x;
+	if (fabs(y) < PI_EPS / 2)
+		return 0;
+	return y;
 }
 
 PG_FUNCTION_INFO_V1(healpix_nest);
