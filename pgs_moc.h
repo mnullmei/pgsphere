@@ -24,7 +24,6 @@
  */
 
 #define PG_TOAST_PAGE_FRAGMENT 1010
-#define MOC_PAGE_SIZE (PG_TOAST_PAGE_FRAGMENT / sizeof(moc_interval))
 #define HP64_SIZE (sizeof(hpint64))
 
 typedef struct
@@ -35,23 +34,26 @@ typedef struct
 
 typedef struct
 {
-	int32	offset;
+	int32	offset;				/* counts in units of char */
 	char	start[HP64_SIZE];
 } moc_tree_entry;
+
+#define MOC_LEAF_PAGE_SIZE (PG_TOAST_PAGE_FRAGMENT / sizeof(moc_interval))
+#define MOC_TREE_PAGE_SIZE (PG_TOAST_PAGE_FRAGMENT / sizeof(moc_tree_entry))
 
 /* das hier ist Mist: typedef moc_interval moc_leaf_page[MOC_PAGE_SIZE]; */
 
 typedef struct
 {
 	char			vl_len_[4];	/* size of PostgreSQL variable-length data */
-	int32			root_size	/* number of moc_tree_entry items in root page */
-	hpint64			begin;		/* first Healpix index in set */
-	hpint64			end;		/* 1 + (last Healpix index in set) */
-	int32				/* */
-	
-	
-	unsigned short	version;
-} moc_header;
+	unsigned short	version;	/* version of the 'toasty' MOC data structure */
+	unsigned char	order;		/* actual MOC order */
+	unsigned char	reserved;
+	hpint64			first;		/* first Healpix index in set */
+	hpint64			start;		/* 1 + (last Healpix index in set) */
+	int32			end;		/* 1 + (offset of last interval) */
+	               /* ^ for "sequential scan" inside this MOC... */
+} moc_header; /* dont't forget to palloc0() this stuff... */
 
 typedef struct
 {
@@ -63,6 +65,27 @@ typedef struct
 	};
 	char		data[FLEXIBLE_ARRAY_MEMBER];
 } Smoc;
+
+/*	move to ^^start of pgs_moc.h ;-)
+
+Layout of pages:
+tree pages:
+* a single int32 'level_end' value == (TOAST) offset value of end of this level
+  -> was: int32 root_size [[number of moc_tree_entry items in root page]]
+* array of moc_tree_entry
+
+-> this means that the offset of the first interval is actually always at the
+   same place, it is the 'offset' value of the first moc_tree_entry of the
+   "root page", this makes a special entry inside moc_header redundant.
+
+	computationally, the offset of first interval is: ...
+
+it can bee easily computed if a page (tree or leaf) does not start on
+a PG_TOAST_PAGE_FRAGMENT boundary by taking the modulus of the start offset by
+exactly PG_TOAST_PAGE_FRAGMENT...
+	
+*/
+if else case default
 
 /* function prototypes for the MOC support functions */
 
