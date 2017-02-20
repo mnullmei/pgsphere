@@ -16,6 +16,7 @@ moc_in(PG_FUNCTION_ARGS)
 	char*	input_text = PG_GETARG_CSTRING(0);
 	char	c;
 	Smoc*	moc;
+	void*	moc_context = create_moc_context();
 	int32	moc_size;
 	hpint64	area; /* number of covered Healpix cells */
 
@@ -35,6 +36,7 @@ moc_in(PG_FUNCTION_ARGS)
 		{
 			if (nb == -1)
 			{
+				release_moc_context(moc_context);
 				ereport(ERROR, (errcode(ERRCODE_INVALID_TEXT_REPRESENTATION),
 						errmsg("[c.%d] Incorrect MOC syntax: a Healpix level "
 								"is expected before a / character!", ind - 1),
@@ -46,6 +48,7 @@ moc_in(PG_FUNCTION_ARGS)
 			}
 			else if (order_invalid((int) nb))
 			{
+				release_moc_context(moc_context);
 				ereport(ERROR, (errcode(ERRCODE_NUMERIC_VALUE_OUT_OF_RANGE),
 						errmsg("[c.%d] Incorrect Healpix order: %ld!", ind - 1,
 																			nb),
@@ -68,6 +71,7 @@ XXX			success = (order == maxOrder)
 						
 			if (index_invalid(npix, nb))
 			{
+				release_moc_context(moc_context);
 				ereport(ERROR, (errcode(ERRCODE_NUMERIC_VALUE_OUT_OF_RANGE),
 							errmsg("[c.%d] Incorrect Healpix index: %ld!",
 																ind - 1, nb),
@@ -82,6 +86,7 @@ XXX			success = (order == maxOrder)
 			nb2 = readNumber(input_text, &ind);
 			if (nb2 == -1)
 			{
+				release_moc_context(moc_context);
 				ereport(ERROR, (errcode(ERRCODE_INVALID_TEXT_REPRESENTATION),
 						errmsg("[c.%d] Incorrect MOC syntax: a second Healpix "
 								"index is expected after a - character!",
@@ -103,6 +108,7 @@ XXX success = setCellRange(moc, nb << 2*(maxOrder-order), ((nb2+1) << 2*(maxOrde
 
 			if (index_invalid(npix, nb2) || nb >= nb2)
 			{
+				release_moc_context(moc_context);
 				ereport(ERROR, (errcode(ERRCODE_NUMERIC_VALUE_OUT_OF_RANGE),
 						errmsg("[c.%d] Incorrect Healpix range: %ld-%ld!",
 															ind - 1 , nb, nb2),
@@ -119,6 +125,7 @@ XXX success = setCellRange(moc, nb << 2*(maxOrder-order), ((nb2+1) << 2*(maxOrde
 XXX		success = (order == maxOrder) ? setCell(moc, nb) : setUpperCell(moc, order, nb);
 			if (index_invalid(npix, nb))
 			{
+				release_moc_context(moc_context);
 				ereport(ERROR, (errcode(ERRCODE_NUMERIC_VALUE_OUT_OF_RANGE),
 							errmsg("[c.%d] Incorrect Healpix index: %ld!",
 																ind - 1, nb),
@@ -134,6 +141,7 @@ XXX		success = (order == maxOrder) ? setCell(moc, nb) : setUpperCell(moc, order,
 		{
 			if (order == -1)
 			{
+				release_moc_context(moc_context);
 				ereport(ERROR, (errcode(ERRCODE_INVALID_TEXT_REPRESENTATION),
 				errmsg("[c.%d] Incorrect MOC syntax: empty string!", ind - 1),
 				errhint("The minimal expected syntax is: '{healpix_order}/', "
@@ -143,6 +151,7 @@ XXX		success = (order == maxOrder) ? setCell(moc, nb) : setUpperCell(moc, order,
 			}
 			else if (nb != -1 && index_invalid(npix, nb))
 			{
+				release_moc_context(moc_context);
 				ereport(ERROR, (errcode(ERRCODE_NUMERIC_VALUE_OUT_OF_RANGE),
 							errmsg("[c.%d] Incorrect Healpix index: %ld!",
 																ind - 1, nb),
@@ -158,6 +167,7 @@ XXXsuccess = (order == maxOrder) ? setCell(moc, nb) : setUpperCell(moc, order, n
 		}
 		else
 		{
+			release_moc_context(moc_context);
 			ereport(ERROR, (errcode(ERRCODE_INVALID_TEXT_REPRESENTATION),
 					errmsg("[c.%d] Incorrect MOC syntax: unsupported character:"
 							" '%c'!", ind - 1, c),
@@ -170,9 +180,13 @@ XXXsuccess = (order == maxOrder) ? setCell(moc, nb) : setUpperCell(moc, order, n
 	while(c != '\0');
 
 	moc_size = MOC_HEADER_SIZE + ...;
-	moc = palloc(moc_size);
+	moc = (Smoc*) palloc(moc_size);
 	memset(moc, 0, MOC_HEADER_SIZE);
 	SET_VARSIZE(moc, moc_size);
+
+
+
+
 	moc->version	= 0;
 	moc->order		= ...;
 	moc->first		= ...;	/* first Healpix index in set */
@@ -180,6 +194,7 @@ XXXsuccess = (order == maxOrder) ? setCell(moc, nb) : setUpperCell(moc, order, n
 	moc->area		= ...;
 	moc->end		= ...;	/* 1 + (offset of last interval) */
 
+	release_moc_context(moc_context);
 	PG_RETURN_POINTER(moc);
 }
 
