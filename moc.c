@@ -31,8 +31,7 @@ moc_in(PG_FUNCTION_ARGS)
 		nb = readNumber(input_text, &ind);
 		c = readChar(input_text, &ind);
 
-		/* CASE: nb is a Healpix order */
-		if (c == '/')
+		if (c == '/') /* nb is a Healpix order */
 		{
 			if (nb == -1)
 			{
@@ -60,8 +59,8 @@ moc_in(PG_FUNCTION_ARGS)
 				npix = c_npix(order);
 			}
 		}
-		/* CASE: nb is a Healpix index */
-		else if (c == ',')
+		else if (c == ',') /* nb is a Healpix index */
+
 		{
 XXX			success = (order == maxOrder)
 						? setCell(moc, nb)
@@ -78,7 +77,7 @@ XXX			success = (order == maxOrder)
 									 								npix - 1)));
 			}
 		}
-		else if (c == '-')
+		else if (c == '-')  /* next Healpix number must follow */
 		{
 			nb2 = readNumber(input_text, &ind);
 			if (nb2 == -1)
@@ -114,8 +113,7 @@ XXX success = setCellRange(moc, nb << 2*(maxOrder-order), ((nb2+1) << 2*(maxOrde
 								"between 0 and 29.", nb, nb2, order)));
 			}
 		}
-		// CASE: nb is the last Healpix index of this Healpix level
-		else if (isdigit(c))
+		else if (isdigit(c)) /* nb is the last Healpix index of this level */
 		{
 XXX		success = (order == maxOrder) ? setCell(moc, nb) : setUpperCell(moc, order, nb);
 			if (index_invalid(npix, nb))
@@ -130,8 +128,7 @@ XXX		success = (order == maxOrder) ? setCell(moc, nb) : setUpperCell(moc, order,
 			}
 ???			ind--; /* Nothing else to do in this function */
 		}
-		// CASE: nb should be the last Healpix index
-		else if (c == '\0')
+		else if (c == '\0') /* nb should be the last Healpix index */
 		{
 			if (order == -1)
 			{
