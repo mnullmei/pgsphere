@@ -44,7 +44,6 @@ moc_in(PG_FUNCTION_ARGS)
 								"{healpix_index}[,...] ...', where "
 								"{healpix_order} is between 0 and 29. Example: "
 								"'1/0 2/3,5-10'.")));
-				PG_RETURN_NULL();
 			}
 			else if (order_invalid((int) nb))
 			{
@@ -54,7 +53,6 @@ moc_in(PG_FUNCTION_ARGS)
 																			nb),
 						errhint("A valid Healpix order must be an integer "
 								"between 0 and 29.")));
-				PG_RETURN_NULL();
 			}
 			else
 			{
@@ -78,7 +76,6 @@ XXX			success = (order == maxOrder)
 							errhint("At order %ld, a Healpix index must be "
 									"an integer between 0 and %d.", order,
 									 								npix - 1)));
-				PG_RETURN_NULL();
 			}
 		}
 		else if (c == '-')
@@ -95,7 +92,6 @@ XXX			success = (order == maxOrder)
 								"{healpix_index}[,...] ...', where "
 								"{healpix_order} is between 0 and 29. Example: "
 								"'1/0 2/3,5-10'.")));
-				PG_RETURN_NULL();
 			}
 			c = readChar(input_text, &ind);
 			if (isdigit(c))
@@ -116,7 +112,6 @@ XXX success = setCellRange(moc, nb << 2*(maxOrder-order), ((nb2+1) << 2*(maxOrde
 								"less than the second one (here %ld). At order "
 								"%ld, a Healpix index must be an integer "
 								"between 0 and 29.", nb, nb2, order)));
-				PG_RETURN_NULL();
 			}
 		}
 		// CASE: nb is the last Healpix index of this Healpix level
@@ -132,7 +127,6 @@ XXX		success = (order == maxOrder) ? setCell(moc, nb) : setUpperCell(moc, order,
 							errhint("At order %ld, a Healpix index must be "
 									"an integer between 0 and %d.", order,
 									 								npix - 1)));
-				PG_RETURN_NULL();
 			}
 ???			ind--; /* Nothing else to do in this function */
 		}
@@ -147,7 +141,6 @@ XXX		success = (order == maxOrder) ? setCell(moc, nb) : setUpperCell(moc, order,
 				errhint("The minimal expected syntax is: '{healpix_order}/', "
 						"where {healpix_order} must be an integer between 0 and"
 						" %d. This will create an empty MOC. Example: '1/'.")));
-				PG_RETURN_NULL();
 			}
 			else if (nb != -1 && index_invalid(npix, nb))
 			{
@@ -158,7 +151,6 @@ XXX		success = (order == maxOrder) ? setCell(moc, nb) : setUpperCell(moc, order,
 							errhint("At order %ld, a Healpix index must be "
 									"an integer between 0 and %d.", order,
 									 								npix - 1)));
-				PG_RETURN_NULL();
 			}
 			else
 			{
@@ -174,28 +166,27 @@ XXXsuccess = (order == maxOrder) ? setCell(moc, nb) : setUpperCell(moc, order, n
 					errhint("Expected syntax: 'MOC {healpix_order}/"
 							"{healpix_index}[,...] ...', where {healpix_order} "
 							"is between 0 and 29. Example: '1/0 2/3,5-10'.")));
-			PG_RETURN_NULL();
 		}
 	}
-	while(c != '\0');
+	while (c != '\0');
 
-	moc_size = MOC_HEADER_SIZE + ...;
+	moc_size = get_moc_size(moc_context);
 	moc = (Smoc*) palloc(moc_size);
 	memset(moc, 0, MOC_HEADER_SIZE);
 	SET_VARSIZE(moc, moc_size);
 
-
-
-
-	moc->version	= 0;
-	moc->order		= ...;
-	moc->first		= ...;	/* first Healpix index in set */
-	moc->start		= ...;	/* 1 + (last Healpix index in set) */
-	moc->area		= ...;
-	moc->end		= ...;	/* 1 + (offset of last interval) */
-
-	release_moc_context(moc_context);
-	PG_RETURN_POINTER(moc);
+	if (create_moc(moc_context, moc))
+	{
+		release_moc_context(moc_context);
+		PG_RETURN_POINTER(moc);
+	}
+	else
+	{
+		release_moc_context(moc_context);
+		ereport(ERROR, (errcode(ERRCODE_INTERNAL_ERROR),
+				errmsg("Internal error in creation of MOC from text input.")));
+		PG_RETURN_NULL();
+	}
 }
 
 /**
