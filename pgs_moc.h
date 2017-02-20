@@ -76,9 +76,11 @@ a PG_TOAST_PAGE_FRAGMENT boundary by taking the modulus of the start offset by
 exactly PG_TOAST_PAGE_FRAGMENT...
 	
 */
-if else case default
 
 /* function prototypes for the MOC support functions */
+
+Datum smoc_in(PG_FUNCTION_ARGS);
+Datum smoc_out(PG_FUNCTION_ARGS);
 
 
 #endif

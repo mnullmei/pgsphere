@@ -1,0 +1,22 @@
+CREATE TYPE smoc;
+
+CREATE FUNCTION smoc_in(cstring) RETURNS smoc
+   AS 'MODULE_PATHNAME'
+   LANGUAGE C
+   IMMUTABLE
+   STRICT;
+
+CREATE FUNCTION smoc_out(smoc) RETURNS cstring
+   AS 'MODULE_PATHNAME'
+   LANGUAGE C
+   IMMUTABLE
+   STRICT;
+
+CREATE TYPE smoc (
+   input = smoc_in,
+   output = smoc_out,
+   delimiter = ';',
+   internallength = VARIABLE,
+   alignment = double,
+   storage = EXTERNAL
+);
