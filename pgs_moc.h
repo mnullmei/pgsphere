@@ -46,15 +46,14 @@ typedef struct
 typedef struct
 {
 	char			vl_len_[4];	/* size of PostgreSQL variable-length data */
-	unsigned short	version;	/* version of the 'toasty' MOC data structure */
-	unsigned char	order;		/* actual MOC order */
-	unsigned char	reserved;
+	uint16			version;	/* version of the 'toasty' MOC data structure */
+	uint8			order;		/* actual MOC order */
+	uint8			reserved;
 	hpint64			first;		/* first Healpix index in set */
 	hpint64			start;		/* 1 + (last Healpix index in set) */
 	int32			end;		/* 1 + (offset of last interval) */
 					/* ^ for "sequential scan" inside this MOC... */
-					/* dont't forget to palloc0() the above stuff... */
-	moc_header		header;
+						/* dont't forget to palloc0() the above stuff... */
 	moc_interval	data[FLEXIBLE_ARRAY_MEMBER];
 } Smoc;
 
