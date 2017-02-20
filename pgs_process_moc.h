@@ -7,6 +7,8 @@
 extern "C" {
 #endif
 
+typedef void (*pgs_error_handler)(const char*, int);
+
 #define PG_TOAST_PAGE_FRAGMENT 1010
 #define HP64_SIZE (sizeof(hpint64))
 
@@ -46,19 +48,19 @@ typedef struct
 #define MOC_HEADER_SIZE (offsetof(Smoc, data))
 
 void*
-create_moc_context(void);
+create_moc_context(pgs_error_handler);
 
 void
-release_moc_context(void*);
+release_moc_context(void*, pgs_error_handler);
 
 int
-add_to_moc(void*, hpint64, hpint64);
+add_to_moc(void*, long, hpint64, hpint64, pgs_error_handler);
 
 int
-get_moc_size(void*);
+get_moc_size(void*, pgs_error_handler);
 
 int
-create_moc(void*, Smoc*);
+create_moc_release_context(void*, Smoc*, pgs_error_handler);
 
 #ifdef __cplusplus
 }
