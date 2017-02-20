@@ -37,7 +37,8 @@ static int ilog2(hpint64 x)
 	return log;
 }
 
-static int order_invalid(int order)
+int
+order_invalid(int order)
 {
 	return (order < 0 || order > 29);
 }
@@ -58,7 +59,8 @@ static hpint64 c_nside2npix(hpint64 nside)
 	return 12 * nside * nside;
 }
 
-static hpint64 c_npix(int order)
+hpint64
+c_npix(int order)
 {
 	return c_nside2npix(c_nside(order));
 }

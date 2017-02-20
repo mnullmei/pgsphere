@@ -1,6 +1,9 @@
 #ifndef __PGS_HEALPIX_H__
 #define __PGS_HEALPIX_H__
 
+int order_invalid(int);
+hpint64 c_npix(int);
+
 /* function prototypes for the Healpix support functions */
 
 Datum pg_nest2ring(PG_FUNCTION_ARGS);
