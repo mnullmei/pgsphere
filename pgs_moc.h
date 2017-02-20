@@ -51,11 +51,14 @@ typedef struct
 	uint8			reserved;
 	hpint64			first;		/* first Healpix index in set */
 	hpint64			start;		/* 1 + (last Healpix index in set) */
+	hpint64			area;		/* number of covered Healpix cells */
 	int32			end;		/* 1 + (offset of last interval) */
 					/* ^ for "sequential scan" inside this MOC... */
 						/* dont't forget to palloc0() the above stuff... */
 	moc_interval	data[FLEXIBLE_ARRAY_MEMBER];
 } Smoc;
+
+#define MOC_HEADER_SIZE (offsetof(Smoc, data))
 
 /*	move the below to ^^start of pgs_moc.h ;-)
 
