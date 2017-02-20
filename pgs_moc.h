@@ -52,21 +52,13 @@ typedef struct
 	hpint64			first;		/* first Healpix index in set */
 	hpint64			start;		/* 1 + (last Healpix index in set) */
 	int32			end;		/* 1 + (offset of last interval) */
-	               /* ^ for "sequential scan" inside this MOC... */
-} moc_header; /* dont't forget to palloc0() this stuff... */
-
-typedef struct
-{
-	union
-	{
-		moc_header	header;
-		hpint64		align_dummy[(1 +
-						sizeof(moc_header) / sizeof(hpint64)) * sizeof(hpint64)]
-	};
-	char		data[FLEXIBLE_ARRAY_MEMBER];
+					/* ^ for "sequential scan" inside this MOC... */
+					/* dont't forget to palloc0() the above stuff... */
+	moc_header		header;
+	moc_interval	data[FLEXIBLE_ARRAY_MEMBER];
 } Smoc;
 
-/*	move to ^^start of pgs_moc.h ;-)
+/*	move the below to ^^start of pgs_moc.h ;-)
 
 Layout of pages:
 tree pages:
