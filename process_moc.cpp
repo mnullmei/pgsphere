@@ -43,6 +43,11 @@ create_moc_context(pgs_error_handler error_out)
 void
 release_moc_context(void* moc_context, pgs_error_handler error_out)
 {
+	moc_input* m = static_cast<moc_input*>(moc_context);
+	
+		delete m;
+		m = 0;
+	
 }
 
 int
