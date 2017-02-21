@@ -51,6 +51,12 @@ else
   include $(top_srcdir)/contrib/contrib-global.mk
 endif
 
+# link a second time as PGXS does not allow to change the linker
+PGS_LINKER = g++ $(CXXFLAGS) $(filter-out $(CC) $(CFLAGS), $(LINK.shared))
+pgs_link: $(OBJS) | $(SHLIB_PREREQS)
+	$(PGS_LINKER) -o $(shlib) $(OBJS) $(LDFLAGS) $(LDFLAGS_SL) $(SHLIB_LINK)
+# CDR == $(wordlist 2, $(words $(LINK.shared)), $(LINK.shared))
+
 # experimental for spoint3
 pg_version := $(word 2,$(shell $(PG_CONFIG) --version))
 pg_version_9_5_plus = $(if $(filter-out 9.1% 9.2% 9.3% 9.4%,$(pg_version)),y,n)
@@ -78,8 +84,8 @@ pg_sphere.test.sql: $(RELEASE_SQL) $(shlib)
 	tail -n+3 $< | sed 's,MODULE_PATHNAME,$(realpath $(shlib)),g' >$@
 
 
-$(RELEASE_SQL): $(addsuffix .in, $(RELEASE_SQL) $(PGS_SQL))
-	cat $^ > $@
+$(RELEASE_SQL): $(addsuffix .in, $(RELEASE_SQL) $(PGS_SQL)) pgs_link $(shlib)
+	cat $(filter-out pgs_link $(shlib), $^) > $@
 
 # for "create extension from unpacked*":
 
