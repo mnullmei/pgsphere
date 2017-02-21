@@ -55,7 +55,6 @@ endif
 PGS_LINKER = g++ $(CXXFLAGS) $(filter-out $(CC) $(CFLAGS), $(LINK.shared))
 pgs_link: $(OBJS) | $(SHLIB_PREREQS)
 	$(PGS_LINKER) -o $(shlib) $(OBJS) $(LDFLAGS) $(LDFLAGS_SL) $(SHLIB_LINK)
-# CDR == $(wordlist 2, $(words $(LINK.shared)), $(LINK.shared))
 
 # experimental for spoint3
 pg_version := $(word 2,$(shell $(PG_CONFIG) --version))
