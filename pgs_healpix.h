@@ -1,6 +1,11 @@
 #ifndef __PGS_HEALPIX_H__
 #define __PGS_HEALPIX_H__
 
+#include <postgres.h>
+#include <fmgr.h>
+
+#include <chealpix.h>
+
 int order_invalid(int);
 hpint64 c_npix(int);
 

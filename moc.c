@@ -14,7 +14,7 @@ moc_error_out(const char *message, int type)
 static bool
 index_invalid(hpint64 npix, long index)
 {
-	return index < 0 || nb >= npix;
+	return index < 0 || index >= npix;
 }
 
 Datum
@@ -170,7 +170,7 @@ smoc_in(PG_FUNCTION_ARGS)
 	}
 	while (c != '\0');
 
-	moc_size = get_moc_size(moc_context);
+	moc_size = get_moc_size(moc_context, moc_error_out);
 	moc = (Smoc*) palloc(moc_size);
 	memset(moc, 0, MOC_HEADER_SIZE);
 	SET_VARSIZE(moc, moc_size);

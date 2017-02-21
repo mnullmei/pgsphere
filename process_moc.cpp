@@ -1,5 +1,5 @@
 #include <exception>
-#include <map>
+#include <set>
 
 #include "pgs_process_moc.h"
 
@@ -7,12 +7,12 @@
 #define PGS_CATCH 2
 
 bool
-operator<(const moc_interval & x, const moc_interval & y) const
+operator<(const moc_interval & x, const moc_interval & y)
 {
 	return x.first < y.first;
 }
 
-typedef std::map<moc_interval> moc_map;
+typedef std::set<moc_interval> moc_map;
 
 struct moc_input
 {
@@ -52,7 +52,7 @@ release_moc_context(void* moc_context, pgs_error_handler error_out)
 
 int
 add_to_moc(void* moc_context, long order, hpint64 first, hpint64 last,
-												pgs_error_handler error_out);
+												pgs_error_handler error_out)
 {
 	moc_input* m = static_cast<moc_input*>(moc_context);
 
@@ -69,18 +69,18 @@ get_moc_size(void* moc_context, pgs_error_handler error_out)
 
 int
 create_moc_release_context(void* moc_context, Smoc* moc,
-												pgs_error_handler error_out);
+												pgs_error_handler error_out)
 {
 	moc_input* m = static_cast<moc_input*>(moc_context);
 
-
 		moc->version	= 0;
 		moc->order		= 0 /* ... */;
+		moc->depth		= 0 /* ... */;
 		moc->first		= 0 /* ... */;	/* first Healpix index in set */
 		moc->last		= 0 /* ... */;	/* 1 + (last Healpix index in set) */
 		moc->area		= 0 /* ... */;
-		moc->end		= 0 /* ... */;	/* 1 + (offset of last interval) */
-
+		moc->root_end	= 0 /* ... */;	/* 1 + (enf of root node) */
+		moc->data_end	= 0 /* ... */;	/* 1 + (offset of last interval) */
 
 	release_moc_context(moc_context, error_out);
 	return 1;

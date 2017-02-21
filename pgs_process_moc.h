@@ -1,11 +1,12 @@
 #ifndef __PGS_PROCESS_MOC_H__
 #define __PGS_PROCESS_MOC_H__
 
-#include <chealpix.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include <c.h> /* PostgreSQL type definitions */
+#include <chealpix.h>
 
 typedef void (*pgs_error_handler)(const char*, int);
 
