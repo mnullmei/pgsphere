@@ -25,14 +25,13 @@ smoc_in(PG_FUNCTION_ARGS)
 	Smoc*	moc;
 	void*	moc_context = create_moc_context(moc_error_out);
 	int32	moc_size;
-	hpint64	area; /* number of covered Healpix cells */
 
 	long	order = -1;
 	hpint64	npix = 0;
+	hpint64	nb;
+	hpint64	nb2;
 
-	int ind = 0, success;
-	long nb, nb2;
-
+	int ind = 0;
 	do
 	{
 		nb = readNumber(input_text, &ind);
@@ -55,7 +54,7 @@ smoc_in(PG_FUNCTION_ARGS)
 			{
 				release_moc_context(moc_context, moc_error_out);
 				ereport(ERROR, (errcode(ERRCODE_NUMERIC_VALUE_OUT_OF_RANGE),
-						errmsg("[c.%d] Incorrect Healpix order: %ld!", ind - 1,
+						errmsg("[c.%d] Incorrect Healpix order: %lld!", ind - 1,
 																			nb),
 						errhint("A valid Healpix order must be an integer "
 								"between 0 and 29.")));
@@ -72,10 +71,10 @@ smoc_in(PG_FUNCTION_ARGS)
 			{
 				release_moc_context(moc_context, moc_error_out);
 				ereport(ERROR, (errcode(ERRCODE_NUMERIC_VALUE_OUT_OF_RANGE),
-							errmsg("[c.%d] Incorrect Healpix index: %ld!",
+							errmsg("[c.%d] Incorrect Healpix index: %lld!",
 																ind - 1, nb),
 							errhint("At order %ld, a Healpix index must be "
-									"an integer between 0 and %d.", order,
+									"an integer between 0 and %lld.", order,
 									 								npix - 1)));
 			}
 			add_to_moc(moc_context, order, nb, nb + 1, moc_error_out);
@@ -88,7 +87,7 @@ smoc_in(PG_FUNCTION_ARGS)
 				release_moc_context(moc_context, moc_error_out);
 				ereport(ERROR, (errcode(ERRCODE_INVALID_TEXT_REPRESENTATION),
 						errmsg("[c.%d] Incorrect MOC syntax: a second Healpix "
-								"index is expected after a - character!",
+								"index is expected after a '-' character.",
 								(ind - 1)),
 						errhint("Expected syntax: 'MOC {healpix_order}/"
 								"{healpix_index}[,...] ...', where "
@@ -106,11 +105,11 @@ smoc_in(PG_FUNCTION_ARGS)
 			{
 				release_moc_context(moc_context, moc_error_out);
 				ereport(ERROR, (errcode(ERRCODE_NUMERIC_VALUE_OUT_OF_RANGE),
-						errmsg("[c.%d] Incorrect Healpix range: %ld-%ld!",
+						errmsg("[c.%d] Incorrect Healpix range: %lld-%lld!",
 															ind - 1 , nb, nb2),
-						errhint("The first value of a range (here %ld) must be "
-								"less than the second one (here %ld). At order "
-								"%ld, a Healpix index must be an integer "
+						errhint("The first value of a range (here %lld) must be"
+								" less than the second one (here %lld). At "
+								"order %ld, a Healpix index must be an integer "
 								"between 0 and 29.", nb, nb2, order)));
 
 			}
@@ -122,10 +121,10 @@ smoc_in(PG_FUNCTION_ARGS)
 			{
 				release_moc_context(moc_context, moc_error_out);
 				ereport(ERROR, (errcode(ERRCODE_NUMERIC_VALUE_OUT_OF_RANGE),
-							errmsg("[c.%d] Incorrect Healpix index: %ld!",
+							errmsg("[c.%d] Incorrect Healpix index: %lld!",
 																ind - 1, nb),
 							errhint("At order %ld, a Healpix index must be "
-									"an integer between 0 and %d.", order,
+									"an integer between 0 and %lld.", order,
 									 								npix - 1)));
 			}
 			ind--; /* Nothing else to do in this function */
@@ -140,16 +139,16 @@ smoc_in(PG_FUNCTION_ARGS)
 				errmsg("[c.%d] Incorrect MOC syntax: empty string!", ind - 1),
 				errhint("The minimal expected syntax is: '{healpix_order}/', "
 						"where {healpix_order} must be an integer between 0 and"
-						" %d. This will create an empty MOC. Example: '1/'.")));
+						" 29. This will create an empty MOC. Example: '1/'.")));
 			}
 			else if (nb != -1 && index_invalid(npix, nb))
 			{
 				release_moc_context(moc_context, moc_error_out);
 				ereport(ERROR, (errcode(ERRCODE_NUMERIC_VALUE_OUT_OF_RANGE),
-							errmsg("[c.%d] Incorrect Healpix index: %ld!",
+							errmsg("[c.%d] Incorrect Healpix index: %lld!",
 																ind - 1, nb),
 							errhint("At order %ld, a Healpix index must be "
-									"an integer between 0 and %d.", order,
+									"an integer between 0 and %lld.", order,
 									 								npix - 1)));
 			}
 			else

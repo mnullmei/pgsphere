@@ -71,6 +71,7 @@ int
 create_moc_release_context(void* moc_context, Smoc* moc,
 												pgs_error_handler error_out)
 {
+	hpint64	area = 0; /* number of covered Healpix cells */
 	moc_input* m = static_cast<moc_input*>(moc_context);
 
 		moc->version	= 0;
