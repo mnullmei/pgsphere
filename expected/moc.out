@@ -1,0 +1,102 @@
+SELECT smoc(-1); -- expected: error
+ERROR:  function smoc(integer) does not exist
+LINE 1: SELECT smoc(-1);
+               ^
+HINT:  No function matches the given name and argument types. You might need to add explicit type casts.
+SELECT smoc(15); -- expected: error
+ERROR:  function smoc(integer) does not exist
+LINE 1: SELECT smoc(15);
+               ^
+HINT:  No function matches the given name and argument types. You might need to add explicit type casts.
+SELECT smoc(0);  -- expected: '0/'
+ERROR:  function smoc(integer) does not exist
+LINE 1: SELECT smoc(0);
+               ^
+HINT:  No function matches the given name and argument types. You might need to add explicit type casts.
+SELECT smoc('');            -- expected: error
+ERROR:  Incorrect MOC syntax: empty string found.
+LINE 1: SELECT smoc('');
+                    ^
+HINT:  The minimal expected syntax is: '{healpix_order}/', where {healpix_order} must be an integer between 0 and 29. This will create an empty MOC. Example: '1/'.
+SELECT smoc('abc');         -- expected: error
+ERROR:  [c.0] Incorrect MOC syntax: unsupported character 'a'.
+LINE 1: SELECT smoc('abc');
+                    ^
+HINT:  Expected syntax: 'MOC {healpix_order}/{healpix_index}[,...] ...', where {healpix_order} is between 0 and 29. Example: '1/0 2/3,5-10'.
+SELECT smoc('-1/');         -- expected: error
+ERROR:  [c.2] Incorrect Healpix range -1-1.
+LINE 1: SELECT smoc('-1/');
+                    ^
+HINT:  The first value of a range (here -1) must be less than the second one (here 1). At order -1, a Healpix index must be an integer between 0 and 29.
+SELECT smoc('30/');         -- expected: error
+ERROR:  [c.2] Incorrect Healpix order 30.
+LINE 1: SELECT smoc('30/');
+                    ^
+HINT:  A valid Healpix order must be an integer between 0 and 29.
+SELECT smoc('0/');          -- expected: '0/'
+  smoc   
+---------
+ [a MOC]
+(1 row)
+
+SELECT smoc('0/0-3,7');     -- expected: '0/0-3,7'
+  smoc   
+---------
+ [a MOC]
+(1 row)
+
+SELECT smoc('0/0,1,2,3,7'); -- expected: '0/0-3,7'
+  smoc   
+---------
+ [a MOC]
+(1 row)
+
+SELECT ''::smoc;            -- expected: error
+ERROR:  Incorrect MOC syntax: empty string found.
+LINE 1: SELECT ''::smoc;
+               ^
+HINT:  The minimal expected syntax is: '{healpix_order}/', where {healpix_order} must be an integer between 0 and 29. This will create an empty MOC. Example: '1/'.
+SELECT 'abc'::smoc;         -- expected: error
+ERROR:  [c.0] Incorrect MOC syntax: unsupported character 'a'.
+LINE 1: SELECT 'abc'::smoc;
+               ^
+HINT:  Expected syntax: 'MOC {healpix_order}/{healpix_index}[,...] ...', where {healpix_order} is between 0 and 29. Example: '1/0 2/3,5-10'.
+SELECT '-1/'::smoc;         -- expected: error
+ERROR:  [c.2] Incorrect Healpix range -1-1.
+LINE 1: SELECT '-1/'::smoc;
+               ^
+HINT:  The first value of a range (here -1) must be less than the second one (here 1). At order -1, a Healpix index must be an integer between 0 and 29.
+SELECT '30/'::smoc;         -- expected: error
+ERROR:  [c.2] Incorrect Healpix order 30.
+LINE 1: SELECT '30/'::smoc;
+               ^
+HINT:  A valid Healpix order must be an integer between 0 and 29.
+SELECT '0/'::smoc;          -- expected: '0/'
+  smoc   
+---------
+ [a MOC]
+(1 row)
+
+SELECT '0/0-3,7'::smoc;     -- expected: '0/0-3,7'
+  smoc   
+---------
+ [a MOC]
+(1 row)
+
+SELECT '0/0,1,2,3,7'::smoc; -- expected: '0/0-3,7'
+  smoc   
+---------
+ [a MOC]
+(1 row)
+
+SELECT smoc('2/0,1,2,3,7 4/17,21-33,111');
+  smoc   
+---------
+ [a MOC]
+(1 row)
+
+SELECT smoc('2/0,1,2,3,7 0/17,21-33,111');
+ERROR:  [c.16] Incorrect Healpix index 17.
+LINE 1: SELECT smoc('2/0,1,2,3,7 0/17,21-33,111');
+                    ^
+HINT:  At order 0, a Healpix index must be an integer between 0 and 11.
