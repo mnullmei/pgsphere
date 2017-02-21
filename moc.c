@@ -208,7 +208,8 @@ smoc_in(PG_FUNCTION_ARGS)
  * @return  The read number,
  *          or -1 if no digit has been found.
  */
-long readNumber(const char* mocAscii, int* start){
+long readNumber(const char* mocAscii, int* start)
+{
   long nb = -1;
   
   // Skip all space characters:
@@ -290,7 +291,8 @@ void readWord(const char* mocAscii, int* start, char* word, int wordLength) {
  * @return  The read non-whitespace character,
  *          or '\0' if the end has been reached.
  */
-char readChar(const char* mocAscii, int* start){
+char readChar(const char* mocAscii, int* start)
+{
   // Skip all space characters:
   while(mocAscii[*start] != '\0' && isspace(mocAscii[*start]))
     (*start)++;
@@ -305,5 +307,7 @@ char readChar(const char* mocAscii, int* start){
 Datum
 smoc_out(PG_FUNCTION_ARGS)
 {
-	PG_RETURN_NULL();
+	char	*buf = (char *) palloc(20);
+	sprintf(buf, "[a MOC]");
+	PG_RETURN_CSTRING(buf);
 }
