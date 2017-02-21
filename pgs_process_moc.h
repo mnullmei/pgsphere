@@ -47,6 +47,7 @@ typedef struct
  */
 
 #define MOC_HEADER_SIZE (offsetof(Smoc, data))
+#define MIN_MOC_SIZE (sizeof(Smoc))
 
 void*
 create_moc_context(pgs_error_handler);

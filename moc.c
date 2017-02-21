@@ -171,7 +171,7 @@ smoc_in(PG_FUNCTION_ARGS)
 
 	moc_size = get_moc_size(moc_context, moc_error_out);
 	moc = (Smoc*) palloc(moc_size);
-	memset(moc, 0, MOC_HEADER_SIZE);
+	memset(moc, 0, MIN_MOC_SIZE);
 	SET_VARSIZE(moc, moc_size);
 
 	if (create_moc_release_context(moc_context, moc, moc_error_out))
