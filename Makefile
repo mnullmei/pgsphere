@@ -18,7 +18,8 @@ REGRESS     = init tables points euler circle line ellipse poly path box index \
 REGRESS_9_5 = index_9.5 # experimental for spoint3
 
 TESTS       = init_test tables points euler circle line ellipse poly path box index \
-			  contains_ops contains_ops_compat bounding_box_gist gnomo healpix
+			  contains_ops contains_ops_compat bounding_box_gist gnomo healpix \
+			  moc
 
 SHLIB_LINK += -lchealpix
 # no support for CXXFLAGS in PGXS
@@ -53,7 +54,7 @@ endif
 
 # link a second time as PGXS does not allow to change the linker
 PGS_LINKER = g++ $(CXXFLAGS) $(filter-out $(CC) $(CFLAGS), $(LINK.shared))
-pgs_link: $(OBJS) | $(SHLIB_PREREQS)
+pgs_link:  $(shlib) $(OBJS) | $(SHLIB_PREREQS)
 	$(PGS_LINKER) -o $(shlib) $(OBJS) $(LDFLAGS) $(LDFLAGS_SL) $(SHLIB_LINK)
 
 # experimental for spoint3
@@ -83,8 +84,8 @@ pg_sphere.test.sql: $(RELEASE_SQL) $(shlib)
 	tail -n+3 $< | sed 's,MODULE_PATHNAME,$(realpath $(shlib)),g' >$@
 
 
-$(RELEASE_SQL): $(addsuffix .in, $(RELEASE_SQL) $(PGS_SQL)) pgs_link $(shlib)
-	cat $(filter-out pgs_link $(shlib), $^) > $@
+$(RELEASE_SQL): $(addsuffix .in, $(RELEASE_SQL) $(PGS_SQL)) pgs_link
+	cat $(filter-out pgs_link, $^) > $@
 
 # for "create extension from unpacked*":
 
