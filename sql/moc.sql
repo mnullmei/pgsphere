@@ -1,5 +1,9 @@
 SET client_min_messages = 'notice';
 
+SELECT '29/0-3,7'::smoc;
+SELECT '29/0,1,2,3,7'::smoc;
+
+
 SELECT smoc(-1); -- expected: error
 SELECT smoc(15); -- expected: error
 SELECT smoc(0);  -- expected: '0/'

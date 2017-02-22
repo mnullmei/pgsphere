@@ -101,19 +101,30 @@ add_to_moc(void* moc_context, long order, hpint64 first, hpint64 last,
 		healpix_convert(last, order);
 		moc_interval input = make_interval(first, last);
 		map_iterator lower = m.input_map.lower_bound(input);
-		if (lower != m.input_map.begin() && (--lower)->second >= first)
-			input.first = lower->first;
+		if (lower != m.input_map.begin())
+		{
+			map_iterator before = lower;
+			--before;
+
+//			input.first = lower->first;
+
+//m.input_map.insert(make_interval(input.first, 100 * lower->first));
+
+		}
 		// interval past the current one, if any
 		map_iterator upper = m.input_map.upper_bound(make_interval(last, 0));
-		if (lower == upper)
-		{
-			// This path would be superflous with C++11's erase(), as it returns
-			// the correct hint for the insert() of the general case down below.
-			m.input_map.insert(lower, input);
-			break;
-		}
-		m.input_map.erase(lower, upper);
+// 		if (lower == upper)
+// 		{
+// 			// This path would be superflous with C++11's erase(), as it returns
+// 			// the correct hint for the insert() of the general case down below.
+// 			m.input_map.insert(lower, input);
+// 			break;
+// 		}
+//		m.input_map.erase(lower, upper);
 		m.input_map.insert(input);
+
+m.input_map.insert(make_interval(10000 + input.first, input.second));
+
 	PGS_CATCH
 	return 0;
 };
