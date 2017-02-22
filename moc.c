@@ -22,10 +22,11 @@ static int
 dbg_to_moc(int pos, void* moc_context, long order, hpint64 first, hpint64 last,
 												pgs_error_handler error_out)
 {
+	char* x = add_to_moc(moc_context, order, first, last, error_out);
 	ereport(NOTICE, (errcode(ERRCODE_WARNING),
-					errmsg("at %d: add order = %ld, %lld, %lld", pos,
-														order, first,	last)));
-	return add_to_moc(moc_context, order, first, last, error_out);
+					errmsg("at %d: add order = %ld, %lld, %lld %s", pos,
+													order, first, last, x)));
+	return 0;
 }
 
 Datum

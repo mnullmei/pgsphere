@@ -54,12 +54,49 @@ operator<<(std::ostream & os, const moc_interval & x)
 typedef std::set<moc_interval> moc_map;
 typedef moc_map::iterator map_iterator;
 
+template<class X>
+std::string to_string(const X & x)
+{
+	std::ostringstream oss;
+	oss << x;
+	return oss.str();
+}
+
 struct moc_input
 {
 	moc_map input_map;
 	std::size_t moc_size;
 	std::string s;
+	char x[99999];
 	moc_input() : moc_size(0) {}
+	void dump()
+	{
+		std::ostringstream oss;
+		oss << (input_map.size() ? "{" : "{ ");
+		for (map_iterator i = input_map.begin(); i != input_map.end(); ++i)
+			oss << *i << " ";
+		s.append(oss.str());
+		*s.rbegin() = '}';
+	}
+	void lndump(const std::string & msg)
+	{
+		s.append("\n");
+		s.append(msg + ":\n");
+		dump();
+	}
+	void addln(const std::string & msg)
+	{
+		s.append("\n");
+		s.append(msg);
+	}
+	std::string to_string(map_iterator i)
+	{
+		if (i == input_map.end())
+			return "[END]";
+		if (i == input_map.begin())
+			return "[BEGIN]";
+		return ::to_string(*i);
+	}
 };
 
 void*
@@ -90,43 +127,73 @@ release_moc_context(void* moc_context, pgs_error_handler error_out)
 	}
 }
 
-int
+char*
 add_to_moc(void* moc_context, long order, hpint64 first, hpint64 last,
 												pgs_error_handler error_out)
 {
 	moc_input* p = static_cast<moc_input*>(moc_context);
 	PGS_TRY
 		moc_input & m = *p;
+m.s.clear();
+m.lndump("entry");
+
 		healpix_convert(first, order); // convert to order 29
 		healpix_convert(last, order);
 		moc_interval input = make_interval(first, last);
 		map_iterator lower = m.input_map.lower_bound(input);
+		map_iterator upper = m.input_map.upper_bound(make_interval(last, 0));
+
+m.addln(to_string("lower = ") + m.to_string(lower));
+m.addln(to_string("upper = ") + m.to_string(upper));
+
 		if (lower != m.input_map.begin())
 		{
+m.lndump("have before");
 			map_iterator before = lower;
 			--before;
+m.addln(std::string("before = ") + m.to_string(before));
 
-//			input.first = lower->first;
+//m.input_map.insert(make_interval(100000 + before->first, before->second));
+//m.input_map.insert(make_interval(200000 + input.first, input.second));
+
+			lower = before;
+			if (lower->second >= input.first)
+			{
+m.lndump("have before connect");
+				input.first = lower->first;
+//m.input_map.insert(make_interval(300000 + input.first, input.second));
+//m.input_map.insert(make_interval(300000 + lower->first, input.second));
+			}
+
 
 //m.input_map.insert(make_interval(input.first, 100 * lower->first));
 
 		}
 		// interval past the current one, if any
-		map_iterator upper = m.input_map.upper_bound(make_interval(last, 0));
-// 		if (lower == upper)
-// 		{
-// 			// This path would be superflous with C++11's erase(), as it returns
-// 			// the correct hint for the insert() of the general case down below.
-// 			m.input_map.insert(lower, input);
-// 			break;
-// 		}
-//		m.input_map.erase(lower, upper);
-		m.input_map.insert(input);
+		if (lower == upper)
+		{
+m.lndump("lower == upper");
+			// This path would be superflous with C++11's erase(), as it returns
+			// the correct hint for the insert() of the general case down below.
+			m.input_map.insert(lower, input);
+			goto go_away; // break;
+		}
 
-m.input_map.insert(make_interval(10000 + input.first, input.second));
+//		m.input_map.erase(lower, upper);
+
+m.lndump("before erase");
+m.input_map.erase(input);
+m.lndump("after erase");
+//m.input_map.erase(lower);
+		m.input_map.insert(input);
+m.lndump("after insert");
+
+///m.input_map.insert(make_interval(10000 + input.first, input.second));
+
+go_away: memmove(m.x, m.s.c_str(), m.s.length() + 1);
 
 	PGS_CATCH
-	return 0;
+	return p->x;
 };
 
 // get_moc_size() prepares creation of MOC
@@ -139,12 +206,8 @@ get_moc_size(void* moc_context, pgs_error_handler error_out)
 	PGS_TRY
 		moc_input & m = *p;
 //prelim: do a string...
-		std::ostringstream oss;
-		oss << (m.input_map.size() ? "{" : "{ ");
-		for (map_iterator i = m.input_map.begin(); i != m.input_map.end(); ++i)
-			oss << *i << " ";
-		m.s = oss.str();
-		*m.s.rbegin() = '}';
+		m.s.clear();
+		m.dump();
 		moc_size = MOC_HEADER_SIZE + m.s.size() + 1;
 		
 		moc_size = std::max(MIN_MOC_SIZE, moc_size);

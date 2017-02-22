@@ -57,7 +57,7 @@ create_moc_context(pgs_error_handler);
 void
 release_moc_context(void*, pgs_error_handler);
 
-int
+char*
 add_to_moc(void*, long, hpint64, hpint64, pgs_error_handler);
 
 int
