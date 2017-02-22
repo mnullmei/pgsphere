@@ -18,6 +18,15 @@ index_invalid(hpint64 npix, long index)
 	return index < 0 || index >= npix;
 }
 
+static int
+dbg_to_moc(void* moc_context, long order, hpint64 first, hpint64 last,
+												pgs_error_handler error_out)
+{
+	ereport(NOTICE, (errcode(ERRCODE_WARNING),
+					errmsg("add order = %ld, %lld, %lld", order, first,	last)));
+	return add_to_moc(moc_context, order, first, last, error_out);
+}
+
 Datum
 smoc_in(PG_FUNCTION_ARGS)
 {
@@ -60,11 +69,8 @@ smoc_in(PG_FUNCTION_ARGS)
 						errhint("A valid Healpix order must be an integer "
 								"between 0 and 29.")));
 			}
-			else
-			{
-				order = nb;
-				npix = c_npix(order);
-			}
+			order = nb;
+			npix = c_npix(order);
 		}
 		else if (c == ',') /* nb is a Healpix index */
 		{
@@ -78,7 +84,7 @@ smoc_in(PG_FUNCTION_ARGS)
 									"an integer between 0 and %lld.", order,
 									 								npix - 1)));
 			}
-			add_to_moc(moc_context, order, nb, nb + 1, moc_error_out);
+			dbg_to_moc(moc_context, order, nb, nb + 1, moc_error_out);
 		}
 		else if (c == '-')  /* next Healpix number must follow */
 		{
@@ -114,7 +120,7 @@ smoc_in(PG_FUNCTION_ARGS)
 								"between 0 and 29.", nb, nb2, order)));
 
 			}
-			add_to_moc(moc_context, order, nb, nb2 + 1, moc_error_out);
+			dbg_to_moc(moc_context, order, nb, nb2 + 1, moc_error_out);
 		}
 		else if (isdigit(c)) /* nb is the last Healpix index of this level */
 		{
@@ -129,7 +135,7 @@ smoc_in(PG_FUNCTION_ARGS)
 									 								npix - 1)));
 			}
 			ind--; /* Nothing else to do in this function */
-			add_to_moc(moc_context, order, nb, nb + 1, moc_error_out);
+			dbg_to_moc(moc_context, order, nb, nb + 1, moc_error_out);
 		}
 		else if (c == '\0') /* nb should be the last Healpix index */
 		{
@@ -154,7 +160,7 @@ smoc_in(PG_FUNCTION_ARGS)
 			}
 			else
 			{
-				add_to_moc(moc_context, order, nb, nb + 1, moc_error_out);
+				dbg_to_moc(moc_context, order, nb, nb + 1, moc_error_out);
 			}
 		}
 		else

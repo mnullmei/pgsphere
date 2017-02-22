@@ -1,3 +1,4 @@
+SET client_min_messages = 'notice';
 
 SELECT smoc(-1); -- expected: error
 SELECT smoc(15); -- expected: error
