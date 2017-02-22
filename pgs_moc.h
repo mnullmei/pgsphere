@@ -53,8 +53,7 @@ Datum smoc_in(PG_FUNCTION_ARGS);
 Datum smoc_out(PG_FUNCTION_ARGS);
 
 /* parsing subroutines */
-long readNumber(const char*, int*);
-void readWord(const char*, int*, char*, int);
+hpint64 readNumber(const char*, int*);
 char readChar(const char*, int*);
 
 #endif

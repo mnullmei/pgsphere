@@ -19,11 +19,12 @@ index_invalid(hpint64 npix, long index)
 }
 
 static int
-dbg_to_moc(void* moc_context, long order, hpint64 first, hpint64 last,
+dbg_to_moc(int pos, void* moc_context, long order, hpint64 first, hpint64 last,
 												pgs_error_handler error_out)
 {
 	ereport(NOTICE, (errcode(ERRCODE_WARNING),
-					errmsg("add order = %ld, %lld, %lld", order, first,	last)));
+					errmsg("at %d: add order = %ld, %lld, %lld", pos,
+														order, first,	last)));
 	return add_to_moc(moc_context, order, first, last, error_out);
 }
 
@@ -46,6 +47,10 @@ smoc_in(PG_FUNCTION_ARGS)
 	{
 		nb = readNumber(input_text, &ind);
 		c = readChar(input_text, &ind);
+
+ereport(NOTICE, (errcode(ERRCODE_WARNING),
+		errmsg("*: nb = %lld, c = '%c'", nb, c)));
+
 
 		if (c == '/') /* nb is a Healpix order */
 		{
@@ -71,6 +76,8 @@ smoc_in(PG_FUNCTION_ARGS)
 			}
 			order = nb;
 			npix = c_npix(order);
+ereport(NOTICE, (errcode(ERRCODE_WARNING),
+		errmsg("*: order = %ld, npix = '%lld'", order, npix)));
 		}
 		else if (c == ',') /* nb is a Healpix index */
 		{
@@ -84,7 +91,7 @@ smoc_in(PG_FUNCTION_ARGS)
 									"an integer between 0 and %lld.", order,
 									 								npix - 1)));
 			}
-			dbg_to_moc(moc_context, order, nb, nb + 1, moc_error_out);
+			dbg_to_moc(1, moc_context, order, nb, nb + 1, moc_error_out);
 		}
 		else if (c == '-')  /* next Healpix number must follow */
 		{
@@ -120,7 +127,7 @@ smoc_in(PG_FUNCTION_ARGS)
 								"between 0 and 29.", nb, nb2, order)));
 
 			}
-			dbg_to_moc(moc_context, order, nb, nb2 + 1, moc_error_out);
+			dbg_to_moc(2, moc_context, order, nb, nb2 + 1, moc_error_out);
 		}
 		else if (isdigit(c)) /* nb is the last Healpix index of this level */
 		{
@@ -135,7 +142,7 @@ smoc_in(PG_FUNCTION_ARGS)
 									 								npix - 1)));
 			}
 			ind--; /* Nothing else to do in this function */
-			dbg_to_moc(moc_context, order, nb, nb + 1, moc_error_out);
+			dbg_to_moc(3, moc_context, order, nb, nb + 1, moc_error_out);
 		}
 		else if (c == '\0') /* nb should be the last Healpix index */
 		{
@@ -160,7 +167,7 @@ smoc_in(PG_FUNCTION_ARGS)
 			}
 			else
 			{
-				dbg_to_moc(moc_context, order, nb, nb + 1, moc_error_out);
+				dbg_to_moc(4, moc_context, order, nb, nb + 1, moc_error_out);
 			}
 		}
 		else
@@ -174,7 +181,7 @@ smoc_in(PG_FUNCTION_ARGS)
 							"is between 0 and 29. Example: '1/0 2/3,5-10'.")));
 		}
 	}
-	while (c != '\0');
+	while (input_text[ind] != '\0');
 
 	moc_size = get_moc_size(moc_context, moc_error_out);
 	moc = (Smoc*) palloc(moc_size);
@@ -215,9 +222,9 @@ smoc_in(PG_FUNCTION_ARGS)
  * @return  The read number,
  *          or -1 if no digit has been found.
  */
-long readNumber(const char* mocAscii, int* start)
+hpint64 readNumber(const char* mocAscii, int* start)
 {
-  long nb = -1;
+  hpint64 nb = -1;
   
   // Skip all space characters:
   while(mocAscii[*start] != '\0' && isspace(mocAscii[*start]))
@@ -235,46 +242,6 @@ long readNumber(const char* mocAscii, int* start)
   
   // Return the read number:
   return nb;
-}
-
-/**
- * [readWord(char*, int*, char*, int)]
- * 
- * Read the next word (string of non-whitespace characters).
- * 
- * All whitespaces from the given position and before the first non-whitespace
- * character are silently skiped.
- * 
- * The given index is incremented each time a character (whatever it is) is
- * skiped.
- * 
- * When the end of the given string is reached, this function stops immediately
- * and returns '\0'. The given index is then set to the corresponding position.
- * 
- * @param mocAscii    The string in which the next word must be read.
- * @param start       Index from which the word must be read.
- *                    This value is incremented at each read character.
- * @param word        The read word, or '\0' if the end of the given string is
- *                    empty.
- * @param wordLength  Maximum number of characters to read.
- *                    If negative, characters will be read until the end of the
- *                    string or a whitespace is encountered.
- */
-void readWord(const char* mocAscii, int* start, char* word, int wordLength) {
-  int length = 0;
-  word[0] = '\0';
-  
-  // Skip all space characters:
-  while(mocAscii[*start] != '\0' && isspace(mocAscii[*start]))
-    (*start)++;
-  
-  // Read all characters until the end or a whitespace is reached:
-  while((wordLength < 0 || length < wordLength)
-					&& mocAscii[*start] != '\0' && !isspace(mocAscii[*start]))
-    word[length++] = mocAscii[(*start)++];
-
-  // Finish the read word:
-  word[length] = '\0';
 }
 
 /**
