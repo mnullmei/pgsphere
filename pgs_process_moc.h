@@ -13,6 +13,8 @@ typedef void (*pgs_error_handler)(const char*, int);
 #define PG_TOAST_PAGE_FRAGMENT 1010
 #define HP64_SIZE (sizeof(hpint64))
 
+/* moc_interval: an half-open interval [first, last) of Healpix elements */
+
 typedef struct
 {
 	hpint64 first;

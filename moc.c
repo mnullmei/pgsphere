@@ -1,3 +1,4 @@
+#include "stddef.h"
 #include "pgs_healpix.h"
 #include "pgs_moc.h"
 
@@ -307,7 +308,9 @@ char readChar(const char* mocAscii, int* start)
 Datum
 smoc_out(PG_FUNCTION_ARGS)
 {
-	char	*buf = (char *) palloc(20);
-	sprintf(buf, "[a MOC]");
+	Smoc *moc = (Smoc *) PG_DETOAST_DATUM(PG_GETARG_DATUM(0));
+	size_t sz = moc->data_end - MOC_HEADER_SIZE;
+	char *buf = (char *) palloc(sz);
+	memmove(buf, &(moc->data), sz);
 	PG_RETURN_CSTRING(buf);
 }
