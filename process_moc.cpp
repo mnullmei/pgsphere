@@ -93,9 +93,8 @@ struct moc_input
 	{
 		if (i == input_map.end())
 			return "[END]";
-		if (i == input_map.begin())
-			return "[BEGIN]";
-		return ::to_string(*i);
+		return std::string(i == input_map.begin() ? "[BEGIN]" : "")
+				+ ::to_string(*i);
 	}
 };
 
@@ -143,6 +142,7 @@ m.lndump("entry");
 		map_iterator lower = m.input_map.lower_bound(input);
 		map_iterator upper = m.input_map.upper_bound(make_interval(last, 0));
 
+m.addln(std::string("input = ") + to_string(input));
 m.addln(to_string("lower = ") + m.to_string(lower));
 m.addln(to_string("upper = ") + m.to_string(upper));
 
@@ -156,11 +156,15 @@ m.addln(std::string("before = ") + m.to_string(before));
 //m.input_map.insert(make_interval(100000 + before->first, before->second));
 //m.input_map.insert(make_interval(200000 + input.first, input.second));
 
-			lower = before;
-			if (lower->second >= input.first)
+			if (before->second >= input.first)
 			{
-m.lndump("have before connect");
+m.lndump("++connect:");
+			lower = before;
+m.addln(to_string("changed: lower = ") + m.to_string(lower));
+
 				input.first = lower->first;
+m.addln(std::string("changed: input = ") + to_string(input));
+
 //m.input_map.insert(make_interval(300000 + input.first, input.second));
 //m.input_map.insert(make_interval(300000 + lower->first, input.second));
 			}
@@ -175,14 +179,16 @@ m.lndump("have before connect");
 m.lndump("lower == upper");
 			// This path would be superflous with C++11's erase(), as it returns
 			// the correct hint for the insert() of the general case down below.
+m.addln(std::string("add input: ") + to_string(input));
 			m.input_map.insert(lower, input);
 			goto go_away; // break;
 		}
 
-//		m.input_map.erase(lower, upper);
-
 m.lndump("before erase");
-m.input_map.erase(input);
+m.addln(to_string("lower = ") + m.to_string(lower));
+m.addln(to_string("upper = ") + m.to_string(upper));
+		m.input_map.erase(lower, upper);
+//////m.input_map.erase(input);
 m.lndump("after erase");
 //m.input_map.erase(lower);
 		m.input_map.insert(input);

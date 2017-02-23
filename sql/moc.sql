@@ -1,4 +1,5 @@
 SET client_min_messages = 'notice';
+-- SET client_min_messages = 'warning';
 
 SELECT '29/0-3,7'::smoc;
 SELECT '29/0,1,2,3,7'::smoc;

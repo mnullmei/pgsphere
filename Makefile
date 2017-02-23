@@ -13,9 +13,10 @@ DATA_built  = $(RELEASE_SQL) \
 			  pg_sphere--1.0_gavo--1.1.5beta0gavo.sql
 
 DOCS        = README.pg_sphere COPYRIGHT.pg_sphere
-REGRESS     = init tables points euler circle line ellipse poly path box index \
-			  contains_ops contains_ops_compat bounding_box_gist gnomo healpix \
-			  moc
+#REGRESS     = init tables points euler circle line ellipse poly path box index \
+#			  contains_ops contains_ops_compat bounding_box_gist gnomo healpix \
+#			  moc
+REGRESS     = init moc
 REGRESS_9_5 = index_9.5 # experimental for spoint3
 
 TESTS       = init_test tables points euler circle line ellipse poly path box index \
