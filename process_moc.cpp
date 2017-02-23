@@ -158,8 +158,17 @@ m.addln(std::string("before = ") + m.to_string(before));
 
 			if (before->second >= input.first)
 			{
-m.lndump("++connect:");
-			lower = before;
+m.addln("connect_front?");
+				if (before->second >= input.second)
+				{
+m.addln("nothing to do here, go away :-) -- input \\subset [before]");
+					goto go_away; 
+				}
+
+
+
+m.lndump("++connect_front:");
+				lower = before;
 m.addln(to_string("changed: lower = ") + m.to_string(lower));
 
 				input.first = lower->first;
