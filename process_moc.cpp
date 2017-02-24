@@ -166,10 +166,10 @@ add_to_moc(void* moc_context, long order, hpint64 first, hpint64 last,
 		}
 		// Skip erase if it would do nothing in order to be able to use
 		// an input hint for set::insert().
-		// This path would be superflous with C++11's erase(), as it returns
+		// This path would be superflous with C++11's erase(), as that returns
 		// the correct hint for the insert() of the general case down below.
-		// lower == upper always refers the interval completely past 
-		// the one to insert, or to input_map.end()
+		// The input hint lower == upper always refers the interval completely
+		// past the one to insert, or to input_map.end()
 		if (lower == upper)
 		{
 			m.input_map.insert(lower, input);
