@@ -23,12 +23,12 @@ dbg_to_moc(int pos, void* moc_context, long order, hpint64 first, hpint64 last,
 												pgs_error_handler error_out)
 {
 	char* x = add_to_moc(moc_context, order, first, last, error_out);
-	ereport(NOTICE, (errcode(ERRCODE_WARNING),
-					errmsg("at %d: add order = %ld, %lld, %lld %s", pos,
-													order, first, last, x)));
 	return 0;
 }
 
+// The release_moc_context() calls of smoc_in() should be eventually wrapped
+// into the finalisation function of a proper PostgreSQL memory context.
+//
 Datum
 smoc_in(PG_FUNCTION_ARGS)
 {
@@ -48,10 +48,6 @@ smoc_in(PG_FUNCTION_ARGS)
 	{
 		nb = readNumber(input_text, &ind);
 		c = readChar(input_text, &ind);
-
-ereport(NOTICE, (errcode(ERRCODE_WARNING),
-		errmsg("*: nb = %lld, c = '%c'", nb, c)));
-
 
 		if (c == '/') /* nb is a Healpix order */
 		{
@@ -77,8 +73,6 @@ ereport(NOTICE, (errcode(ERRCODE_WARNING),
 			}
 			order = nb;
 			npix = c_npix(order);
-ereport(NOTICE, (errcode(ERRCODE_WARNING),
-		errmsg("*: order = %ld, npix = '%lld'", order, npix)));
 		}
 		else if (c == ',') /* nb is a Healpix index */
 		{

@@ -10,6 +10,9 @@
 
 #include "pgs_process_moc.h"
 
+// PGS_TRY / PGS_CATCH: use an additional 'do {} while (0);' to allow for
+// 'break;' as an alternative to 'return;'
+
 #define PGS_TRY try	{ do {
 #define PGS_CATCH 	} while (0); }			\
 	catch (std::exception & e)				\
@@ -68,7 +71,7 @@ struct moc_input
 	std::size_t moc_size;
 	std::string s;
 	char x[99999];
-	moc_input() : moc_size(0) {}
+	moc_input() : moc_size(0) { x[0] = '\0'; }
 	void dump()
 	{
 		std::ostringstream oss;
@@ -137,6 +140,8 @@ add_to_moc(void* moc_context, long order, hpint64 first, hpint64 last,
 		healpix_convert(first, order); // convert to order 29
 		healpix_convert(last, order);
 		moc_interval input = make_interval(first, last);
+
+		// a refactored, C++-interal version of add_to_moc() should start here:
 		map_iterator lower = m.input_map.lower_bound(input);
 		map_iterator upper = m.input_map.upper_bound(make_interval(last, 0));
 
@@ -147,9 +152,7 @@ add_to_moc(void* moc_context, long order, hpint64 first, hpint64 last,
 			if (before->second >= input.first)
 			{
 				if (before->second >= input.second)
-				{
-					goto go_away; // input \subset [before]
-				}
+					break; // input \subset [before]
 				lower = before;
 				input.first = lower->first;
 			}
@@ -159,9 +162,7 @@ add_to_moc(void* moc_context, long order, hpint64 first, hpint64 last,
 			map_iterator after = upper;
 			--after;
 			if (after->second > input.second)
-			{
 				input.second = after->second;
-			}
 		}
 		// Skip erase if it would do nothing in order to be able to use
 		// an input hint for set::insert().
@@ -172,13 +173,10 @@ add_to_moc(void* moc_context, long order, hpint64 first, hpint64 last,
 		if (lower == upper)
 		{
 			m.input_map.insert(lower, input);
-			goto go_away; // break;
+			break;
 		}
 		m.input_map.erase(lower, upper);
 		m.input_map.insert(input);
-
-go_away: memmove(m.x, m.s.c_str(), m.s.length() + 1);
-
 	PGS_CATCH
 	return p->x;
 };
