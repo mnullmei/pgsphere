@@ -133,8 +133,6 @@ add_to_moc(void* moc_context, long order, hpint64 first, hpint64 last,
 	moc_input* p = static_cast<moc_input*>(moc_context);
 	PGS_TRY
 		moc_input & m = *p;
-m.s.clear();
-m.lndump("entry");
 
 		healpix_convert(first, order); // convert to order 29
 		healpix_convert(last, order);
@@ -142,53 +140,29 @@ m.lndump("entry");
 		map_iterator lower = m.input_map.lower_bound(input);
 		map_iterator upper = m.input_map.upper_bound(make_interval(last, 0));
 
-m.addln(std::string("input = ") + to_string(input));
-m.addln(to_string("lower = ") + m.to_string(lower));
-m.addln(to_string("upper = ") + m.to_string(upper));
-
 		if (lower != m.input_map.begin())
 		{
-m.lndump("have before");
 			map_iterator before = lower;
 			--before;
-m.addln(std::string("before = ") + m.to_string(before));
-
 			if (before->second >= input.first)
 			{
-m.addln("connect_front?");
 				if (before->second >= input.second)
 				{
-m.addln("nothing to do here, go away :-) -- input \\subset [before]");
-					goto go_away; 
+					goto go_away; // input \subset [before]
 				}
-
-m.lndump("++connect_front:");
 				lower = before;
-m.addln(to_string("changed: lower = ") + m.to_string(lower));
-
 				input.first = lower->first;
-m.addln(std::string("changed: input = ") + to_string(input));
-
 			}
 		}
-
 		if (upper != m.input_map.begin())
 		{
-m.lndump("have after");
 			map_iterator after = upper;
 			--after;
-m.addln(std::string("after = ") + m.to_string(after));
-
 			if (after->second > input.second)
 			{
-m.addln("++connect_back.");
 				input.second = after->second;
-m.addln(std::string("changed: input = ") + to_string(input));
-
 			}
-
 		}
-
 		// Skip erase if it would do nothing in order to be able to use
 		// an input hint for set::insert().
 		// This path would be superflous with C++11's erase(), as it returns
@@ -197,23 +171,11 @@ m.addln(std::string("changed: input = ") + to_string(input));
 		// the one to insert, or to input_map.end()
 		if (lower == upper)
 		{
-m.lndump("lower == upper");
-m.addln(std::string("add input: ") + to_string(input));
 			m.input_map.insert(lower, input);
 			goto go_away; // break;
 		}
-
-m.lndump("before erase");
-m.addln(to_string("lower = ") + m.to_string(lower));
-m.addln(to_string("upper = ") + m.to_string(upper));
-
 		m.input_map.erase(lower, upper);
-
-m.lndump("after erase");
-
 		m.input_map.insert(input);
-
-m.lndump("after insert");
 
 go_away: memmove(m.x, m.s.c_str(), m.s.length() + 1);
 
