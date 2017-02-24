@@ -153,9 +153,6 @@ m.lndump("have before");
 			--before;
 m.addln(std::string("before = ") + m.to_string(before));
 
-//m.input_map.insert(make_interval(100000 + before->first, before->second));
-//m.input_map.insert(make_interval(200000 + input.first, input.second));
-
 			if (before->second >= input.first)
 			{
 m.addln("connect_front?");
@@ -165,8 +162,6 @@ m.addln("nothing to do here, go away :-) -- input \\subset [before]");
 					goto go_away; 
 				}
 
-
-
 m.lndump("++connect_front:");
 				lower = before;
 m.addln(to_string("changed: lower = ") + m.to_string(lower));
@@ -174,20 +169,35 @@ m.addln(to_string("changed: lower = ") + m.to_string(lower));
 				input.first = lower->first;
 m.addln(std::string("changed: input = ") + to_string(input));
 
-//m.input_map.insert(make_interval(300000 + input.first, input.second));
-//m.input_map.insert(make_interval(300000 + lower->first, input.second));
+			}
+		}
+
+		if (upper != m.input_map.begin())
+		{
+m.lndump("have after");
+			map_iterator after = upper;
+			--after;
+m.addln(std::string("after = ") + m.to_string(after));
+
+			if (after->second > input.second)
+			{
+m.addln("++connect_back.");
+				input.second = after->second;
+m.addln(std::string("changed: input = ") + to_string(input));
+
 			}
 
-
-//m.input_map.insert(make_interval(input.first, 100 * lower->first));
-
 		}
-		// interval past the current one, if any
+
+		// Skip erase if it would do nothing in order to be able to use
+		// an input hint for set::insert().
+		// This path would be superflous with C++11's erase(), as it returns
+		// the correct hint for the insert() of the general case down below.
+		// lower == upper always refers the interval completely past 
+		// the one to insert, or to input_map.end()
 		if (lower == upper)
 		{
 m.lndump("lower == upper");
-			// This path would be superflous with C++11's erase(), as it returns
-			// the correct hint for the insert() of the general case down below.
 m.addln(std::string("add input: ") + to_string(input));
 			m.input_map.insert(lower, input);
 			goto go_away; // break;
@@ -196,14 +206,14 @@ m.addln(std::string("add input: ") + to_string(input));
 m.lndump("before erase");
 m.addln(to_string("lower = ") + m.to_string(lower));
 m.addln(to_string("upper = ") + m.to_string(upper));
-		m.input_map.erase(lower, upper);
-//////m.input_map.erase(input);
-m.lndump("after erase");
-//m.input_map.erase(lower);
-		m.input_map.insert(input);
-m.lndump("after insert");
 
-///m.input_map.insert(make_interval(10000 + input.first, input.second));
+		m.input_map.erase(lower, upper);
+
+m.lndump("after erase");
+
+		m.input_map.insert(input);
+
+m.lndump("after insert");
 
 go_away: memmove(m.x, m.s.c_str(), m.s.length() + 1);
 
