@@ -223,6 +223,7 @@ get_moc_size(void* moc_in_context, pgs_error_handler error_out)
 // put the debug string squarely into the moc options header.
 		m.s.clear();
 
+m.s.append(to_string(TOAST_MAX_CHUNK_SIZE));
 
 		m.dump();
 		m.options_bytes = m.s.size() + 1;
