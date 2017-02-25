@@ -6,8 +6,15 @@ extern "C" {
 #endif
 
 #include <c.h>					/* PostgreSQL type definitions */
-#include <postgres.h>					/* PostgreSQL type definitions */
-#include <access/tuptoaster.h>	/* for TOAST_MAX_CHUNK_SIZE */
+
+/*
+ * PG_TOAST_PAGE_FRAGMENT should equal TOAST_MAX_CHUNK_SIZE, but we
+ * do not want to include too much stuff just for the small gain of
+ * getting its value right. Usually, TOAST_MAX_CHUNK_SIZE equals 1996.
+ * 
+ * #include <postgres.h>
+ * #include <access/tuptoaster.h>	// for TOAST_MAX_CHUNK_SIZE
+ */
 
 #include <chealpix.h>
 
