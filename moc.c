@@ -177,7 +177,7 @@ smoc_in(PG_FUNCTION_ARGS)
 							"is between 0 and 29. Example: '1/0 2/3,5-10'.")));
 		}
 	}
-	
+
 	moc_size = get_moc_size(moc_in_context, moc_error_out);
 	/* palloc() will leak the moc_in_context if it fails :-/ */
 	moc = (Smoc*) palloc(moc_size);

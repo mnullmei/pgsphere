@@ -10,8 +10,8 @@ extern "C" {
 
 typedef void (*pgs_error_handler)(const char*, int);
 
-#define PG_TOAST_PAGE_FRAGMENT 1010
 #define HP64_SIZE (sizeof(hpint64))
+#define PG_TOAST_PAGE_FRAGMENT 1016 /* must be divisible by HP64_SIZE == 8 */
 
 /* moc_interval: an half-open interval [first, last) of Healpix elements */
 

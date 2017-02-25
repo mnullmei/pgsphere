@@ -250,6 +250,7 @@ create_moc_release_context(void* moc_in_context, Smoc* moc,
 		moc_input & m = *p;
 
 		hpint64	area = 0; /* number of covered Healpix cells */
+area = 9223372036854775807; /* 2^63 - 1 */
 
 
 		moc->version	= 0;
