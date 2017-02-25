@@ -94,10 +94,11 @@ LINE 1: SELECT smoc(0);
                ^
 HINT:  No function matches the given name and argument types. You might need to add explicit type casts.
 SELECT smoc('');            -- expected: error
-ERROR:  Incorrect MOC syntax: empty string found.
-LINE 1: SELECT smoc('');
-                    ^
-HINT:  The minimal expected syntax is: '{healpix_order}/', where {healpix_order} must be an integer between 0 and 29. This will create an empty MOC. Example: '1/'.
+ smoc 
+------
+ {}
+(1 row)
+
 SELECT smoc('abc');         -- expected: error
 ERROR:  [c.0] Incorrect MOC syntax: unsupported character 'a'.
 LINE 1: SELECT smoc('abc');
@@ -132,10 +133,11 @@ SELECT smoc('0/0,1,2,3,7'); -- expected: '0/0-3,7'
 (1 row)
 
 SELECT ''::smoc;            -- expected: error
-ERROR:  Incorrect MOC syntax: empty string found.
-LINE 1: SELECT ''::smoc;
-               ^
-HINT:  The minimal expected syntax is: '{healpix_order}/', where {healpix_order} must be an integer between 0 and 29. This will create an empty MOC. Example: '1/'.
+ smoc 
+------
+ {}
+(1 row)
+
 SELECT 'abc'::smoc;         -- expected: error
 ERROR:  [c.0] Incorrect MOC syntax: unsupported character 'a'.
 LINE 1: SELECT 'abc'::smoc;

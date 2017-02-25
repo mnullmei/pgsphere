@@ -27,23 +27,32 @@ typedef struct
 	char	start[HP64_SIZE];
 } moc_tree_entry;
 
+typedef struct
+{
+	int32			next_begin;	/* counts in units of char, from start of MOC */
+	moc_tree_entry	nodes[1];
+} moc_tree_page;
+
+#define MOC_DATA_ALIGN (sizeof(int32))
+
 #define MOC_INTERVAL_SIZE (sizeof(moc_interval))
 #define MOC_TREE_ENTRY_SIZE (sizeof(moc_tree_entry))
-#define MOC_LEAF_PAGE_SIZE (PG_TOAST_PAGE_FRAGMENT / MOC_INTERVAL_SIZE)
-#define MOC_TREE_PAGE_SIZE (PG_TOAST_PAGE_FRAGMENT / MOC_TREE_ENTRY_SIZE)
+#define MOC_LEAF_PAGE_LEN (PG_TOAST_PAGE_FRAGMENT / MOC_INTERVAL_SIZE)
+#define MOC_TREE_PAGE_LEN \
+			((PG_TOAST_PAGE_FRAGMENT - MOC_DATA_ALIGN) / MOC_TREE_ENTRY_SIZE)
 
 typedef struct
 {
-	char			vl_len_[4];	/* size of PostgreSQL variable-length data */
-	uint16			version;	/* version of the 'toasty' MOC data structure */
-	uint8			order;		/* actual MOC order */
-	uint8			depth;		/* depth of B+-tree */
-	hpint64			first;		/* first Healpix index in set */
-	hpint64			last;		/* 1 + (last Healpix index in set) */
-	hpint64			area;		/* number of covered Healpix cells */
-	int32			root_begin;	/* start of root node, past the options block */
-	int32			root_end;	/* end of root node */
-	int32			data[1];	/* no need to optimise for empty MOCs */
+	char		vl_len_[4];	/* size of PostgreSQL variable-length data */
+	uint16		version;	/* version of the 'toasty' MOC data structure */
+	uint8		order;		/* actual MOC order */
+	uint8		depth;		/* depth of B+-tree */
+	hpint64		first;		/* first Healpix index in set */
+	hpint64		last;		/* 1 + (last Healpix index in set) */
+	hpint64		area;		/* number of covered Healpix cells */
+	int32		root_begin;	/* start of root node, past the options block */
+	int32		root_end;	/* end of root node */
+	int32		data[1];	/* no need to optimise for empty MOCs */
 } Smoc;
 
 /* the redundant data_end allows to skip reading the tree before a "sequential
@@ -52,7 +61,6 @@ typedef struct
 
 #define MOC_HEADER_SIZE (offsetof(Smoc, data))
 #define MIN_MOC_SIZE (sizeof(Smoc))
-#define MOC_DATA_ALIGN (sizeof(int32))
 
 void*
 create_moc_in_context(pgs_error_handler);

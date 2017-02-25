@@ -280,6 +280,8 @@ create_moc_out_context(Smoc* moc, pgs_error_handler error_out)
 		p = new moc_output;
 		moc_output & m = *p;
 
+		// There must be an option to output pure intervals as well!
+
 		// moc output fiddling:
 
 
