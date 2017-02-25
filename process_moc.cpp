@@ -26,6 +26,37 @@
 		error_out("unknown exception", 0);	\
 	}
 
+// Throwing expections from destructors is not strictly forbidden, it is just
+// discouraged in the strongest possible way.
+template <class C>
+void
+release_context(void* context, pgs_error_handler error_out)
+{
+	C* p = static_cast<C*>(context);
+	try
+	{
+		delete p;
+	}
+	catch (std::exception & e)
+	{
+		error_out(e.what(), 0);
+	}
+	catch (...)
+	{
+		error_out("unknown exception", 0);
+	}
+}
+
+char* data_as_char(Smoc* moc, size_t offset = 0)
+{
+	return offset + reinterpret_cast<char*>(&((moc->data)[0]));
+}
+
+size_t align_round(size_t offset, size_t alignment)
+{
+	return (1 + offset / alignment) * alignment;
+}
+
 static void
 healpix_convert(hpint64 & idx, int32 from_order)
 {
@@ -65,13 +96,23 @@ std::string to_string(const X & x)
 	return oss.str();
 }
 
+struct moc_output
+{
+	std::string s;
+};
+
 struct moc_input
 {
 	moc_map input_map;
-	std::size_t moc_size;
+	std::size_t options_bytes;
+	std::size_t options_size;
+	std::size_t root_begin;
 	std::string s;
 	char x[99999];
-	moc_input() : moc_size(0) { x[0] = '\0'; }
+	moc_input() : options_bytes(0), options_size(0), root_begin(0)
+	{
+		x[0] = '\0';
+	}
 	void dump()
 	{
 		std::ostringstream oss;
@@ -102,7 +143,7 @@ struct moc_input
 };
 
 void*
-create_moc_context(pgs_error_handler error_out)
+create_moc_in_context(pgs_error_handler error_out)
 {
 	moc_input* p = 0;
 	PGS_TRY
@@ -112,28 +153,16 @@ create_moc_context(pgs_error_handler error_out)
 };
 
 void
-release_moc_context(void* moc_context, pgs_error_handler error_out)
+release_moc_in_context(void* moc_in_context, pgs_error_handler error_out)
 {
-	moc_input* p = static_cast<moc_input*>(moc_context);
-	try
-	{
-		delete p;
-	}
-	catch (std::exception & e)
-	{
-		error_out(e.what(), 0);
-	}
-	catch (...)
-	{
-		error_out("unknown exception", 0);
-	}
+	release_context<moc_input>(moc_in_context, error_out);
 }
 
 char*
-add_to_moc(void* moc_context, long order, hpint64 first, hpint64 last,
+add_to_moc(void* moc_in_context, long order, hpint64 first, hpint64 last,
 												pgs_error_handler error_out)
 {
-	moc_input* p = static_cast<moc_input*>(moc_context);
+	moc_input* p = static_cast<moc_input*>(moc_in_context);
 	PGS_TRY
 		moc_input & m = *p;
 
@@ -184,52 +213,103 @@ add_to_moc(void* moc_context, long order, hpint64 first, hpint64 last,
 // get_moc_size() prepares creation of MOC
 
 int
-get_moc_size(void* moc_context, pgs_error_handler error_out)
+get_moc_size(void* moc_in_context, pgs_error_handler error_out)
 {
-	moc_input* p = static_cast<moc_input*>(moc_context);
+	moc_input* p = static_cast<moc_input*>(moc_in_context);
 	std::size_t moc_size = MOC_HEADER_SIZE;
 	PGS_TRY
 		moc_input & m = *p;
-//prelim: do a string...
+
+// put the debug string squarely into the moc options header.
 		m.s.clear();
+
+
 		m.dump();
-		moc_size = MOC_HEADER_SIZE + m.s.size() + 1;
-		
+		m.options_bytes = m.s.size() + 1;
+		m.options_size = align_round(m.options_bytes, MOC_DATA_ALIGN);
+		moc_size += m.options_size;
+		m.root_begin = moc_size;
+
 		moc_size = std::max(MIN_MOC_SIZE, moc_size);
-		m.moc_size = moc_size;
 	PGS_CATCH
 	return moc_size;
 };
 
 // create_moc_release_context()
-// moc_context:	-- must be have been prepared by get_moc_size()
+// moc_in_context:	-- must be have been prepared by get_moc_size()
 // moc:			-- must be allocated with a size returned by get_moc_size()
 //
 
 int
-create_moc_release_context(void* moc_context, Smoc* moc,
-												pgs_error_handler error_out)
+create_moc_release_context(void* moc_in_context, Smoc* moc,
+													pgs_error_handler error_out)
 {
-	moc_input* p = static_cast<moc_input*>(moc_context);
+	moc_input* p = static_cast<moc_input*>(moc_in_context);
 	int ret = 1;
 	PGS_TRY
 		moc_input & m = *p;
 
 		hpint64	area = 0; /* number of covered Healpix cells */
-		int root_end = MOC_HEADER_SIZE;
 
-	
+
 		moc->version	= 0;
 		moc->order		= 0 /* ... */;
 		moc->depth		= 0 /* ... */;
 		moc->first		= 0 /* ... */;	/* first Healpix index in set */
 		moc->last		= 0 /* ... */;	/* 1 + (last Healpix index in set) */
 		moc->area		= area;
-		moc->root_end	= root_end;		// 1 + (enf of root node)
-		moc->data_end	= m.moc_size;	// 1 + (offset of last interval)
+		moc->root_begin	= m.root_begin;	// start of root node
+		moc->root_end	= m.root_begin;	// 1 + (end of root node)
 		
-		memmove(&(moc->data), m.s.c_str(), m.moc_size - MOC_HEADER_SIZE);
+		char* data = data_as_char(moc);
+		
+		// put the debug string squarely into the moc options header.
+		memmove(data, m.s.c_str(), m.options_bytes);
+//		memset(data + m.options_size, 0, m.options_size - m.options_bytes);
 	PGS_CATCH
-	release_moc_context(moc_context, error_out);
+	release_moc_in_context(moc_in_context, error_out);
 	return ret;
 };
+
+moc_out_data
+create_moc_out_context(Smoc* moc, pgs_error_handler error_out)
+{
+	moc_output* p = 0;
+	size_t out_size = 0;
+	PGS_TRY
+		p = new moc_output;
+		moc_output & m = *p;
+
+		if (moc->root_begin != MOC_HEADER_SIZE)
+		{
+			/* assume a raw C string within the MOC options for now */
+			m.s.append(data_as_char(moc));
+		}
+
+		// moc output fiddling:
+		
+		out_size = m.s.length() + 1;
+	PGS_CATCH
+	moc_out_data ret;
+	ret.context = static_cast<void*>(p);
+	ret.out_size = out_size;
+	return ret;
+}
+
+void 
+release_moc_out_context(moc_out_data out_context, pgs_error_handler error_out)
+{
+	release_context<moc_output>(out_context.context, error_out);
+}
+
+void
+print_moc_release_context(moc_out_data out_context, char* buffer,
+													pgs_error_handler error_out)
+{
+	moc_output* p = static_cast<moc_output*>(out_context.context);
+	PGS_TRY
+		moc_output & m = *p;
+		memmove(buffer, m.s.c_str(), out_context.out_size);
+	PGS_CATCH
+	release_moc_out_context(out_context, error_out);
+}

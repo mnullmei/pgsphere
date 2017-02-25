@@ -19,14 +19,15 @@ index_invalid(hpint64 npix, long index)
 }
 
 static int
-dbg_to_moc(int pos, void* moc_context, long order, hpint64 first, hpint64 last,
+dbg_to_moc(int pos, void* moc_in_context, long order, hpint64 first, hpint64 last,
 												pgs_error_handler error_out)
 {
-	char* x = add_to_moc(moc_context, order, first, last, error_out);
+	/* char* x = */
+	add_to_moc(moc_in_context, order, first, last, error_out);
 	return 0;
 }
 
-// The release_moc_context() calls of smoc_in() should be eventually wrapped
+// The release_moc_in_context() calls of smoc_in() should be eventually wrapped
 // into the finalisation function of a proper PostgreSQL memory context.
 //
 Datum
@@ -35,7 +36,7 @@ smoc_in(PG_FUNCTION_ARGS)
 	char*	input_text = PG_GETARG_CSTRING(0);
 	char	c;
 	Smoc*	moc;
-	void*	moc_context = create_moc_context(moc_error_out);
+	void*	moc_in_context = create_moc_in_context(moc_error_out);
 	int32	moc_size;
 
 	long	order = -1;
@@ -53,7 +54,7 @@ smoc_in(PG_FUNCTION_ARGS)
 		{
 			if (nb == -1)
 			{
-				release_moc_context(moc_context, moc_error_out);
+				release_moc_in_context(moc_in_context, moc_error_out);
 				ereport(ERROR, (errcode(ERRCODE_INVALID_TEXT_REPRESENTATION),
 						errmsg("[c.%d] Incorrect MOC syntax: a Healpix level "
 								"is expected before a / character.", ind - 1),
@@ -64,7 +65,7 @@ smoc_in(PG_FUNCTION_ARGS)
 			}
 			else if (order_invalid((int) nb))
 			{
-				release_moc_context(moc_context, moc_error_out);
+				release_moc_in_context(moc_in_context, moc_error_out);
 				ereport(ERROR, (errcode(ERRCODE_NUMERIC_VALUE_OUT_OF_RANGE),
 						errmsg("[c.%d] Incorrect Healpix order %lld.", ind - 1,
 																			nb),
@@ -78,7 +79,7 @@ smoc_in(PG_FUNCTION_ARGS)
 		{
 			if (index_invalid(npix, nb))
 			{
-				release_moc_context(moc_context, moc_error_out);
+				release_moc_in_context(moc_in_context, moc_error_out);
 				ereport(ERROR, (errcode(ERRCODE_NUMERIC_VALUE_OUT_OF_RANGE),
 							errmsg("[c.%d] Incorrect Healpix index %lld.",
 																ind - 1, nb),
@@ -86,14 +87,14 @@ smoc_in(PG_FUNCTION_ARGS)
 									"an integer between 0 and %lld.", order,
 									 								npix - 1)));
 			}
-			dbg_to_moc(1, moc_context, order, nb, nb + 1, moc_error_out);
+			dbg_to_moc(1, moc_in_context, order, nb, nb + 1, moc_error_out);
 		}
 		else if (c == '-')  /* next Healpix number must follow */
 		{
 			nb2 = readNumber(input_text, &ind);
 			if (nb2 == -1)
 			{
-				release_moc_context(moc_context, moc_error_out);
+				release_moc_in_context(moc_in_context, moc_error_out);
 				ereport(ERROR, (errcode(ERRCODE_INVALID_TEXT_REPRESENTATION),
 						errmsg("[c.%d] Incorrect MOC syntax: a second Healpix "
 								"index is expected after a '-' character.",
@@ -112,7 +113,7 @@ smoc_in(PG_FUNCTION_ARGS)
 
 			if (index_invalid(npix, nb2) || nb >= nb2)
 			{
-				release_moc_context(moc_context, moc_error_out);
+				release_moc_in_context(moc_in_context, moc_error_out);
 				ereport(ERROR, (errcode(ERRCODE_NUMERIC_VALUE_OUT_OF_RANGE),
 						errmsg("[c.%d] Incorrect Healpix range %lld-%lld.",
 															ind - 1 , nb, nb2),
@@ -122,13 +123,13 @@ smoc_in(PG_FUNCTION_ARGS)
 								"between 0 and 29.", nb, nb2, order)));
 
 			}
-			dbg_to_moc(2, moc_context, order, nb, nb2 + 1, moc_error_out);
+			dbg_to_moc(2, moc_in_context, order, nb, nb2 + 1, moc_error_out);
 		}
 		else if (isdigit(c)) /* nb is the last Healpix index of this level */
 		{
 			if (index_invalid(npix, nb))
 			{
-				release_moc_context(moc_context, moc_error_out);
+				release_moc_in_context(moc_in_context, moc_error_out);
 				ereport(ERROR, (errcode(ERRCODE_NUMERIC_VALUE_OUT_OF_RANGE),
 							errmsg("[c.%d] Incorrect Healpix index %lld.",
 																ind - 1, nb),
@@ -137,13 +138,13 @@ smoc_in(PG_FUNCTION_ARGS)
 									 								npix - 1)));
 			}
 			ind--; /* Nothing else to do in this function */
-			dbg_to_moc(3, moc_context, order, nb, nb + 1, moc_error_out);
+			dbg_to_moc(3, moc_in_context, order, nb, nb + 1, moc_error_out);
 		}
 		else if (c == '\0') /* nb should be the last Healpix index */
 		{
 			if (order == -1)
 			{
-				release_moc_context(moc_context, moc_error_out);
+				release_moc_in_context(moc_in_context, moc_error_out);
 				ereport(ERROR, (errcode(ERRCODE_INVALID_TEXT_REPRESENTATION),
 				errmsg("Incorrect MOC syntax: empty string found."),
 				errhint("The minimal expected syntax is: '{healpix_order}/', "
@@ -152,7 +153,7 @@ smoc_in(PG_FUNCTION_ARGS)
 			}
 			else if (nb != -1 && index_invalid(npix, nb))
 			{
-				release_moc_context(moc_context, moc_error_out);
+				release_moc_in_context(moc_in_context, moc_error_out);
 				ereport(ERROR, (errcode(ERRCODE_NUMERIC_VALUE_OUT_OF_RANGE),
 							errmsg("[c.%d] Incorrect Healpix index %lld.",
 																ind - 1, nb),
@@ -162,12 +163,12 @@ smoc_in(PG_FUNCTION_ARGS)
 			}
 			else
 			{
-				dbg_to_moc(4, moc_context, order, nb, nb + 1, moc_error_out);
+				dbg_to_moc(4, moc_in_context, order, nb, nb + 1, moc_error_out);
 			}
 		}
 		else
 		{
-			release_moc_context(moc_context, moc_error_out);
+			release_moc_in_context(moc_in_context, moc_error_out);
 			ereport(ERROR, (errcode(ERRCODE_INVALID_TEXT_REPRESENTATION),
 					errmsg("[c.%d] Incorrect MOC syntax: unsupported character "
 							"'%c'.", ind - 1, c),
@@ -178,12 +179,13 @@ smoc_in(PG_FUNCTION_ARGS)
 	}
 	while (input_text[ind] != '\0');
 
-	moc_size = get_moc_size(moc_context, moc_error_out);
+	moc_size = get_moc_size(moc_in_context, moc_error_out);
+	/* palloc() will leak the moc_in_context if it fails :-/ */
 	moc = (Smoc*) palloc(moc_size);
 	memset(moc, 0, MIN_MOC_SIZE);
 	SET_VARSIZE(moc, moc_size);
 
-	if (create_moc_release_context(moc_context, moc, moc_error_out))
+	if (create_moc_release_context(moc_in_context, moc, moc_error_out))
 	{
 		PG_RETURN_POINTER(moc);
 	}
@@ -273,12 +275,16 @@ char readChar(const char* mocAscii, int* start)
     return mocAscii[(*start)++];
 }
 
+	void*	context;
+	size_t	out_size;
+
 Datum
 smoc_out(PG_FUNCTION_ARGS)
 {
 	Smoc *moc = (Smoc *) PG_DETOAST_DATUM(PG_GETARG_DATUM(0));
-	size_t sz = moc->data_end - MOC_HEADER_SIZE;
-	char *buf = (char *) palloc(sz);
-	memmove(buf, &(moc->data), sz);
+	moc_out_data out_context = create_moc_out_context(moc, moc_error_out);
+	/* palloc() will leak the out_context if it fails :-/ */
+	char *buf = (char *) palloc(out_context.out_size);
+	print_moc_release_context(out_context, buf, moc_error_out);
 	PG_RETURN_CSTRING(buf);
 }
