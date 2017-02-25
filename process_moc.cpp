@@ -280,14 +280,15 @@ create_moc_out_context(Smoc* moc, pgs_error_handler error_out)
 		p = new moc_output;
 		moc_output & m = *p;
 
+		// moc output fiddling:
+
+
 		if (moc->root_begin != MOC_HEADER_SIZE)
 		{
 			/* assume a raw C string within the MOC options for now */
 			m.s.append(data_as_char(moc));
 		}
 
-		// moc output fiddling:
-		
 		out_size = m.s.length() + 1;
 	PGS_CATCH
 	moc_out_data ret;
