@@ -84,6 +84,16 @@ make_interval(hpint64 first, hpint64 last)
 	return x;
 }
 
+template<class X>
+moc_tree_entry
+make_node(int32 offset, const X & start)
+{
+	moc_tree_entry x;
+	x.offset = offset;
+	std::memmove(x.start, &start, HP64_SIZE);
+	return x;
+}
+
 bool
 operator<(const moc_interval & x, const moc_interval & y)
 {
@@ -130,6 +140,31 @@ struct moc_tree_layout
 	moc_tree_layout(size_t len): entries(len), page_rest(0), rest_nodes(0),
 									rest_level(0), full_pages(0), last_page(0),
 									level_end(0) {}
+	void
+	layout_level(size_t & moc_size, size_t entry_size)
+	{
+		size_t page_len = PG_TOAST_PAGE_FRAGMENT / entry_size;
+		page_rest = page_len - moc_size % page_len;
+		rest_nodes = page_rest / entry_size;
+		if (entries >= rest_nodes)
+		{
+			rest_level = entries - rest_nodes 
+		}			
+		else // there is only a single page fragment at this level
+		{
+			rest_nodes = entries;
+			rest_level = 0;
+		}
+		full_pages = rest_level / page_len;
+		last_page = rest_level % entry_size;
+
+		if (!(full_pages || last_page))
+			page_rest = entries * entry_size;
+
+		moc_size += page_rest + PG_TOAST_PAGE_FRAGMENT * full_pages
+													+ entry_size * last_page;
+		level_end = moc_size;
+	}
 };
 
 typedef std::vector<moc_tree_layout> layout_vec;
@@ -139,12 +174,11 @@ struct moc_input
 	moc_map		input_map;
 	size_t		options_bytes;
 	size_t		options_size;
-	size_t		tree_begin;
 	layout_vec	layout;
 
 	std::string s;
 	char x[99999];
-	moc_input() : options_bytes(0), options_size(0), tree_begin(0)
+	moc_input() : options_bytes(0), options_size(0)
 	{
 		layout.reserve(5);
 		x[0] = '\0';
@@ -178,31 +212,6 @@ struct moc_input
 	}
 };
 
-void 
-layout_level(size_t & moc_size, moc_tree_layout & q, size_t entry_size)
-{
-	size_t page_len = PG_TOAST_PAGE_FRAGMENT / entry_size;
-	q.page_rest = page_len - moc_size % page_len;
-	q.rest_nodes = q.page_rest / entry_size;
-	if (q.entries >= q.rest_nodes)
-	{
-		q.rest_level = q.entries - q.rest_nodes 
-	}			
-	else // there is only a single page fragment at this level
-	{
-		q.rest_nodes = q.entries;
-		q.rest_level = 0;
-	}
-	q.full_pages = q.rest_level / page_len;
-	q.last_page = q.rest_level % entry_size;
-	if (q.full_pages || q.last_page)
-		moc_size += q.page_rest + PG_TOAST_PAGE_FRAGMENT * q.full_pages
-								+ entry_size * q.last_page;
-	else
-		moc_size += q.entries * entry_size;
-	q.level_end = moc_size;
-}
-
 template<class V, size_t page_size, size_t value_size = sizeof(V)>
 class rpage_iter
 {
@@ -212,16 +221,31 @@ private:
 	static const size_t page_decrement
 						= page_size + (page_size / value_size - 1) * value_size;
 public:
-	rpage_iter(char* b, int32 index): base(b), offset(index) {}
+	rpage_iter(char* b, int32 index): base(b), offset(index)
+	{
+		operator++(); // a simplification that fails for the general case
+	}
 	void set(const V & v)
 	{
-		memmove(base + offset, &v, value_size);
+		std::memmove(base + offset, &v, value_size);
+	}
+	V operator *() const
+	{
+		V v;
+		std::memmove(&v, base + offset, value_size);
+		return v;
+	}
+	bool operator !=(const rpage_iter & x)
+	{
+		return base != x.base || offset != x.offset;
+	}
+	bool page_ready() const
+	{
+		return offset % page_size == 0;
 	}
 	rpage_iter & operator++()
 	{
-		offset -= offset % page_size != 0
-					? value_size
-					: page_decrement;
+		offset -= page_ready() ? page_decrement : value_size;
 		return *this;
 	}
 	int index() const
@@ -229,6 +253,9 @@ public:
 		return offset;
 	}
 };
+
+typedef rpage_iter<moc_interval, PG_TOAST_PAGE_FRAGMENT>	rint_iter;
+typedef rpage_iter<moc_tree_entry, PG_TOAST_PAGE_FRAGMENT>	rnode_iter;
 
 void*
 create_moc_in_context(pgs_error_handler error_out)
@@ -322,7 +349,6 @@ get_moc_size(void* moc_in_context, pgs_error_handler error_out)
 		m.options_size = align_round(m.options_bytes, MOC_INDEX_ALIGN);
 		moc_size += m.options_size;
 
-		m.tree_begin = moc_size;
 		// calculate number of nodes of the B+-tree layout
 		size_t len = m.input_map.size();
 		m.layout.push_back(len);
@@ -340,11 +366,11 @@ get_moc_size(void* moc_in_context, pgs_error_handler error_out)
 		moc_size += depth * MOC_INDEX_ALIGN;
 		// layout: B+-tree layout
 		for (unsigned k = depth; k >= 1; --k)
-			layout_level(moc_size, m.layout[k], MOC_TREE_ENTRY_SIZE);
+			m.layout[k].layout_level(moc_size, MOC_TREE_ENTRY_SIZE);
 		// layout: intervals
 		moc_size = align_round(moc_size, HP64_SIZE);
 		m.layout[1].level_end = moc_size; // fix up alignment of intervals
-		layout_level(moc_size, m.layout[0], MOC_INTERVAL_SIZE);
+		m.layout[0].layout_level(moc_size, MOC_INTERVAL_SIZE);
 
 		moc_size = std::max(MIN_MOC_SIZE, moc_size);
 	PGS_CATCH
@@ -368,48 +394,79 @@ create_moc_release_context(void* moc_in_context, Smoc* moc,
 		moc->version = 0;
 		char* data = data_as_char(moc);
 
+		moc->version |= 1; // flag indicating options
 		// put the debug string squarely into the moc options header.
-		memmove(data, m.s.c_str(), m.options_bytes);
+		std::memmove(data, m.s.c_str(), m.options_bytes);
 
-		hpint64	area = 0; /* number of covered Healpix cells */
-area = 9223372036854775807; /* 2^63 - 1 */
-
-		moc->tree_begin	= m.tree_begin;	// start of level-end section
+		hpint64	area = 0;
+/////area = 9223372036854775807; /* 2^63 - 1 */
 
 		char* moc_data = data - MOC_HEADER_SIZE;
-
-		// fill out level-end section
-		int32* level_ends = data_as<int32>(moc_data + m.tree_begin);
-		uint8 depth = m.layout.size() - 1;
-		moc->depth	= depth /* ... */;
-		for (unsigned k = depth; k >= 1; --k)
-			*(level_ends + depth - k) = m.layout[k].level_end;
 
 		// All levels will be filled out from end to beginning such that
 		// the above level-end values stay correct.
 
 		// process the interval pages
-		map_rev_iter r	= m.input_map.rbegin();
-		const moc_tree_layout & int_layout = m.layout[0];
-		char* intervals	= moc_data + m.layout[1].level_end;
-		// final page fragment, if any
-		for (int j = int_layout.last_page; j >= 0; --j)
+		hpint64	order_log = 0;
+		rint_iter	i(moc_data, m.layout[0].level_end);
+		rnode_iter	n(moc_data, m.layout[1].level_end);
+		for (map_rev_iter r	= m.input_map.rbegin(); r != m.input_map.rend();
+																			++r)
 		{
-			++r;
-					
-		
+			hpint64	first	= r->first;
+			hpint64	last	= r->second;
+			order_log |= first;
+			order_log |= last;
+			area += last - first;
+			if (i.page_ready())
+			{
+				n.set(make_node(i.index(), first);
+				++n;
+			}
+			i.set(make_interval(first, last));
+			++i;
 		}
+		// process the tree pages
+		rnode_iter rend = n;
+		for (int k = 1; k < depth; ++k)
+		{
+			rnode_iter z(moc_data, m.layout[k].level_end);
+			rnode_iter n(moc_data, m.layout[k + 1].level_end);
+			for ( ; z != rend; ++z)
+			{
+				if (z.page_ready())
+				{
+					n.set(make_node(z.index(), (*z).start));
+					++n;
+				}
+				++z;
+			}
+			rend = n;
+		}
+
+		// The level-end section must be put relative to the actual beginning
+		// of the root node to prevent confusing redunancies.
+		int32 tree_begin = rend.index() - depth * MOC_INDEX_ALIGN;
 		
+		// fill out level-end section
+		int32* level_ends = data_as<int32>(moc_data + tree_begin);
+		uint8 depth = m.layout.size() - 1;
+		moc->depth	= depth /* ... */;
+		for (int k = depth; k >= 1; --k)
+			*(level_ends + depth - k) = m.layout[k].level_end;
 
+		moc->tree_begin	= tree_begin;	// start of level-end section
 
-		// fill out tree levels
-
-
-
-		moc->order		= 0 /* ... */;
-		moc->first		= 0 /* ... */;	/* first Healpix index in set */
-		moc->last		= 0 /* ... */;	/* 1 + (last Healpix index in set) */
-		moc->area		= area;
+		moc->area	= area;
+////XXX simple stupid linear search shift loop on order_log to get da order
+		moc->order	= 0 /* ... */;
+		moc->first	= 0; // first Healpix index in set
+		moc->last	= 0; // 1 + (last Healpix index in set)
+		if (m.input_map.size())
+		{
+			moc->first	= m.input_map.begin()->first;
+			moc->last	= m.input_map.rbegin()->second;
+		}
 		
 		
 	PGS_CATCH
@@ -430,8 +487,7 @@ create_moc_out_context(Smoc* moc, pgs_error_handler error_out)
 
 		// moc output fiddling:
 
-
-		if (moc->tree_begin != MOC_HEADER_SIZE)
+		if (moc->version & 1)
 		{
 			/* assume a raw C string within the MOC options for now */
 			m.s.append(data_as_char(moc));
@@ -458,7 +514,7 @@ print_moc_release_context(moc_out_data out_context, char* buffer,
 	moc_output* p = static_cast<moc_output*>(out_context.context);
 	PGS_TRY
 		moc_output & m = *p;
-		memmove(buffer, m.s.c_str(), out_context.out_size);
+		std::memmove(buffer, m.s.c_str(), out_context.out_size);
 	PGS_CATCH
 	release_moc_out_context(out_context, error_out);
 }
