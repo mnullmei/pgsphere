@@ -50,11 +50,20 @@ release_context(void* context, pgs_error_handler error_out)
 	}
 }
 
+static
 char* data_as_char(Smoc* moc, size_t offset = 0)
 {
 	return offset + reinterpret_cast<char*>(&((moc->data)[0]));
 }
 
+template<class X, class Y>
+static
+X* data_as(Y* y)
+{
+	return reinterpret_cast<X*>(y);
+}
+
+static
 size_t align_round(size_t offset, size_t alignment)
 {
 	return (1 + offset / alignment) * alignment;
@@ -320,23 +329,41 @@ create_moc_release_context(void* moc_in_context, Smoc* moc,
 	PGS_TRY
 		moc_input & m = *p;
 
+		moc->version = 0;
+		char* data = data_as_char(moc);
+
+		// put the debug string squarely into the moc options header.
+		memmove(data, m.s.c_str(), m.options_bytes);
+
 		hpint64	area = 0; /* number of covered Healpix cells */
 area = 9223372036854775807; /* 2^63 - 1 */
 
+		moc->tree_begin	= m.tree_begin;	// start of level-end section
 
-		moc->version	= 0;
+		char* moc_data = data - MOC_HEADER_SIZE;
+
+		// fill out level-end section
+		int32* level_ends = data_as<int32>(moc_data + m.tree_begin);
+		uint8 depth = m.layout.size() - 1;
+		moc->depth	= depth /* ... */;
+		for (unsigned k = depth; k >= 1; --k)
+			*(level_ends + depth - k) = m.layout[k].level_end;
+
+		// process the interval pages
+		map_iterator i	= m.input_map.begin();
+		char* intervals	= moc_data + 
+
+
+		// fill out tree levels
+
+
+
 		moc->order		= 0 /* ... */;
-		moc->depth		= 0 /* ... */;
 		moc->first		= 0 /* ... */;	/* first Healpix index in set */
 		moc->last		= 0 /* ... */;	/* 1 + (last Healpix index in set) */
 		moc->area		= area;
-		moc->tree_begin	= m.tree_begin;	// start of root node
 		
-		char* data = data_as_char(moc);
 		
-		// put the debug string squarely into the moc options header.
-		memmove(data, m.s.c_str(), m.options_bytes);
-//		memset(data + m.options_size, 0, m.options_size - m.options_bytes);
 	PGS_CATCH
 	release_moc_in_context(moc_in_context, error_out);
 	return ret;
