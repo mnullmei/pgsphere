@@ -2,6 +2,7 @@
 #include <cstring>
 #include <exception>
 #include <map>
+#include <vector>
 #include <algorithm>
 #include <ostream>
 #include <iostream>
@@ -25,6 +26,8 @@
 		delete p;							\
 		error_out("unknown exception", 0);	\
 	}
+
+using std::size_t;
 
 // Throwing expections from destructors is not strictly forbidden, it is just
 // discouraged in the strongest possible way.
@@ -102,16 +105,37 @@ struct moc_output
 	std::string s;
 };
 
+struct moc_tree_layout
+{
+	size_t entries;		// # all nodes
+	size_t page_rest;	// # bytes
+	size_t rest_nodes;	// # nodes
+	size_t rest_level;	// # nodes
+	size_t full_pages;	// # pages 
+	size_t last_page;	// # nodes
+	size_t level_end;	// index of next entity below this level
+	moc_tree_layout(): entries(0), page_rest(0), rest_nodes(0), rest_level(0),
+									full_pages(0), last_page(0), level_end(0) {}
+	moc_tree_layout(size_t len): entries(len), page_rest(0), rest_nodes(0),
+									rest_level(0), full_pages(0), last_page(0),
+									level_end(0) {}
+};
+
+typedef std::vector<moc_tree_layout> layout_vec;
+
 struct moc_input
 {
-	moc_map input_map;
-	std::size_t options_bytes;
-	std::size_t options_size;
-	std::size_t root_begin;
+	moc_map		input_map;
+	size_t		options_bytes;
+	size_t		options_size;
+	size_t		tree_begin;
+	layout_vec	layout;
+
 	std::string s;
 	char x[99999];
-	moc_input() : options_bytes(0), options_size(0), root_begin(0)
+	moc_input() : options_bytes(0), options_size(0), tree_begin(0)
 	{
+		layout.reserve(5);
 		x[0] = '\0';
 	}
 	void dump()
@@ -142,6 +166,24 @@ struct moc_input
 				+ ::to_string(*i);
 	}
 };
+
+void 
+layout_level(size_t & moc_size, moc_tree_layout & q, size_t entry_size)
+{
+	size_t page_len = PG_TOAST_PAGE_FRAGMENT / entry_size;
+	q.page_rest = page_len - moc_size % page_len;
+	q.rest_nodes = q.page_rest / entry_size;
+	q.rest_level = q.entries >= q.rest_nodes ? q.entries - q.rest_nodes : 0;
+	q.full_pages = q.rest_level / page_len;
+	q.last_page = q.rest_level % entry_size;
+	if (q.full_pages || q.last_page)
+		moc_size += q.page_rest + PG_TOAST_PAGE_FRAGMENT * q.full_pages
+								+ entry_size * q.last_page;
+	else
+		moc_size += q.entries * entry_size;
+	q.level_end = moc_size;
+}
+
 
 void*
 create_moc_in_context(pgs_error_handler error_out)
@@ -223,7 +265,7 @@ int
 get_moc_size(void* moc_in_context, pgs_error_handler error_out)
 {
 	moc_input* p = static_cast<moc_input*>(moc_in_context);
-	std::size_t moc_size = MOC_HEADER_SIZE;
+	size_t moc_size = MOC_HEADER_SIZE;
 	PGS_TRY
 		moc_input & m = *p;
 
@@ -232,9 +274,32 @@ get_moc_size(void* moc_in_context, pgs_error_handler error_out)
 
 		m.dump();
 		m.options_bytes = m.s.size() + 1;
-		m.options_size = align_round(m.options_bytes, MOC_DATA_ALIGN);
+		m.options_size = align_round(m.options_bytes, MOC_INDEX_ALIGN);
 		moc_size += m.options_size;
-		m.root_begin = moc_size;
+
+		m.tree_begin = moc_size;
+		// calculate number of nodes of the B+-tree layout
+		size_t len = m.input_map.size();
+		m.layout.push_back(len);
+		len = 1 + align_round(len, MOC_LEAF_PAGE_LEN);
+		bool not_root;
+		do
+		{
+			not_root = len > MOC_TREE_PAGE_LEN;
+			m.layout.push_back(len);
+			len = 1 + align_round(len, MOC_TREE_PAGE_LEN);
+		}
+		while (not_root);
+		// layout: end of B+-tree level-end section
+		size_t depth = m.layout.size() - 1;
+		moc_size += depth * MOC_INDEX_ALIGN;
+		// layout: B+-tree layout
+		for (unsigned k = depth; k >= 1; --k)
+			layout_level(moc_size, m.layout[k], MOC_TREE_ENTRY_SIZE);
+		// layout: intervals
+		moc_size = align_round(moc_size, HP64_SIZE);
+		m.layout[1].level_end = moc_size; // fix up alignment of intervals
+		layout_level(moc_size, m.layout[0], MOC_INTERVAL_SIZE);
 
 		moc_size = std::max(MIN_MOC_SIZE, moc_size);
 	PGS_CATCH
@@ -265,8 +330,7 @@ area = 9223372036854775807; /* 2^63 - 1 */
 		moc->first		= 0 /* ... */;	/* first Healpix index in set */
 		moc->last		= 0 /* ... */;	/* 1 + (last Healpix index in set) */
 		moc->area		= area;
-		moc->root_begin	= m.root_begin;	// start of root node
-		moc->root_end	= m.root_begin;	// 1 + (end of root node)
+		moc->tree_begin	= m.tree_begin;	// start of root node
 		
 		char* data = data_as_char(moc);
 		
@@ -292,7 +356,7 @@ create_moc_out_context(Smoc* moc, pgs_error_handler error_out)
 		// moc output fiddling:
 
 
-		if (moc->root_begin != MOC_HEADER_SIZE)
+		if (moc->tree_begin != MOC_HEADER_SIZE)
 		{
 			/* assume a raw C string within the MOC options for now */
 			m.s.append(data_as_char(moc));

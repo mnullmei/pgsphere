@@ -178,7 +178,7 @@ smoc_in(PG_FUNCTION_ARGS)
 		}
 	}
 
-	moc_size = get_moc_size(moc_in_context, moc_error_out);
+	moc_size = PG_VL_LEN_SIZE + get_moc_size(moc_in_context, moc_error_out);
 	/* palloc() will leak the moc_in_context if it fails :-/ */
 	moc = (Smoc*) palloc(moc_size);
 	memset(moc, 0, MIN_MOC_SIZE);

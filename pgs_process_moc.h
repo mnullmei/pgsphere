@@ -43,13 +43,12 @@ typedef struct
 	moc_tree_entry	nodes[1];
 } moc_tree_page;
 
-#define MOC_DATA_ALIGN (sizeof(int32))
+#define MOC_INDEX_ALIGN (sizeof(int32))
 
 #define MOC_INTERVAL_SIZE (sizeof(moc_interval))
 #define MOC_TREE_ENTRY_SIZE (sizeof(moc_tree_entry))
 #define MOC_LEAF_PAGE_LEN (PG_TOAST_PAGE_FRAGMENT / MOC_INTERVAL_SIZE)
-#define MOC_TREE_PAGE_LEN \
-			((PG_TOAST_PAGE_FRAGMENT - MOC_DATA_ALIGN) / MOC_TREE_ENTRY_SIZE)
+#define MOC_TREE_PAGE_LEN (PG_TOAST_PAGE_FRAGMENT / MOC_TREE_ENTRY_SIZE)
 
 typedef struct
 {
@@ -60,17 +59,13 @@ typedef struct
 	hpint64		first;		/* first Healpix index in set */
 	hpint64		last;		/* 1 + (last Healpix index in set) */
 	hpint64		area;		/* number of covered Healpix cells */
-	int32		root_begin;	/* start of root node, past the options block */
-	int32		root_end;	/* end of root node */
+	int32		tree_begin;	/* start of B+ tree, past the options block */
 	int32		data[1];	/* no need to optimise for empty MOCs */
 } Smoc;
 
-/* the redundant data_end allows to skip reading the tree before a "sequential
- * scan" inside a single MOC, thus minising the number of TOAST page reads
- */
-
-#define MOC_HEADER_SIZE (offsetof(Smoc, data))
-#define MIN_MOC_SIZE (sizeof(Smoc))
+#define PG_VL_LEN_SIZE 4
+#define MOC_HEADER_SIZE (offsetof(Smoc, data) - PG_VL_LEN_SIZE)
+#define MIN_MOC_SIZE (sizeof(Smoc) - PG_VL_LEN_SIZE)
 
 void*
 create_moc_in_context(pgs_error_handler);
