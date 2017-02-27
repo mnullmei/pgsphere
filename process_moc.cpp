@@ -91,10 +91,10 @@ operator<(const moc_interval & x, const moc_interval & y)
 }
 
 
-typedef std::map<hpint64, hpint64>	moc_map;
-typedef moc_map::iterator			map_iterator;
-typedef moc_map::const_iterator		const_map_iter;
-typedef moc_map::value_type			moc_map_entry;
+typedef std::map<hpint64, hpint64>		moc_map;
+typedef moc_map::iterator				map_iterator;
+typedef moc_map::const_reverse_iterator	map_rev_iter;
+typedef moc_map::value_type				moc_map_entry;
 
 std::ostream &
 operator<<(std::ostream & os, const moc_map_entry & x)
@@ -359,20 +359,15 @@ area = 9223372036854775807; /* 2^63 - 1 */
 		for (unsigned k = depth; k >= 1; --k)
 			*(level_ends + depth - k) = m.layout[k].level_end;
 
-		// All tree levels will be (conceptually) filled out from end
-		// to beginning such that the above level-end values stay correct.
+		// All levels will be filled out from end to beginning such that
+		// the above level-end values stay correct.
 
 		// process the interval pages
-		const_map_iter i = m.input_map.begin();
+		map_rev_iter r	= m.input_map.rbegin();
 		const moc_tree_layout & int_layout = m.layout[0];
 		char* intervals	= moc_data + m.layout[1].level_end;
-		// first page fragment, if any
-		for (size_t j = 0; j != int_layout.rest_nodes; ++j)
-		{
-		
-		
-		
-		}
+		// final page fragment, if any
+		for (int j = int_layout.last_page; j >= 0; --j)
 		
 
 
