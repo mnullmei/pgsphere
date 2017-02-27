@@ -203,6 +203,32 @@ layout_level(size_t & moc_size, moc_tree_layout & q, size_t entry_size)
 	q.level_end = moc_size;
 }
 
+template<class V, size_t page_size, size_t value_size = sizeof(V)>
+class rpage_iter
+{
+private:
+	char* base;
+	int32 offset;
+	static const size_t page_decrement
+						= page_size + (page_size / value_size - 1) * value_size;
+public:
+	rpage_iter(char* b, int32 index): base(b), offset(index) {}
+	void set(const V & v)
+	{
+		memmove(base + offset, &v, value_size);
+	}
+	rpage_iter & operator++()
+	{
+		offset -= offset % page_size != 0
+					? value_size
+					: page_decrement;
+		return *this;
+	}
+	int index() const
+	{
+		return offset;
+	}
+};
 
 void*
 create_moc_in_context(pgs_error_handler error_out)
@@ -368,6 +394,11 @@ area = 9223372036854775807; /* 2^63 - 1 */
 		char* intervals	= moc_data + m.layout[1].level_end;
 		// final page fragment, if any
 		for (int j = int_layout.last_page; j >= 0; --j)
+		{
+			++r;
+					
+		
+		}
 		
 
 
