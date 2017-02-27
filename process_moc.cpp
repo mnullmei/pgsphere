@@ -205,6 +205,12 @@ add_to_moc(void* moc_in_context, long order, hpint64 first, hpint64 last,
 			m.input_map.insert(lower, input);
 			break;
 		}
+		if (lower->first == first)
+		{
+			lower->second = last;
+			m.input_map.erase(++lower, upper);
+			break;
+		}
 		m.input_map.erase(lower, upper);
 		m.input_map.insert(input);
 	PGS_CATCH
