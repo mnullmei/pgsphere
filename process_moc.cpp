@@ -93,7 +93,9 @@ operator<(const moc_interval & x, const moc_interval & y)
 
 typedef std::map<hpint64, hpint64>	moc_map;
 typedef moc_map::iterator			map_iterator;
+typedef moc_map::const_iterator		const_map_iter;
 typedef moc_map::value_type			moc_map_entry;
+
 std::ostream &
 operator<<(std::ostream & os, const moc_map_entry & x)
 {
@@ -182,7 +184,15 @@ layout_level(size_t & moc_size, moc_tree_layout & q, size_t entry_size)
 	size_t page_len = PG_TOAST_PAGE_FRAGMENT / entry_size;
 	q.page_rest = page_len - moc_size % page_len;
 	q.rest_nodes = q.page_rest / entry_size;
-	q.rest_level = q.entries >= q.rest_nodes ? q.entries - q.rest_nodes : 0;
+	if (q.entries >= q.rest_nodes)
+	{
+		q.rest_level = q.entries - q.rest_nodes 
+	}			
+	else // there is only a single page fragment at this level
+	{
+		q.rest_nodes = q.entries;
+		q.rest_level = 0;
+	}
 	q.full_pages = q.rest_level / page_len;
 	q.last_page = q.rest_level % entry_size;
 	if (q.full_pages || q.last_page)
@@ -324,10 +334,10 @@ int
 create_moc_release_context(void* moc_in_context, Smoc* moc,
 													pgs_error_handler error_out)
 {
-	moc_input* p = static_cast<moc_input*>(moc_in_context);
+	moc_input* p = static_cast<const moc_input*>(moc_in_context);
 	int ret = 1;
 	PGS_TRY
-		moc_input & m = *p;
+		const moc_input & m = *p;
 
 		moc->version = 0;
 		char* data = data_as_char(moc);
@@ -349,9 +359,21 @@ area = 9223372036854775807; /* 2^63 - 1 */
 		for (unsigned k = depth; k >= 1; --k)
 			*(level_ends + depth - k) = m.layout[k].level_end;
 
+		// All tree levels will be (conceptually) filled out from end
+		// to beginning such that the above level-end values stay correct.
+
 		// process the interval pages
-		map_iterator i	= m.input_map.begin();
-		char* intervals	= moc_data + 
+		const_map_iter i = m.input_map.begin();
+		const moc_tree_layout & int_layout = m.layout[0];
+		char* intervals	= moc_data + m.layout[1].level_end;
+		// first page fragment, if any
+		for (size_t j = 0; j != int_layout.rest_nodes; ++j)
+		{
+		
+		
+		
+		}
+		
 
 
 		// fill out tree levels
