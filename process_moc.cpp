@@ -1,7 +1,7 @@
 #include <cstddef>
 #include <cstring>
 #include <exception>
-#include <set>
+#include <map>
 #include <algorithm>
 #include <ostream>
 #include <iostream>
@@ -78,15 +78,16 @@ operator<(const moc_interval & x, const moc_interval & y)
 	return x.first < y.first;
 }
 
+
+typedef std::map<hpint64, hpint64>	moc_map;
+typedef moc_map::iterator			map_iterator;
+typedef moc_map::value_type			moc_map_entry;
 std::ostream &
-operator<<(std::ostream & os, const moc_interval & x)
+operator<<(std::ostream & os, const moc_map_entry & x)
 {
 	os << "[" << x.first << ", " << x.second << ")";
 	return os;
 }
-
-typedef std::set<moc_interval> moc_map;
-typedef moc_map::iterator map_iterator;
 
 template<class X>
 std::string to_string(const X & x)
@@ -168,30 +169,29 @@ add_to_moc(void* moc_in_context, long order, hpint64 first, hpint64 last,
 
 		healpix_convert(first, order); // convert to order 29
 		healpix_convert(last, order);
-		moc_interval input = make_interval(first, last);
 
 		// a refactored, C++-interal version of add_to_moc() should start here:
-		map_iterator lower = m.input_map.lower_bound(input);
-		map_iterator upper = m.input_map.upper_bound(make_interval(last, 0));
+		map_iterator lower = m.input_map.lower_bound(first);
+		map_iterator upper = m.input_map.upper_bound(last);
 
 		if (lower != m.input_map.begin())
 		{
 			map_iterator before = lower;
 			--before;
-			if (before->second >= input.first)
+			if (before->second >= first)
 			{
-				if (before->second >= input.second)
-					break; // input \subset [before]
+				if (before->second >= last)
+					break; // [first, last) \subset [before]
 				lower = before;
-				input.first = lower->first;
+				first = lower->first;
 			}
 		}
 		if (upper != m.input_map.begin())
 		{
 			map_iterator after = upper;
 			--after;
-			if (after->second > input.second)
-				input.second = after->second;
+			if (after->second > last)
+				last = after->second;
 		}
 		// Skip erase if it would do nothing in order to be able to use
 		// an input hint for set::insert().
@@ -199,6 +199,7 @@ add_to_moc(void* moc_in_context, long order, hpint64 first, hpint64 last,
 		// the correct hint for the insert() of the general case down below.
 		// The input hint lower == upper always refers the interval completely
 		// past the one to insert, or to input_map.end()
+		moc_map_entry input(first, last);
 		if (lower == upper)
 		{
 			m.input_map.insert(lower, input);
