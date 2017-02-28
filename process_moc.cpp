@@ -333,6 +333,12 @@ add_to_moc(void* moc_in_context, long order, hpint64 first, hpint64 last,
 
 // get_moc_size() prepares creation of MOC
 
+static
+size_t align_pages(size_t len, size_t page_len)
+{
+	return align_round(len, page_len) + (len > 2 * page_len ? 1 : 0);
+}
+
 int
 get_moc_size(void* moc_in_context, pgs_error_handler error_out)
 {
@@ -352,13 +358,13 @@ get_moc_size(void* moc_in_context, pgs_error_handler error_out)
 		// calculate number of nodes of the B+-tree layout
 		size_t len = m.input_map.size();
 		m.layout.push_back(len);
-		len = 1 + align_round(len, MOC_LEAF_PAGE_LEN);
+		len = align_pages(len, MOC_LEAF_PAGE_LEN);
 		bool not_root;
 		do
 		{
 			not_root = len > MOC_TREE_PAGE_LEN;
 			m.layout.push_back(len);
-			len = 1 + align_round(len, MOC_TREE_PAGE_LEN);
+			len = align_pages(len, MOC_TREE_PAGE_LEN);
 		}
 		while (not_root);
 		// layout: end of B+-tree level-end section
