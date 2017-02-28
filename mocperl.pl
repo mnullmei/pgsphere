@@ -1,14 +1,17 @@
 CREATE OR REPLACE FUNCTION mocd(bytea) RETURNS text AS $$
 
-	(my $in) = @_;
-	my $len = (length($in) - 2) / 2;
-	($var_len, $version, $order, $depth, $first, $last, $area, $tree_begin,
-					$data) = unpack("LSCCQQQLC*", pack("H*", substr($_[0], 2)));
-	return sprintf( "len = %d, var_len = %d, version = %u, order = %u, " .
+	$in = @_;
+	$len = (length($in) - 2) / 2;
+	($version, $order, $depth, $first, $last, $area, $tree_begin,
+					 $data) = unpack("SCCQQQLC*", pack("H*", substr($_[0], 2)));
+	($dstr) = unpack("Z*", $data);
+
+	return sprintf( "len = %d, version = %u, order = %u, " .
 					"depth = %u, first = %llu, last = %llu, area = %llu, " .
-					"tree_begin = %u",
-					$len, $var_len, $version, $order, $depth,
-					$first, $last, $area, $tree_begin);
+					"tree_begin = %u, %s",
+					$len, $version, $order, $depth,
+					$first, $last, $area, $tree_begin,
+					$dstr);
 $$ LANGUAGE plperlu;
 
 
