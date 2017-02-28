@@ -148,7 +148,7 @@ struct moc_tree_layout
 		rest_nodes = page_rest / entry_size;
 		if (entries >= rest_nodes)
 		{
-			rest_level = entries - rest_nodes 
+			rest_level = entries - rest_nodes;
 		}			
 		else // there is only a single page fragment at this level
 		{
@@ -393,7 +393,7 @@ int
 create_moc_release_context(void* moc_in_context, Smoc* moc,
 													pgs_error_handler error_out)
 {
-	moc_input* p = static_cast<const moc_input*>(moc_in_context);
+	const moc_input* p = static_cast<const moc_input*>(moc_in_context);
 	int ret = 1;
 	PGS_TRY
 		const moc_input & m = *p;
@@ -418,8 +418,8 @@ create_moc_release_context(void* moc_in_context, Smoc* moc,
 		rint_iter	i(moc_data, m.layout[0].level_end);
 		rnode_iter	n(moc_data, m.layout[1].level_end);
 		rint_iter last_i;
-		hpint64	first;
-		hpint64	last;
+		hpint64	first = 0;
+		hpint64	last = 0;
 		for (map_rev_iter r	= m.input_map.rbegin(); r != m.input_map.rend();
 																			++r)
 		{
@@ -440,7 +440,8 @@ create_moc_release_context(void* moc_in_context, Smoc* moc,
 		n.set(make_node(last_i.index(), first));
 		rnode_iter rend = ++n;
 		// process the tree pages
-		for (int k = 1; k < depth; ++k)
+		size_t depth = m.layout.size() - 1;
+		for (size_t k = 1; k < depth; ++k)
 		{
 			rnode_iter z(moc_data, m.layout[k].level_end);
 			rnode_iter n(moc_data, m.layout[k + 1].level_end);
@@ -465,7 +466,6 @@ create_moc_release_context(void* moc_in_context, Smoc* moc,
 		
 		// fill out level-end section
 		int32* level_ends = data_as<int32>(moc_data + tree_begin);
-		uint8 depth = m.layout.size() - 1;
 		moc->depth	= depth /* ... */;
 		for (int k = depth; k >= 1; --k)
 			*(level_ends + depth - k) = m.layout[k].level_end;
