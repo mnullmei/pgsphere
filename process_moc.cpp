@@ -221,6 +221,7 @@ private:
 	static const size_t page_decrement
 						= page_size + (page_size / value_size - 1) * value_size;
 public:
+	rpage_iter(): base(0), offset(0) {}
 	rpage_iter(char* b, int32 index): base(b), offset(index)
 	{
 		operator++(); // a simplification that fails for the general case
@@ -416,28 +417,34 @@ create_moc_release_context(void* moc_in_context, Smoc* moc,
 		hpint64	order_log = 0;
 		rint_iter	i(moc_data, m.layout[0].level_end);
 		rnode_iter	n(moc_data, m.layout[1].level_end);
+		rint_iter last_i;
+		hpint64	first;
+		hpint64	last;
 		for (map_rev_iter r	= m.input_map.rbegin(); r != m.input_map.rend();
 																			++r)
 		{
-			hpint64	first	= r->first;
-			hpint64	last	= r->second;
+			first	= r->first;
+			last	= r->second;
 			order_log |= first;
 			order_log |= last;
 			area += last - first;
 			if (i.page_ready())
 			{
-				n.set(make_node(i.index(), first);
+				n.set(make_node(i.index(), first));
 				++n;
 			}
 			i.set(make_interval(first, last));
+			last_i = i;
 			++i;
 		}
+		n.set(make_node(last_i.index(), first));
+		rnode_iter rend = ++n;
 		// process the tree pages
-		rnode_iter rend = n;
 		for (int k = 1; k < depth; ++k)
 		{
 			rnode_iter z(moc_data, m.layout[k].level_end);
 			rnode_iter n(moc_data, m.layout[k + 1].level_end);
+			rnode_iter last_z;
 			for ( ; z != rend; ++z)
 			{
 				if (z.page_ready())
@@ -445,9 +452,11 @@ create_moc_release_context(void* moc_in_context, Smoc* moc,
 					n.set(make_node(z.index(), (*z).start));
 					++n;
 				}
+				last_z = z;
 				++z;
 			}
-			rend = n;
+			n.set(make_node(last_z.index(), (*last_z).start));
+			rend = ++n;
 		}
 
 		// The level-end section must be put relative to the actual beginning
