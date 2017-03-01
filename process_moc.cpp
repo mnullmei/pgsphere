@@ -446,7 +446,8 @@ create_moc_release_context(void* moc_in_context, Smoc* moc,
 		}
 		// If the Smoc should be the empty set, still generate a root node
 		// with a single moc_tree_entry: both its offset and start members
-		// will be duly set to zero here.
+		// will be duly set to zero here. Only the empty set can ever get
+		// an offset value of zero.
 		n.set(make_node(last_i.index(), first));
 		rnode_iter last_rend = n;
 		rnode_iter rend = ++n;
@@ -482,8 +483,9 @@ create_moc_release_context(void* moc_in_context, Smoc* moc,
 		for (int k = depth; k >= 1; --k)
 			*(level_ends + depth - k) = m.layout[k].level_end;
 
-		// a relocation of the whole tree, putting tree_begin right after
-		// the options, might follow here.
+		// There may be some space between the end of the options and
+		// moc->tree_begin, but simple relocation of the tree is not an option
+		// because of padding at the end of the pages.
 
 		moc->tree_begin	= tree_begin;	// start of level-end section
 

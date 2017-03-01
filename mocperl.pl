@@ -1,8 +1,8 @@
 CREATE OR REPLACE FUNCTION mocd(bytea) RETURNS text AS $$
 
 	($in) = @_;
-	$len = (length($in) - 2) / 2;
 	$moc = pack("H*", substr($in, 2));
+	$len = length($moc);
 	
 	($version, $order, $depth, $first, $last, $area, $tree_begin,
 					 $data) = unpack("SCCQQQLa*", $moc);
@@ -20,22 +20,37 @@ CREATE OR REPLACE FUNCTION mocd(bytea) RETURNS text AS $$
 	@level_ends = unpack("L" . $depth, substr($tree, 0, $level_ends_size));
 
 	$pages_start = $tree_begin + $level_ends_size;
-	$pages = substr($tree, $level_ends_size);
 	
 	$node_size = 12;
-	$i = 0;
 	$last_end = $pages_start;
 	$out_str = "\n";
-	for ($j = $last_end; $j < $level_ends[$i]; $j += $node_size)
+
+	for ($i = $0; $i < $depth; ++$i)
 	{
-		# insert page bump code here
-		$node = substr($moc, $j, $node_size);
-		($subnode, $start) = unpack("LQ", $node);
-		$out_str .= sprintf("%u:{%llu -> %u} ", $j, $start, $subnode);
+		$out_str .= sprintf("%u:: ", $i);
+		for ($j = $last_end; $j < $level_ends[$i]; $j += $node_size)
+		{
+			# insert page bump code here
+			$node = substr($moc, $j, $node_size);
+			($subnode, $start) = unpack("LQ", $node);
+			$out_str .= sprintf("%u:{%llu -> %u} ", $j, $start, $subnode);
+		}
+		$out_str .= "\n";
+		$last_end = $level_ends[$i];
 	}
-	
-	
-	
+	# must read the following from the root node:
+	($interval_begin) = unpack("L",
+							substr($moc, $tree_begin + $level_ends_size, 4));
+
+	$interval_size = 16;
+	for ($j = $interval_begin; $j < $len; $j += $interval_size)
+	{
+		$interval = substr($moc, $j, $interval_size);
+		($first, $second) = unpack("QQ", $interval);
+		$out_str .= sprintf("%u:[%llu, %u) ", $j, $first, $second);
+	}
+
+$gap=""; # $tree_hex="";
 
 #@level_ends = (2204, 1103, 1234); $depth = 3;
 
