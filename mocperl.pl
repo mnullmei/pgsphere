@@ -2,8 +2,10 @@ CREATE OR REPLACE FUNCTION mocd(bytea) RETURNS text AS $$
 
 	($in) = @_;
 	$len = (length($in) - 2) / 2;
+	$moc = pack("H*", substr($in, 2));
+	
 	($version, $order, $depth, $first, $last, $area, $tree_begin,
-					 $data) = unpack("SCCQQQLa*", pack("H*", substr($in, 2)));
+					 $data) = unpack("SCCQQQLa*", $moc);
 
 	($dstr) = unpack("Z*", $data);
 	$len_dstr = length($dstr);
@@ -18,17 +20,34 @@ CREATE OR REPLACE FUNCTION mocd(bytea) RETURNS text AS $$
 	@level_ends = unpack("L" . $depth, substr($tree, 0, $level_ends_size));
 
 	$pages_start = $tree_begin + $level_ends_size;
+	$pages = substr($tree, $level_ends_size);
+	
+	$node_size = 12;
+	$i = 0;
+	$last_end = $pages_start;
+	$out_str = "\n";
+	for ($j = $last_end; $j < $level_ends[$i]; $j += $node_size)
+	{
+		# insert page bump code here
+		$node = substr($moc, $j, $node_size);
+		($subnode, $start) = unpack("LQ", $node);
+		$out_str .= sprintf("%u:{%llu -> %u} ", $j, $start, $subnode);
+	}
+	
+	
+	
 
-#	for ($x in 
 #@level_ends = (2204, 1103, 1234); $depth = 3;
 
 	return sprintf( "len = %d, version = %u, order = %u, " .
 					"depth = %u, first = %llu, last = %llu, area = %llu, " .
-					"tree_begin = %u\n%s\n%s\n%s\nlevel_ends: ",
+					"tree_begin = %u\n%s\n%s\n%s\npages_start = %u, " .
+					"level_ends: ",
 					$len, $version, $order, $depth,
 					$first, $last, $area, $tree_begin,
-					$dstr, $gap, $tree_hex)
-				. sprintf("%d " x $depth, @level_ends);
+					$dstr, $gap, $tree_hex,
+					$pages_start)
+				. sprintf("%d " x $depth, @level_ends) . $out_str;
 $$ LANGUAGE plperlu;
 
 -- # "SCCQQQL" =^= 32 bytes.
