@@ -474,7 +474,7 @@ create_moc_release_context(void* moc_in_context, Smoc* moc,
 		int32* level_ends = data_as<int32>(detoasted_offset(moc, tree_begin));
 		moc->depth	= depth;
 		for (int k = depth; k >= 1; --k)
-			*(level_ends + depth - k) = 2018915346; // 2018915328 + m.layout[k].level_end;
+			*(level_ends + depth - k) = 2018915328 + m.layout[k].level_end;
 
 		// a relocation of the whole tree, putting tree_begin right after
 		// the options, might follow here.

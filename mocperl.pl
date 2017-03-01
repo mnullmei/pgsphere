@@ -11,7 +11,9 @@ CREATE OR REPLACE FUNCTION mocd(bytea) RETURNS text AS $$
 	$tree_begin_32 = $tree_begin - 32;
 	$gap = unpack("H*", substr($data, $len_dstr, $tree_begin_32 - $len_dstr));
 
-	$tree = substr($data, $tree_begin_32 - $len_dstr);
+	$tree = substr($data, $tree_begin_32);
+	$tree_hex = unpack("H*", $tree);
+
 	$level_ends_size = 4 * $depth;
 	@level_ends = unpack("L" . $lv, substr($tree, $level_ends_size));
 
@@ -22,10 +24,10 @@ CREATE OR REPLACE FUNCTION mocd(bytea) RETURNS text AS $$
 
 	return sprintf( "len = %d, version = %u, order = %u, " .
 					"depth = %u, first = %llu, last = %llu, area = %llu, " .
-					"tree_begin = %u\n%s\n%s\nlevel_ends: ",
+					"tree_begin = %u\n%s\n%s\n%s\nlevel_ends: ",
 					$len, $version, $order, $depth,
 					$first, $last, $area, $tree_begin,
-					$dstr, $gap)
+					$dstr, $gap, $tree_hex)
 				. sprintf("%d " x $depth, @level_ends);
 $$ LANGUAGE plperlu;
 
