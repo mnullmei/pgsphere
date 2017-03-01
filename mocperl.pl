@@ -6,13 +6,17 @@ CREATE OR REPLACE FUNCTION mocd(bytea) RETURNS text AS $$
 					 $data) = unpack("SCCQQQLa*", pack("H*", substr($in, 2)));
 
 	($dstr) = unpack("Z*", $data);
+	$len_dstr = length($dstr);
+
+	$tree_begin -= 32;
+	$gap = unpack("H*", substr($data, $len_dstr, $tree_begin - $len_dstr));
 
 	return sprintf( "len = %d, version = %u, order = %u, " .
 					"depth = %u, first = %llu, last = %llu, area = %llu, " .
-					"tree_begin = %u\n%s",
+					"tree_begin = %u\n%s\n%s",
 					$len, $version, $order, $depth,
 					$first, $last, $area, $tree_begin,
-					$dstr);
+					$dstr, $gap);
 $$ LANGUAGE plperlu;
 
 -- # "SCCQQQL" =^= 32 bytes.
