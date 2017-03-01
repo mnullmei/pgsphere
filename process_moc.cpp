@@ -357,26 +357,23 @@ add_to_moc(void* moc_in_context, long order, hpint64 first, hpint64 last,
 // get_moc_size() prepares creation of MOC
 
 static
-// _some_ refactoring w.r.t. moc_tree_layout::layout_level desired
+// calculate the number of entries of the next-higher level
 std::string // void
-align_pages(size_t & len, size_t entry_size)
+next_level(size_t & len, size_t entry_size)
 {
 std::string dx;
-	// maximal # of entries in a page
+	// maximal # of entries in a page of the current level
 	size_t page_len = PG_TOAST_PAGE_FRAGMENT / entry_size;
 DEBUG_DX(page_len)
-	// # of unused bytes in a full page
-	size_t page_nix = PG_TOAST_PAGE_FRAGMENT % entry_size;
-DEBUG_DX(page_nix)
-
 	// # of full pages the current level needs
 	size_t full_pages = len / page_len;
 DEBUG_DX(full_pages)
-	// # of bytes that one or two fractional pages are used for
-	size_t frac_pages = (len % page_len) * entry_size;
+	// is there an additional fractional page?
+	bool frac_page = len % page_len;
 DEBUG_DX(frac_pages)
 
-	len = frac_pages + page_nix + PG_TOAST_PAGE_FRAGMENT * full_pages;
+	len = full_pages + 1 + frac_page;
+DEBUG_DX(len*1)
 return dx;
 }
 
@@ -405,9 +402,8 @@ std::string dx;
 DEBUG_DX(len)
 		m.layout.push_back(len);
 dx += "tree:\n";
-		size_t space_len = m.input_map.size();
 dx +=
-		align_pages(len, MOC_INTERVAL_SIZE);
+		next_level(len, MOC_INTERVAL_SIZE);
 DEBUG_DX(len)
 		// add the maximal sizes of each tree level
 		bool not_root;
@@ -417,7 +413,7 @@ DEBUG_DX(len)
 			m.layout.push_back(len);
 DEBUG_DX( len )
 dx +=
-			align_pages(len, MOC_TREE_ENTRY_SIZE);
+			next_level(len, MOC_TREE_ENTRY_SIZE);
 		}
 		while (not_root);
 		
