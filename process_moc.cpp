@@ -56,6 +56,12 @@ char* data_as_char(Smoc* moc, size_t offset = 0)
 	return offset + reinterpret_cast<char*>(&((moc->data)[0]));
 }
 
+static
+char* detoasted_offset(Smoc* moc, size_t offset = 0)
+{
+	return offset + reinterpret_cast<char*>(&(moc->version));
+}
+
 template<class X, class Y>
 static
 X* data_as(Y* y)
@@ -399,16 +405,16 @@ create_moc_release_context(void* moc_in_context, Smoc* moc,
 		const moc_input & m = *p;
 
 		moc->version = 0;
-		char* data = data_as_char(moc);
 
 		moc->version |= 1; // flag indicating options
 		// put the debug string squarely into the moc options header.
-		std::memmove(data, m.s.c_str(), m.options_bytes);
+		std::memmove(data_as_char(moc), m.s.c_str(), m.options_bytes);
 
 		hpint64	area = 0;
 /////area = 9223372036854775807; /* 2^63 - 1 */
 
-		char* moc_data = data - MOC_HEADER_SIZE;
+		// this guards against  
+		char* moc_data = detoasted_offset(moc, 0);
 
 		// All levels will be filled out from end to beginning such that
 		// the above level-end values stay correct.
@@ -465,10 +471,10 @@ create_moc_release_context(void* moc_in_context, Smoc* moc,
 		int32 tree_begin = rend.index() - depth * MOC_INDEX_ALIGN;
 		
 		// fill out level-end section
-		int32* level_ends = data_as<int32>(moc_data + tree_begin);
-		moc->depth	= depth /* ... */;
+		int32* level_ends = data_as<int32>(detoasted_offset(moc, tree_begin));
+		moc->depth	= depth;
 		for (int k = depth; k >= 1; --k)
-			*(level_ends + depth - k) = m.layout[k].level_end;
+			*(level_ends + depth - k) = 2018915346; // 2018915328 + m.layout[k].level_end;
 
 		// a relocation of the whole tree, putting tree_begin right after
 		// the options, might follow here.
