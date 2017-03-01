@@ -15,7 +15,7 @@ CREATE OR REPLACE FUNCTION mocd(bytea) RETURNS text AS $$
 	$tree_hex = unpack("H*", $tree);
 
 	$level_ends_size = 4 * $depth;
-	@level_ends = unpack("L" . $lv, substr($tree, $level_ends_size));
+	@level_ends = unpack("L" . $depth, substr($tree, 0, $level_ends_size));
 
 	$pages_start = $tree_begin + $level_ends_size;
 
