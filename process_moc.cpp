@@ -11,7 +11,8 @@
 
 #include "pgs_process_moc.h"
 
-#define DEBUG_DX(name) dx += to_string("*" #name " = ") + to_string(name)+ "\n";
+#define DEBUG_DX(name) dx += to_string("*" #name " = ") + to_string(name)+ "; ";
+#define DEBUG_MA(name) m.addln(to_string("_" #name " = ") + to_string(name));
 
 // PGS_TRY / PGS_CATCH: use an additional 'do {} while (0);' to allow for
 // 'break;' as an alternative to 'return;'
@@ -137,55 +138,52 @@ struct moc_output
 struct moc_tree_layout
 {
 	size_t entries;		// # of all entries of a particular level
-	size_t full_pages;	// # pages 
-	size_t last_page;	// # entries
 	size_t level_end;	// index of next entity below this level
-	moc_tree_layout(): entries(0), page_rest(0), rest_entries(0), rest_level(0),
-									full_pages(0), last_page(0), level_end(0) {}
-	moc_tree_layout(size_t len): entries(len), page_rest(0), rest_entries(0),
-									rest_level(0), full_pages(0), last_page(0),
-									level_end(0) {}
+	moc_tree_layout(): entries(0), level_end(0) {}
+	moc_tree_layout(size_t len): entries(len), level_end(0) {}
 std::string // void
 	layout_level(size_t & moc_size, size_t entry_size)
 	{
 std::string dx;
-dx += to_string("*moc_size = ") + to_string(moc_size) + "\n";
+DEBUG_DX(moc_size)
+DEBUG_DX(entries)
 
 		// maximal # of entries in a page
 		size_t page_len = PG_TOAST_PAGE_FRAGMENT / entry_size;
 DEBUG_DX(page_len)
 		// # of remaining bytes of the current page
-		page_rest = PG_TOAST_PAGE_FRAGMENT - moc_size % page_len;
+		size_t page_rest = PG_TOAST_PAGE_FRAGMENT - moc_size % page_len;
 DEBUG_DX(page_rest)
 		// # of remaining entries within the current page
 		size_t rest_entries = page_rest / entry_size;
 DEBUG_DX(rest_entries)
-		size_t rest_level = 4022250974; // # of entries beyond the current page
+		size_t rest_level = 4022250974;	// # of entries beyond the current page
+		size_t this_page = 3992890810;	// # of bytes used of the current page
 		if (entries >= rest_entries)
 		{
 			rest_level = entries - rest_entries;
+			this_page = page_rest;
 DEBUG_DX(rest_level)
+DEBUG_DX(this_page)
 		}			
 		else // there is only a single page fragment at this level
 		{
-			rest_entries = entries;
 			rest_level = 0;
-DEBUG_DX(rest_entries)
+			this_page = entries * entry_size;
 DEBUG_DX(rest_level)
+DEBUG_DX(this_page)
 		}
-		full_pages = rest_level / page_len;
-		last_page = rest_level % entry_size;
+
+		// # of full pages the current level needs
+		size_t full_pages = rest_level / page_len;
+		// # of bytes that the last page, certainly fractionally, is used for
+		size_t last_page = (rest_level % page_len) * entry_size;
 DEBUG_DX(full_pages)
 DEBUG_DX(last_page)
 
-		if (!(full_pages || last_page))
-			page_rest = entries * entry_size;
-DEBUG_DX(page_rest)
-
-		moc_size += page_rest + PG_TOAST_PAGE_FRAGMENT * full_pages
-													+ entry_size * last_page;
+		moc_size += this_page + PG_TOAST_PAGE_FRAGMENT * full_pages + last_page;
 		level_end = moc_size;
-dx += to_string("*moc_size = ") + to_string(moc_size) + "\n";
+DEBUG_DX(moc_size)
 return dx;
 	}
 };
@@ -359,14 +357,33 @@ add_to_moc(void* moc_in_context, long order, hpint64 first, hpint64 last,
 // get_moc_size() prepares creation of MOC
 
 static
-size_t align_pages(size_t len, size_t page_len)
+// _some_ refactoring w.r.t. moc_tree_layout::layout_level desired
+std::string // void
+align_pages(size_t & len, size_t entry_size)
 {
-	return align_round(len, page_len) + (len > 2 * page_len ? 1 : 0);
+std::string dx;
+	// maximal # of entries in a page
+	size_t page_len = PG_TOAST_PAGE_FRAGMENT / entry_size;
+DEBUG_DX(page_len)
+	// # of unused bytes in a full page
+	size_t page_nix = PG_TOAST_PAGE_FRAGMENT % entry_size;
+DEBUG_DX(page_nix)
+
+	// # of full pages the current level needs
+	size_t full_pages = len / page_len;
+DEBUG_DX(full_pages)
+	// # of bytes that one or two fractional pages are used for
+	size_t frac_pages = (len % page_len) * entry_size;
+DEBUG_DX(frac_pages)
+
+	len = frac_pages + page_nix + PG_TOAST_PAGE_FRAGMENT * full_pages;
+return dx;
 }
 
 int
 get_moc_size(void* moc_in_context, pgs_error_handler error_out)
 {
+std::string dx;
 	moc_input* p = static_cast<moc_input*>(moc_in_context);
 	size_t moc_size = MOC_HEADER_SIZE;
 	PGS_TRY
@@ -374,46 +391,60 @@ get_moc_size(void* moc_in_context, pgs_error_handler error_out)
 
 // put the debug string squarely into the moc options header.
 		m.s.clear();
-		m.dump();
 		if (0) { // non-debug case
+			m.dump();
 			m.options_bytes = m.s.size() + 1;
 			m.options_size = align_round(m.options_bytes, MOC_INDEX_ALIGN);
 			moc_size += m.options_size;
 		} else { // debug case
 		}
-		// calculate number of nodes of the B+-tree layout
+		// Before doing the layout, calculate the maximal size that the B+-tree
+		// needs:
+		// first, calculate the maximal size the interval pages take
 		size_t len = m.input_map.size();
+DEBUG_DX(len)
 		m.layout.push_back(len);
-		len = align_pages(len, MOC_LEAF_PAGE_LEN);
+dx += "tree:\n";
+		size_t space_len = m.input_map.size();
+dx +=
+		align_pages(len, MOC_INTERVAL_SIZE);
+DEBUG_DX(len)
+		// add the maximal sizes of each tree level
 		bool not_root;
 		do
 		{
 			not_root = len > MOC_TREE_PAGE_LEN;
 			m.layout.push_back(len);
-			len = align_pages(len, MOC_TREE_PAGE_LEN);
+DEBUG_DX( len )
+dx +=
+			align_pages(len, MOC_TREE_ENTRY_SIZE);
 		}
 		while (not_root);
-		// layout: end of B+-tree level-end section
+		
+dx += "layout:\n";
+		// layout: start with the section of the ends of each B+-tree level
 		size_t depth = m.layout.size() - 1;
-m.addln(to_string("moc_size = ") + to_string(moc_size));
+DEBUG_DX(moc_size)
 		moc_size += depth * MOC_INDEX_ALIGN;
 		// layout: B+-tree layout, starting at root node
-m.addln(to_string("moc_size = ") + to_string(moc_size));
+DEBUG_DX(moc_size)
 std::string ddx;
 		for (unsigned k = depth; k >= 1; --k)
 			ddx += m.layout[k].layout_level(moc_size, MOC_TREE_ENTRY_SIZE);
-m.addln(ddx);
-m.addln(to_string("moc_size = ") + to_string(moc_size));
+dx += ddx;
+DEBUG_DX(moc_size)
+
 		// layout: intervals
 		moc_size = align_round(moc_size, HP64_SIZE);
-m.addln(to_string("moc_size = ") + to_string(moc_size));
+DEBUG_DX(moc_size)
 		m.layout[1].level_end = moc_size; // fix up alignment of intervals
 		m.layout[0].layout_level(moc_size, MOC_INTERVAL_SIZE);
-m.addln(to_string("moc_size = ") + to_string(moc_size));
-m.addln("");
+DEBUG_DX(moc_size)
+m.addln(dx);
 
 		if (0) { // non-debug case
 		} else { // debug case
+			m.dump();
 			m.options_bytes = m.s.size() + 1;
 			m.options_size = m.options_bytes + MOC_INDEX_ALIGN; // worst case OK
 			moc_size += m.options_size;
