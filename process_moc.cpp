@@ -437,14 +437,18 @@ create_moc_release_context(void* moc_in_context, Smoc* moc,
 			area += last - first;
 			if (i.page_ready())
 			{
-				n.set(make_node(i.index(), 1000 + first));
+				n.set(make_node(i.index(), first));
 				++n;
 			}
 			i.set(make_interval(first, last));
 			last_i = i;
 			++i;
 		}
-		n.set(make_node(last_i.index(), 2000 + first));
+		// If the Smoc should be the empty set, still generate a root node
+		// with a single moc_tree_entry: both its offset and start members
+		// will be duly set to zero here.
+		n.set(make_node(last_i.index(), first));
+		rnode_iter last_rend = n;
 		rnode_iter rend = ++n;
 		// process the tree pages of higher-order nodes:
 		size_t depth = m.layout.size() - 1;
@@ -464,12 +468,13 @@ create_moc_release_context(void* moc_in_context, Smoc* moc,
 				++z;
 			}
 			n.set(make_node(last_z.index(), (*last_z).start));
+			last_rend = rend;
 			rend = ++n;
 		}
 
 		// The level-end section must be put relative to the actual beginning
 		// of the root node to prevent confusing redunancies.
-		int32 tree_begin = rend.index() - depth * MOC_INDEX_ALIGN;
+		int32 tree_begin = last_rend.index() - depth * MOC_INDEX_ALIGN;
 		
 		// fill out level-end section
 		int32* level_ends = data_as<int32>(detoasted_offset(moc, tree_begin));
