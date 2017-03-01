@@ -228,6 +228,7 @@ private:
 						= page_size + (page_size / value_size - 1) * value_size;
 public:
 	rpage_iter(): base(0), offset(0) {}
+	rpage_iter(int32 index): base(0), offset(index) {}
 	rpage_iter(char* b, int32 index): base(b), offset(index)
 	{
 		operator++(); // a simplification that fails for the general case
@@ -423,7 +424,8 @@ create_moc_release_context(void* moc_in_context, Smoc* moc,
 		hpint64	order_log = 0;
 		rint_iter	i(moc_data, m.layout[0].level_end);
 		rnode_iter	n(moc_data, m.layout[1].level_end);
-		rint_iter last_i;
+		// default for "empty" root node:
+		rint_iter last_i(i.index() + MOC_INTERVAL_SIZE);
 		hpint64	first = 0;
 		hpint64	last = 0;
 		// intervals and root node:
@@ -444,10 +446,10 @@ create_moc_release_context(void* moc_in_context, Smoc* moc,
 			last_i = i;
 			++i;
 		}
-		// If the Smoc should be the empty set, still generate a root node
-		// with a single moc_tree_entry: both its offset and start members
-		// will be duly set to zero here. Only the empty set can ever get
-		// an offset value of zero.
+		// If the Smoc should be the empty set, still generate an "empty"
+		// root node with a single moc_tree_entry: its offset member will
+		// point just at the end of the Smoc, with its start member duly set to
+		// zero here.
 		n.set(make_node(last_i.index(), first));
 		rnode_iter last_rend = n;
 		rnode_iter rend = ++n;
