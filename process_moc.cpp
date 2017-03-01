@@ -470,6 +470,9 @@ create_moc_release_context(void* moc_in_context, Smoc* moc,
 		for (int k = depth; k >= 1; --k)
 			*(level_ends + depth - k) = m.layout[k].level_end;
 
+		// a relocation of the whole tree, putting tree_begin right after
+		// the options, might follow here.
+
 		moc->tree_begin	= tree_begin;	// start of level-end section
 
 		moc->area	= area;
@@ -482,7 +485,6 @@ create_moc_release_context(void* moc_in_context, Smoc* moc,
 			moc->first	= m.input_map.begin()->first;
 			moc->last	= m.input_map.rbegin()->second;
 		}
-		
 		
 	PGS_CATCH
 	release_moc_in_context(moc_in_context, error_out);

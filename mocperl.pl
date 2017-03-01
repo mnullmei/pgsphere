@@ -8,15 +8,25 @@ CREATE OR REPLACE FUNCTION mocd(bytea) RETURNS text AS $$
 	($dstr) = unpack("Z*", $data);
 	$len_dstr = length($dstr);
 
-	$tree_begin -= 32;
-	$gap = unpack("H*", substr($data, $len_dstr, $tree_begin - $len_dstr));
+	$tree_begin_32 = $tree_begin - 32;
+	$gap = unpack("H*", substr($data, $len_dstr, $tree_begin_32 - $len_dstr));
+
+	$tree = substr($data, $tree_begin_32 - $len_dstr);
+	$level_ends_size = 4 * $depth;
+	@level_ends = unpack("L" . $lv, substr($tree, $level_ends_size));
+
+	$pages_start = $tree_begin + $level_ends_size;
+
+#	for ($x in 
+#@level_ends = (2204, 1103, 1234); $depth = 3;
 
 	return sprintf( "len = %d, version = %u, order = %u, " .
 					"depth = %u, first = %llu, last = %llu, area = %llu, " .
-					"tree_begin = %u\n%s\n%s",
+					"tree_begin = %u\n%s\n%s\nlevel_ends: ",
 					$len, $version, $order, $depth,
 					$first, $last, $area, $tree_begin,
-					$dstr, $gap);
+					$dstr, $gap)
+				. sprintf("%d " x $depth, @level_ends);
 $$ LANGUAGE plperlu;
 
 -- # "SCCQQQL" =^= 32 bytes.
