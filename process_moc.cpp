@@ -370,7 +370,7 @@ DEBUG_DX(page_len)
 DEBUG_DX(full_pages)
 	// is there an additional fractional page?
 	bool frac_page = len % page_len;
-DEBUG_DX(frac_pages)
+DEBUG_DX(frac_page)
 
 	len = full_pages + 1 + frac_page;
 DEBUG_DX(len*1)
