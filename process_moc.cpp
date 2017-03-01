@@ -426,6 +426,7 @@ create_moc_release_context(void* moc_in_context, Smoc* moc,
 		rint_iter last_i;
 		hpint64	first = 0;
 		hpint64	last = 0;
+		// intervals and root node:
 		for (map_rev_iter r	= m.input_map.rbegin(); r != m.input_map.rend();
 																			++r)
 		{
@@ -436,16 +437,16 @@ create_moc_release_context(void* moc_in_context, Smoc* moc,
 			area += last - first;
 			if (i.page_ready())
 			{
-				n.set(make_node(i.index(), first));
+				n.set(make_node(i.index(), 1000 + first));
 				++n;
 			}
 			i.set(make_interval(first, last));
 			last_i = i;
 			++i;
 		}
-		n.set(make_node(last_i.index(), first));
+		n.set(make_node(last_i.index(), 2000 + first));
 		rnode_iter rend = ++n;
-		// process the tree pages
+		// process the tree pages of higher-order nodes:
 		size_t depth = m.layout.size() - 1;
 		for (size_t k = 1; k < depth; ++k)
 		{
