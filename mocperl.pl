@@ -50,7 +50,7 @@ CREATE OR REPLACE FUNCTION mocd(bytea) RETURNS text AS $$
 		$out_str .= sprintf("%u:[%llu, %u) ", $j, $first, $second);
 	}
 
-$gap=""; # $tree_hex="";
+#$gap=""; # $tree_hex="";
 
 #@level_ends = (2204, 1103, 1234); $depth = 3;
 
