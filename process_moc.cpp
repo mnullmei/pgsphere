@@ -449,10 +449,10 @@ DEBUG_DX(moc_size)
 dx +=
 		m.layout[0].layout_level(moc_size, MOC_INTERVAL_SIZE);
 DEBUG_DX(moc_size)
-m.addln(dx);
 
 		if (!LAYDEB) { // non-debug case
 		} else { // debug case
+			m.addln(dx);
 			m.dump();
 			m.options_bytes = m.s.size() + 1;
 			m.options_size = m.options_bytes + MOC_INDEX_ALIGN; // worst case OK
