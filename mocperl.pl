@@ -22,31 +22,43 @@ CREATE OR REPLACE FUNCTION mocd(bytea) RETURNS text AS $$
 
 	$pages_start = $tree_begin + $level_ends_size;
 	
-	$node_size = 12;
+	$entry_size = 12;
 	$level_start = $pages_start; # "only correct for root node"
 	$out_str = "\n";
 
 	for ($i = $0; $i < $depth; ++$i)
 	{
 		$out_str .= sprintf("%u:: ", $i);
-		for ($j = $level_start; $j < $level_ends[$i]; $j += $node_size)
+		$next_start = 0;
+		for ($j = $level_start; $j < $level_ends[$i]; $j += $entry_size)
 		{
-			# insert page bump code here
-			$node = substr($moc, $j, $node_size);
+			# page bump code
+				$mod = ($j + $entry_size) % $toast_page;
+				if ($mod > 0 && $mod < $entry_size)
+				{
+					$j += $entry_size - $mod;
+				}
+			$node = substr($moc, $j, $entry_size);
 			($subnode, $start) = unpack("LQ", $node);
 			$out_str .= sprintf("%u:{%llu -> %u} ", $j, $start, $subnode);
+			if (! $next_start)
+			{
+				$next_start = $start;
+			}
 		}
 		$out_str .= "\n";
-		$level_start = $level_ends[$i];
+		$level_start = $next_start;
 	}
-	# must read the following from the root node --> NOT AT ALL.
-	($interval_begin) = unpack("L",
-							substr($moc, $tree_begin + $level_ends_size, 4));
-
-	$interval_size = 16;
-	for ($j = $interval_begin; $j < $len; $j += $interval_size)
+	$entry_size = 16;
+	for ($j = $data_begin; $j < $len; $j += $entry_size)
 	{
-		$interval = substr($moc, $j, $interval_size);
+		# page bump code
+			$mod = ($j + $entry_size) % $toast_page;
+			if ($mod > 0 && $mod < $entry_size)
+			{
+				$j += $entry_size - $mod;
+			}
+		$interval = substr($moc, $j, $entry_size);
 		($first, $second) = unpack("QQ", $interval);
 		$out_str .= sprintf("%u:[%llu, %u) ", $j, $first, $second);
 	}

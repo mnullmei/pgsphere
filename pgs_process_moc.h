@@ -50,6 +50,10 @@ typedef struct
 #define MOC_LEAF_PAGE_LEN (PG_TOAST_PAGE_FRAGMENT / MOC_INTERVAL_SIZE)
 #define MOC_TREE_PAGE_LEN (PG_TOAST_PAGE_FRAGMENT / MOC_TREE_ENTRY_SIZE)
 
+/*
+ * this particular layout should prevent the compiler from introducing unwanted
+ * padding
+ */
 typedef struct
 {
 	char		vl_len_[4];	/* size of PostgreSQL variable-length data */
