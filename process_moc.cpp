@@ -586,11 +586,20 @@ DEBUG_DX(last_i.index())
 		int32 tree_begin = last_rend.index() - depth * MOC_INDEX_ALIGN;
 		
 		// fill out level-end section
+DEBUG_DX(moc)
+DEBUG_DX(static_cast<void*>(detoasted_offset(moc, 0)))
 		int32* level_ends = data_as<int32>(detoasted_offset(moc, tree_begin));
 		moc->depth	= depth;
+DEBUG_DX(tree_begin)
+DEBUG_DX(depth)
+DEBUG_DX(level_ends)
 		for (int k = depth; k >= 1; --k)
+{
+DEBUG_DX(k)
+DEBUG_DX(level_ends + depth - k)
 			*(level_ends + depth - k) = m.layout[k].level_end;
-
+DEBUG_DX(m.layout[k].level_end)
+}
 		// There may be some space between the end of the options and
 		// moc->tree_begin, but simple relocation of the tree is not an option
 		// because of padding at the end of the pages.

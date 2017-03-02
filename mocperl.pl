@@ -11,10 +11,10 @@ CREATE OR REPLACE FUNCTION mocd(bytea) RETURNS text AS $$
 	($dstr) = unpack("Z*", $data);
 	$len_dstr = length($dstr);
 
-	$tree_begin_32 = $tree_begin - 32;
-	$gap = unpack("H*", substr($data, $len_dstr, $tree_begin_32 - $len_dstr));
+	$tree_begin_36 = $tree_begin - 36;
+	$gap = unpack("H*", substr($data, $len_dstr, $tree_begin_36 - $len_dstr));
 
-	$tree = substr($data, $tree_begin_32);
+	$tree = substr($data, $tree_begin_36);
 	$tree_hex = unpack("H*", $tree);
 
 	$level_ends_size = 4 * $depth;
@@ -51,6 +51,7 @@ CREATE OR REPLACE FUNCTION mocd(bytea) RETURNS text AS $$
 		$out_str .= sprintf("%u:[%llu, %u) ", $j, $first, $second);
 	}
 
+#
 $gap="";  $tree_hex="";
 
 	return sprintf( "len = %d, version = %u, order = %u, " .
