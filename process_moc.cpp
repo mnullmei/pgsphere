@@ -243,8 +243,8 @@ class rpage_iter
 private:
 	char* base;
 	int32 offset;
-	static const size_t page_decrement
-						= page_size + (page_size / value_size - 1) * value_size;
+	static const size_t page_decrement = value_size
+							+ page_size - (page_size / value_size) * value_size;
 public:
 	rpage_iter(): base(0), offset(0) {}
 	rpage_iter(int32 index): base(0), offset(index) {}
