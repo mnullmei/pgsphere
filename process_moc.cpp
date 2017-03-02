@@ -13,7 +13,8 @@
 
 #define LAYDEB 1
 
-#define DEBUG_DX(name) dx += to_string("*" #name " = ") + to_string(name)+ "; ";
+#define DEBUG_DX(name) do { if (LAYDEB) \
+		dx += to_string("*" #name " = ") + to_string(name)+ "; "; } while (0);
 #define DEBUG_MA(name) m.addln(to_string("_" #name " = ") + to_string(name));
 
 // PGS_TRY / PGS_CATCH: use an additional 'do {} while (0);' to allow for
@@ -184,17 +185,27 @@ DEBUG_DX(this_page)
 DEBUG_DX(full_pages)
 DEBUG_DX(last_page)
 
+
+		size_t this_page_entries = entries * entry_size;
+		if (full_pages || last_page)
+			this_page_entries = this_page;
+DEBUG_DX(this_page_entries)
+		if (!in_tree)
+			this_page = this_page_entries;
+DEBUG_DX(this_page)
+
 		size_t full_pages_space = PG_TOAST_PAGE_FRAGMENT * full_pages;
 		// special case: end of intervals at end of page
-		if (!in_tree && full_pages && last_page == 0)
+		if (!in_tree && last_page == 0)
 		{
-			full_pages_space = page_len * entry_size;
+			full_pages_space = full_pages ? page_len * entry_size : 0;
 			if (full_pages > 1)
 				full_pages_space += PG_TOAST_PAGE_FRAGMENT * (full_pages - 1);
 		}
 DEBUG_DX(full_pages_space)
 
-		level_end = moc_size + ...;
+			
+		level_end = moc_size + this_page_entries + full_pages_space + last_page;
 DEBUG_DX(level_end)
 		
 		moc_size += this_page + full_pages_space + last_page;
