@@ -144,7 +144,7 @@ struct moc_tree_layout
 std::string // void
 	layout_level(size_t & moc_size, size_t entry_size)
 	{
-std::string dx;
+std::string dx = "layout_level(): ";
 DEBUG_DX(moc_size)
 DEBUG_DX(entries)
 
@@ -184,6 +184,7 @@ DEBUG_DX(last_page)
 		moc_size += this_page + PG_TOAST_PAGE_FRAGMENT * full_pages + last_page;
 		level_end = moc_size;
 DEBUG_DX(moc_size)
+dx += " ~~layout_level() ";
 return dx;
 	}
 };
@@ -362,6 +363,14 @@ std::string // void
 next_level(size_t & len, size_t entry_size)
 {
 std::string dx;
+
+	// can't split a single entry into two pages:
+// 	if (len <= 1)
+// 	{
+// 		len = 1;
+// 		return;
+// 	}
+
 	// maximal # of entries in a page of the current level
 	size_t page_len = PG_TOAST_PAGE_FRAGMENT / entry_size;
 DEBUG_DX(page_len)
@@ -382,7 +391,7 @@ get_moc_size(void* moc_in_context, pgs_error_handler error_out)
 {
 std::string dx;
 	moc_input* p = static_cast<moc_input*>(moc_in_context);
-	size_t moc_size = MOC_HEADER_SIZE + 500;
+	size_t moc_size = MOC_HEADER_SIZE;
 	PGS_TRY
 		moc_input & m = *p;
 
@@ -394,6 +403,7 @@ std::string dx;
 			m.options_size = align_round(m.options_bytes, MOC_INDEX_ALIGN);
 			moc_size += m.options_size;
 		} else { // debug case
+			moc_size += 1000;
 		}
 		// Before doing the layout, calculate the maximal size that the B+-tree
 		// needs:
@@ -434,6 +444,7 @@ DEBUG_DX(moc_size)
 		moc_size = align_round(moc_size, HP64_SIZE);
 DEBUG_DX(moc_size)
 		m.layout[1].level_end = moc_size; // fix up alignment of intervals
+dx +=
 		m.layout[0].layout_level(moc_size, MOC_INTERVAL_SIZE);
 DEBUG_DX(moc_size)
 m.addln(dx);
