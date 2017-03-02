@@ -28,7 +28,7 @@ CREATE OR REPLACE FUNCTION mocd(bytea) RETURNS text AS $$
 
 	for ($i = $0; $i < $depth; ++$i)
 	{
-		$out_str .= sprintf("%u:: ", $i);
+		$out_str .= sprintf("%u::%u..<%u: ", $i, $level_start, $level_ends[$i]);
 		$next_start = 0;
 		for ($j = $level_start; $j < $level_ends[$i]; $j += $entry_size)
 		{
@@ -36,7 +36,9 @@ CREATE OR REPLACE FUNCTION mocd(bytea) RETURNS text AS $$
 				$mod = ($j + $entry_size) % $toast_page;
 				if ($mod > 0 && $mod < $entry_size)
 				{
+$out_str .= sprintf("[%u]", $j);
 					$j += $entry_size - $mod;
+$out_str .= sprintf("[%u]", $j);
 				}
 			$node = substr($moc, $j, $entry_size);
 			($subnode, $start) = unpack("LQ", $node);
