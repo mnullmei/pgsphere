@@ -4,7 +4,7 @@ CREATE OR REPLACE FUNCTION mocd(bytea) RETURNS text AS $$
 	$moc = pack("H*", substr($in, 2));
 	$len = length($moc);
 	
-	($version, $order, $depth, $first, $last, $area, $tree_begin,
+	($version, $order, $depth, $first_moc, $last_moc, $area, $tree_begin,
 					 $data) = unpack("SCCQQQLa*", $moc);
 
 	($dstr) = unpack("Z*", $data);
@@ -59,7 +59,7 @@ $gap=""; # $tree_hex="";
 					"tree_begin = %u\n%s\n%s\n%s\npages_start = %u, " .
 					"level_ends: ",
 					$len, $version, $order, $depth,
-					$first, $last, $area, $tree_begin,
+					$first_moc, $last_moc, $area, $tree_begin,
 					$dstr, $gap, $tree_hex,
 					$pages_start)
 				. sprintf("%d " x $depth, @level_ends) . $out_str;
