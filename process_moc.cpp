@@ -382,7 +382,7 @@ get_moc_size(void* moc_in_context, pgs_error_handler error_out)
 {
 std::string dx;
 	moc_input* p = static_cast<moc_input*>(moc_in_context);
-	size_t moc_size = MOC_HEADER_SIZE;
+	size_t moc_size = MOC_HEADER_SIZE + 500;
 	PGS_TRY
 		moc_input & m = *p;
 
