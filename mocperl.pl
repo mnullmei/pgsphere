@@ -6,7 +6,7 @@ CREATE OR REPLACE FUNCTION mocd(bytea) RETURNS text AS $$
 	$len = length($moc);
 	
 	($version, $order, $depth, $first_moc, $last_moc, $area, $tree_begin,
-					 $data) = unpack("SCCQQQLa*", $moc);
+		$data_begin, $data) = unpack("SCCQQQLLa*", $moc);
 
 	($dstr) = unpack("Z*", $data);
 	$len_dstr = length($dstr);
@@ -23,13 +23,13 @@ CREATE OR REPLACE FUNCTION mocd(bytea) RETURNS text AS $$
 	$pages_start = $tree_begin + $level_ends_size;
 	
 	$node_size = 12;
-	$last_end = $pages_start; // "only correct for root node"
+	$level_start = $pages_start; # "only correct for root node"
 	$out_str = "\n";
 
 	for ($i = $0; $i < $depth; ++$i)
 	{
 		$out_str .= sprintf("%u:: ", $i);
-		for ($j = $last_end; $j < $level_ends[$i]; $j += $node_size)
+		for ($j = $level_start; $j < $level_ends[$i]; $j += $node_size)
 		{
 			# insert page bump code here
 			$node = substr($moc, $j, $node_size);
@@ -37,9 +37,9 @@ CREATE OR REPLACE FUNCTION mocd(bytea) RETURNS text AS $$
 			$out_str .= sprintf("%u:{%llu -> %u} ", $j, $start, $subnode);
 		}
 		$out_str .= "\n";
-		$last_end = $level_ends[$i];
+		$level_start = $level_ends[$i];
 	}
-	# must read the following from the root node:
+	# must read the following from the root node --> NOT AT ALL.
 	($interval_begin) = unpack("L",
 							substr($moc, $tree_begin + $level_ends_size, 4));
 
@@ -55,10 +55,11 @@ $gap="";  $tree_hex="";
 
 	return sprintf( "len = %d, version = %u, order = %u, " .
 					"depth = %u, first = %llu, last = %llu, area = %llu, " .
-					"tree_begin = %u\n%s\n%s\n%s\npages_start = %u, " .
+					"tree_begin = %u, data_begin = %u\n%s\n%s\n%s\n" .
+					"pages_start = %u, " .
 					"level_ends: ",
 					$len, $version, $order, $depth,
-					$first_moc, $last_moc, $area, $tree_begin,
+					$first_moc, $last_moc, $area, $tree_begin, $data_begin,
 					$dstr, $gap, $tree_hex,
 					$pages_start)
 				. sprintf("%d_" x $depth, @level_ends) . $out_str;

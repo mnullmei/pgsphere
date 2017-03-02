@@ -60,6 +60,7 @@ typedef struct
 	hpint64		last;		/* 1 + (last Healpix index in set) */
 	hpint64		area;		/* number of covered Healpix cells */
 	int32		tree_begin;	/* start of B+ tree, past the options block */
+	int32		data_begin;	/* start of Healpix intervals, bypassing the tree */
 	int32		data[1];	/* no need to optimise for empty MOCs */
 } Smoc;
 

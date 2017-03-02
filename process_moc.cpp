@@ -437,18 +437,23 @@ DEBUG_DX(moc_size)
 		moc_size += depth * MOC_INDEX_ALIGN;
 		// layout: B+-tree layout, starting at root node
 DEBUG_DX(moc_size)
-std::string ddx;
 		for (unsigned k = depth; k >= 1; --k)
-			ddx += m.layout[k].layout_level(moc_size, MOC_TREE_ENTRY_SIZE);
-dx += ddx;
+{		
+			dx += m.layout[k].layout_level(moc_size, MOC_TREE_ENTRY_SIZE);
+DEBUG_DX(k)
+DEBUG_DX(m.layout[k].level_end)
+DEBUG_DX(moc_size)
+}
 DEBUG_DX(moc_size)
 
 		// layout: intervals
 		moc_size = align_round(moc_size, HP64_SIZE);
 DEBUG_DX(moc_size)
 		m.layout[1].level_end = moc_size; // fix up alignment of intervals
+DEBUG_DX(m.layout[1].level_end)
 dx +=
 		m.layout[0].layout_level(moc_size, MOC_INTERVAL_SIZE);
+DEBUG_DX(m.layout[0].level_end)
 DEBUG_DX(moc_size)
 
 		if (!LAYDEB) { // non-debug case
@@ -520,10 +525,12 @@ create_moc_release_context(void* moc_in_context, Smoc* moc,
 			last_i = i;
 			++i;
 		}
-		// If the Smoc should be the empty set, still generate an "empty"
-		// root node with a single moc_tree_entry: its offset member will
-		// point just at the end of the Smoc, with its start member duly set to
-		// zero here.
+		// put start of Healpix intervals into the header
+		moc->data_begin = last_i.index();
+		// If the Smoc should be the empty set, still, as no special case,
+		// generate an "empty" root node with a single moc_tree_entry:
+		// its offset member will point just at the end of the Smoc,
+		// with its start member duly set to zero here.
 		n.set(make_node(last_i.index(), first));
 		rnode_iter last_rend = n;
 		rnode_iter rend = ++n;
