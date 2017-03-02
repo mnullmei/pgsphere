@@ -144,7 +144,7 @@ struct moc_tree_layout
 	moc_tree_layout(): entries(0), level_end(0) {}
 	moc_tree_layout(size_t len): entries(len), level_end(0) {}
 std::string // void
-	layout_level(size_t & moc_size, size_t entry_size)
+	layout_level(size_t & moc_size, size_t entry_size, bool in_tree = true)
 	{
 std::string dx = "layout_level(): ";
 DEBUG_DX(moc_size)
@@ -184,7 +184,17 @@ DEBUG_DX(this_page)
 DEBUG_DX(full_pages)
 DEBUG_DX(last_page)
 
-		moc_size += this_page + PG_TOAST_PAGE_FRAGMENT * full_pages + last_page;
+		size_t full_pages_space = PG_TOAST_PAGE_FRAGMENT * full_pages;
+		// special case: end of intervals at end of page
+		if (!in_tree && full_pages && last_page == 0)
+		{
+			full_pages_space = page_len * entry_size;
+			if (full_pages > 1)
+				full_pages_space += PG_TOAST_PAGE_FRAGMENT * (full_pages - 1);
+		}
+DEBUG_DX(full_pages_space)
+
+		moc_size += this_page + full_pages_space + last_page;
 		level_end = moc_size;
 DEBUG_DX(moc_size)
 dx += " ~~layout_level() ";
@@ -281,7 +291,7 @@ public:
 	}
 };
 
-typedef rpage_iter<moc_interval, PG_TOAST_PAGE_FRAGMENT>	rint_iter;
+typedef rpage_iter<moc_interval, PG_TOAST_PAGE_FRAGMENT>	rintv_iter;
 typedef rpage_iter<moc_tree_entry, PG_TOAST_PAGE_FRAGMENT>	rnode_iter;
 
 void*
@@ -406,7 +416,7 @@ std::string dx;
 			m.options_size = align_round(m.options_bytes, MOC_INDEX_ALIGN);
 			moc_size += m.options_size;
 		} else { // debug case
-			moc_size += 2000;
+			moc_size += 4000;
 		}
 		// Before doing the layout, calculate the maximal size that the B+-tree
 		// needs:
@@ -451,7 +461,7 @@ DEBUG_DX(moc_size)
 		moc_size = align_round(moc_size, HP64_SIZE);		// fix up alignment
 DEBUG_DX(moc_size)
 dx +=
-		m.layout[0].layout_level(moc_size, MOC_INTERVAL_SIZE);
+		m.layout[0].layout_level(moc_size, MOC_INTERVAL_SIZE, false);
 DEBUG_DX(m.layout[0].level_end)
 DEBUG_DX(moc_size)
 
@@ -501,10 +511,10 @@ std::string dx = m.s + "\n";
 
 		// process the interval pages
 		hpint64	order_log = 0;
-		rint_iter	i(moc_data, m.layout[0].level_end);
+		rintv_iter	i(moc_data, m.layout[0].level_end);
 		rnode_iter	n(moc_data, m.layout[1].level_end);
 		// default for "empty" root node:
-		rint_iter last_i(i.index() + MOC_INTERVAL_SIZE);
+		rintv_iter last_i(i.index() + MOC_INTERVAL_SIZE);
 DEBUG_DX(last_i.index())
 		hpint64	first = 0;
 		hpint64	last = 0;
