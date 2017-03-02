@@ -11,7 +11,7 @@
 
 #include "pgs_process_moc.h"
 
-#define LAYDEB 0
+#define LAYDEB 1
 
 #define DEBUG_DX(name) dx += to_string("*" #name " = ") + to_string(name)+ "; ";
 #define DEBUG_MA(name) m.addln(to_string("_" #name " = ") + to_string(name));
@@ -154,7 +154,8 @@ DEBUG_DX(entries)
 		size_t page_len = PG_TOAST_PAGE_FRAGMENT / entry_size;
 DEBUG_DX(page_len)
 		// # of remaining bytes of the current page
-		size_t page_rest = PG_TOAST_PAGE_FRAGMENT - moc_size % page_len;
+		size_t page_rest = PG_TOAST_PAGE_FRAGMENT
+											- moc_size % PG_TOAST_PAGE_FRAGMENT;
 DEBUG_DX(page_rest)
 		// # of remaining entries within the current page
 		size_t rest_entries = page_rest / entry_size;
@@ -405,7 +406,7 @@ std::string dx;
 			m.options_size = align_round(m.options_bytes, MOC_INDEX_ALIGN);
 			moc_size += m.options_size;
 		} else { // debug case
-			moc_size += 1000;
+			moc_size += 2000;
 		}
 		// Before doing the layout, calculate the maximal size that the B+-tree
 		// needs:
