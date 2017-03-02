@@ -23,7 +23,7 @@ CREATE OR REPLACE FUNCTION mocd(bytea) RETURNS text AS $$
 	$pages_start = $tree_begin + $level_ends_size;
 	
 	$node_size = 12;
-	$last_end = $pages_start;
+	$last_end = $pages_start; // "only correct for root node"
 	$out_str = "\n";
 
 	for ($i = $0; $i < $depth; ++$i)
@@ -53,8 +53,6 @@ CREATE OR REPLACE FUNCTION mocd(bytea) RETURNS text AS $$
 
 $gap="";  $tree_hex="";
 
-#@level_ends = (2204, 1103, 1234); $depth = 3;
-
 	return sprintf( "len = %d, version = %u, order = %u, " .
 					"depth = %u, first = %llu, last = %llu, area = %llu, " .
 					"tree_begin = %u\n%s\n%s\n%s\npages_start = %u, " .
@@ -63,7 +61,7 @@ $gap="";  $tree_hex="";
 					$first_moc, $last_moc, $area, $tree_begin,
 					$dstr, $gap, $tree_hex,
 					$pages_start)
-				. sprintf("%d " x $depth, @level_ends) . $out_str;
+				. sprintf("%d_" x $depth, @level_ends) . $out_str;
 $$ LANGUAGE plperlu;
 
 -- # "SCCQQQL" =^= 32 bytes.
