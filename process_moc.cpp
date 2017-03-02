@@ -392,10 +392,10 @@ return dx;
 int
 get_moc_size(void* moc_in_context, pgs_error_handler error_out)
 {
-std::string dx;
 	moc_input* p = static_cast<moc_input*>(moc_in_context);
 	size_t moc_size = MOC_HEADER_SIZE;
 	PGS_TRY
+std::string dx;
 		moc_input & m = *p;
 
 // put the debug string squarely into the moc options header.
@@ -482,6 +482,7 @@ create_moc_release_context(void* moc_in_context, Smoc* moc,
 	int ret = 1;
 	PGS_TRY
 		const moc_input & m = *p;
+std::string dx = m.s + "\n";
 
 		moc->version = 0;
 
@@ -504,6 +505,7 @@ create_moc_release_context(void* moc_in_context, Smoc* moc,
 		rnode_iter	n(moc_data, m.layout[1].level_end);
 		// default for "empty" root node:
 		rint_iter last_i(i.index() + MOC_INTERVAL_SIZE);
+DEBUG_DX(last_i.index())
 		hpint64	first = 0;
 		hpint64	last = 0;
 		// intervals and next-level node:
@@ -581,7 +583,9 @@ create_moc_release_context(void* moc_in_context, Smoc* moc,
 			moc->first	= m.input_map.begin()->first;
 			moc->last	= m.input_map.rbegin()->second;
 		}
-		
+
+std::memmove(data_as_char(moc), dx.c_str(), 1 + dx.size());
+
 	PGS_CATCH
 	release_moc_in_context(moc_in_context, error_out);
 	return ret;
