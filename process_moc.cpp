@@ -11,7 +11,7 @@
 
 #include "pgs_process_moc.h"
 
-#define LAYDEB 1
+#define LAYDEB 0
 
 #define DEBUG_DX(name) do { if (LAYDEB) \
 		dx += to_string("*" #name " = ") + to_string(name)+ "; "; } while (0);

@@ -26,7 +26,7 @@ TESTS       = init_test tables points euler circle line ellipse poly path box in
 SHLIB_LINK += -lchealpix
 # no support for CXXFLAGS in PGXS
 CXXFLAGS = -Wall -Wpointer-arith -Wendif-labels \
-			-Wmissing-format-attribute -Wformat-security -g -O2 -fpic
+		-Wmissing-format-attribute -Wformat-security -g -O0 -fpic
 
 EXTRA_CLEAN = $(PGS_SQL) pg_sphere.test.sql
 
