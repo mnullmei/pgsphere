@@ -11,6 +11,8 @@
 
 #include "pgs_process_moc.h"
 
+#define LAYDEB 0
+
 #define DEBUG_DX(name) dx += to_string("*" #name " = ") + to_string(name)+ "; ";
 #define DEBUG_MA(name) m.addln(to_string("_" #name " = ") + to_string(name));
 
@@ -397,7 +399,7 @@ std::string dx;
 
 // put the debug string squarely into the moc options header.
 		m.s.clear();
-		if (0) { // non-debug case
+		if (!LAYDEB) { // non-debug case
 			m.dump();
 			m.options_bytes = m.s.size() + 1;
 			m.options_size = align_round(m.options_bytes, MOC_INDEX_ALIGN);
@@ -449,7 +451,7 @@ dx +=
 DEBUG_DX(moc_size)
 m.addln(dx);
 
-		if (0) { // non-debug case
+		if (!LAYDEB) { // non-debug case
 		} else { // debug case
 			m.dump();
 			m.options_bytes = m.s.size() + 1;
@@ -499,7 +501,7 @@ create_moc_release_context(void* moc_in_context, Smoc* moc,
 		rint_iter last_i(i.index() + MOC_INTERVAL_SIZE);
 		hpint64	first = 0;
 		hpint64	last = 0;
-		// intervals and root node:
+		// intervals and next-level node:
 		for (map_rev_iter r	= m.input_map.rbegin(); r != m.input_map.rend();
 																			++r)
 		{
