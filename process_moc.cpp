@@ -447,10 +447,9 @@ DEBUG_DX(moc_size)
 DEBUG_DX(moc_size)
 
 		// layout: intervals
-		moc_size = align_round(moc_size, HP64_SIZE);
+
+		moc_size = align_round(moc_size, HP64_SIZE);		// fix up alignment
 DEBUG_DX(moc_size)
-		m.layout[1].level_end = moc_size; // fix up alignment of intervals
-DEBUG_DX(m.layout[1].level_end)
 dx +=
 		m.layout[0].layout_level(moc_size, MOC_INTERVAL_SIZE);
 DEBUG_DX(m.layout[0].level_end)
@@ -472,7 +471,7 @@ DEBUG_DX(moc_size)
 
 // create_moc_release_context()
 // moc_in_context:	-- must be have been prepared by get_moc_size()
-// moc:			-- must be allocated with a size returned by get_moc_size()
+// moc:				-- must be allocated with a size returned by get_moc_size()
 //
 
 int
