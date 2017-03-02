@@ -190,13 +190,15 @@ DEBUG_DX(last_page)
 		if (full_pages || last_page)
 			this_page_entries = this_page;
 DEBUG_DX(this_page_entries)
-		if (!in_tree)
-			this_page = this_page_entries;
-DEBUG_DX(this_page)
+
+/// ???
+///		if (!in_tree)
+///			this_page = this_page_entries;
+///DEBUG_DX(this_page)
 
 		size_t full_pages_space = PG_TOAST_PAGE_FRAGMENT * full_pages;
-		// special case: end of intervals at end of page
-		if (!in_tree && last_page == 0)
+		// special case: end of entries at end of page
+		if (last_page == 0)
 		{
 			full_pages_space = full_pages ? page_len * entry_size : 0;
 			if (full_pages > 1)
