@@ -206,12 +206,9 @@ DEBUG_DX(this_page_entries)
 		}
 DEBUG_DX(full_pages_space)
 
-			
-		level_end = moc_size + this_page_entries + full_pages_space + last_page;
+		moc_size += this_page_entries + full_pages_space + last_page;
+		level_end = moc_size;
 DEBUG_DX(level_end)
-		
-		moc_size += this_page + full_pages_space + last_page;
-
 DEBUG_DX(moc_size)
 dx += " ~~layout_level() ";
 return dx;
