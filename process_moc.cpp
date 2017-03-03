@@ -11,7 +11,8 @@
 
 #include "pgs_process_moc.h"
 
-#define LAYDEB 0
+#define LAYDEB 1
+#define MOC_DEBUG_SPACE 8056
 
 #define DEBUG_DX(name) do { if (LAYDEB) \
 		dx += to_string("*" #name " = ") + to_string(name)+ "; "; } while (0);
@@ -441,7 +442,7 @@ std::string dx;
 			m.options_size = align_round(m.options_bytes, MOC_INDEX_ALIGN);
 			moc_size += m.options_size;
 		} else { // debug case
-			moc_size += 8000;
+			moc_size += MOC_DEBUG_SPACE;
 		}
 		// Before doing the layout, calculate the maximal size that the B+-tree
 		// needs:
