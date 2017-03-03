@@ -103,6 +103,9 @@ release_moc_out_context(moc_out_data, pgs_error_handler);
 void
 print_moc_release_context(moc_out_data, char*, pgs_error_handler);
 
+size_t
+get_moc_debug(const char**, pgs_error_handler);
+
 #ifdef __cplusplus
 }
 #endif

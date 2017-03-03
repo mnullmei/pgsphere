@@ -1,9 +1,11 @@
-#include "stddef.h"
+#include <stddef.h>
+#include <string.h>
 #include "pgs_healpix.h"
 #include "pgs_moc.h"
 
 PG_FUNCTION_INFO_V1(smoc_in);
 PG_FUNCTION_INFO_V1(smoc_out);
+PG_FUNCTION_INFO_V1(moc_debug);
 
 static void
 moc_error_out(const char *message, int type)
@@ -285,4 +287,15 @@ smoc_out(PG_FUNCTION_ARGS)
 	char *buf = (char *) palloc(out_context.out_size);
 	print_moc_release_context(out_context, buf, moc_error_out);
 	PG_RETURN_CSTRING(buf);
+}
+
+Datum
+moc_debug(PG_FUNCTION_ARGS)
+{
+	const char *c_str;
+	size_t x_size = get_moc_debug(&c_str, moc_error_out);
+	const char *x = (const char*) palloc(VARHDRSZ + x_size);
+	SET_VARSIZE(x, x_size);
+	memmove((void*) x, (void*) c_str, x_size);
+	PG_RETURN_TEXT_P(x);
 }

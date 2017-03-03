@@ -20,3 +20,9 @@ CREATE TYPE smoc (
    alignment = double,
    storage = EXTERNAL
 );
+
+CREATE FUNCTION moc_debug() RETURNS text
+   AS 'MODULE_PATHNAME'
+   LANGUAGE C
+   IMMUTABLE
+   STRICT;

@@ -11,11 +11,11 @@
 
 #include "pgs_process_moc.h"
 
-#define LAYDEB 1
+#define LAYDEB 2
 #define MOC_DEBUG_SPACE 8056
 
-#define DEBUG_DX(name) do { if (LAYDEB) \
-		dx += to_string("*" #name " = ") + to_string(name)+ "; "; } while (0);
+#define DEBUG_DX(name) do { if (LAYDEB) log_string() += to_string( \
+						"*" #name " = ") + to_string(name)+ "; "; } while (0);
 #define DEBUG_MA(name) m.addln(to_string("_" #name " = ") + to_string(name));
 
 // PGS_TRY / PGS_CATCH: use an additional 'do {} while (0);' to allow for
@@ -35,6 +35,25 @@
 	}
 
 using std::size_t;
+
+static std::string &
+log_string()
+{
+	static std::string s;
+	return s;
+}
+
+size_t
+get_moc_debug(const char** c_str, pgs_error_handler error_out)
+{
+	int* p = 0;
+	size_t size;
+	PGS_TRY
+		*c_str = log_string().c_str();
+		size = log_string().size(); // Postgres' TEXT is sane
+	PGS_CATCH
+	return size;
+}
 
 // Throwing expections from destructors is not strictly forbidden, it is just
 // discouraged in the strongest possible way.
@@ -153,10 +172,10 @@ struct moc_tree_layout
 	size_t level_end;	// index of next entity below this level
 	moc_tree_layout(): entries(0), level_end(0) {}
 	moc_tree_layout(size_t len): entries(len), level_end(0) {}
-std::string // void
+	void
 	layout_level(size_t & moc_size, size_t entry_size)
 	{
-std::string dx = "layout_level(): ";
+log_string() += "layout_level(): ";
 DEBUG_DX(moc_size)
 DEBUG_DX(entries)
 
@@ -214,8 +233,7 @@ DEBUG_DX(full_pages_space)
 		level_end = moc_size;
 DEBUG_DX(level_end)
 DEBUG_DX(moc_size)
-dx += " ~~layout_level() ";
-return dx;
+log_string() += " ~~layout_level() ";
 	}
 };
 
@@ -398,10 +416,9 @@ add_to_moc(void* moc_in_context, long order, hpint64 first, hpint64 last,
 
 static
 // calculate the number of entries of the next-higher level
-std::string // void
+void
 next_level(size_t & len, size_t entry_size)
 {
-std::string dx;
 
 	// can't split a single entry into two pages:
 // 	if (len <= 1)
@@ -422,7 +439,6 @@ DEBUG_DX(frac_page)
 
 	len = full_pages + 1 + frac_page;
 DEBUG_DX(len*1)
-return dx;
 }
 
 int
@@ -431,17 +447,17 @@ get_moc_size(void* moc_in_context, pgs_error_handler error_out)
 	moc_input* p = static_cast<moc_input*>(moc_in_context);
 	size_t moc_size = MOC_HEADER_SIZE;
 	PGS_TRY
-std::string dx;
 		moc_input & m = *p;
 
+		log_string().clear();
 // put the debug string squarely into the moc options header.
 		m.s.clear();
-		if (!LAYDEB) { // non-debug case
+		if (LAYDEB != 1) {
 			m.dump();
 			m.options_bytes = m.s.size() + 1;
 			m.options_size = align_round(m.options_bytes, MOC_INDEX_ALIGN);
 			moc_size += m.options_size;
-		} else { // debug case
+		} else if (LAYDEB == 1) {
 			moc_size += MOC_DEBUG_SPACE;
 		}
 		// Before doing the layout, calculate the maximal size that the B+-tree
@@ -450,8 +466,8 @@ std::string dx;
 		size_t len = m.input_map.size();
 DEBUG_DX(len)
 		m.layout.push_back(len);
-dx += "tree:\n";
-dx +=
+log_string() += "tree:\n";
+
 		next_level(len, MOC_INTERVAL_SIZE);
 DEBUG_DX(len)
 		// add the maximal sizes of each tree level
@@ -461,12 +477,12 @@ DEBUG_DX(len)
 			not_root = len > MOC_TREE_PAGE_LEN;
 			m.layout.push_back(len);
 DEBUG_DX( len )
-dx +=
+
 			next_level(len, MOC_TREE_ENTRY_SIZE);
 		}
 		while (not_root);
 		
-dx += "layout:\n";
+log_string() += "layout:\n";
 		// layout: start with the section of the ends of each B+-tree level
 		size_t depth = m.layout.size() - 1;
 DEBUG_DX(moc_size)
@@ -475,7 +491,7 @@ DEBUG_DX(moc_size)
 DEBUG_DX(moc_size)
 		for (unsigned k = depth; k >= 1; --k)
 {		
-			dx += m.layout[k].layout_level(moc_size, MOC_TREE_ENTRY_SIZE);
+			m.layout[k].layout_level(moc_size, MOC_TREE_ENTRY_SIZE);
 DEBUG_DX(k)
 DEBUG_DX(m.layout[k].level_end)
 DEBUG_DX(moc_size)
@@ -486,14 +502,14 @@ DEBUG_DX(moc_size)
 
 		moc_size = align_round(moc_size, HP64_SIZE);		// fix up alignment
 DEBUG_DX(moc_size)
-dx +=
+
 		m.layout[0].layout_level(moc_size, MOC_INTERVAL_SIZE);
 DEBUG_DX(m.layout[0].level_end)
 DEBUG_DX(moc_size)
 
-		if (!LAYDEB) { // non-debug case
+		if (LAYDEB != 1) {
 		} else { // debug case
-			m.addln(dx);
+			m.addln(log_string());
 			m.dump();
 			m.options_bytes = m.s.size() + 1;
 			m.options_size = m.options_bytes + MOC_INDEX_ALIGN; // worst case OK
@@ -518,7 +534,7 @@ create_moc_release_context(void* moc_in_context, Smoc* moc,
 	int ret = 1;
 	PGS_TRY
 		const moc_input & m = *p;
-std::string dx = m.s + "\n";
+log_string() += m.s + "\n";
 
 		moc->version = 0;
 
@@ -650,8 +666,6 @@ DEBUG_DX(m.layout[k].level_end)
 			moc->first	= m.input_map.begin()->first;
 			moc->last	= m.input_map.rbegin()->second;
 		}
-
-std::memmove(data_as_char(moc), dx.c_str(), 1 + dx.size());
 
 	PGS_CATCH
 	release_moc_in_context(moc_in_context, error_out);
