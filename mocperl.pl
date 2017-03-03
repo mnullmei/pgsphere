@@ -65,8 +65,7 @@ CREATE OR REPLACE FUNCTION mocd(bytea) RETURNS text AS $$
 		$out_str .= sprintf("%u:[%llu, %u) ", $j, $first, $second);
 	}
 
-#
-$gap="";  $tree_hex="";
+#$gap="";  $tree_hex="";
 
 	return sprintf( "len = %d, version = %u, order = %u, " .
 					"depth = %u, first = %llu, last = %llu, area = %llu, " .
