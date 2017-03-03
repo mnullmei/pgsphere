@@ -537,6 +537,8 @@ DEBUG_DX(last_i.index())
 		hpint64	first = 0;
 		hpint64	last = 0;
 		// intervals and next-level node:
+		rnode_iter last_rend;
+		rnode_iter rend;
 		for (map_rev_iter r	= m.input_map.rbegin(); r != m.input_map.rend();
 																			++r)
 		{
@@ -547,8 +549,10 @@ DEBUG_DX(last_i.index())
 			area += last - first;
 			if (i.page_ready())
 			{
+				// need to re-factor this into its own function:
 				n.set(make_node(i.index(), first));
-				++n;
+				last_rend = n;
+				rend = ++n;
 			}
 			i.set(make_interval(first, last));
 			last_i = i;
@@ -556,13 +560,16 @@ DEBUG_DX(last_i.index())
 		}
 		// put start of Healpix intervals into the header
 		moc->data_begin = last_i.index();
-		// If the Smoc should be the empty set, still, as no special case,
-		// generate an "empty" root node with a single moc_tree_entry:
+		// If the Smoc should be the empty set, still generate an "empty"
+		// root node with a single moc_tree_entry:
 		// its offset member will point just at the end of the Smoc,
 		// with its start member duly set to zero here.
-		n.set(make_node(last_i.index(), first));
-		rnode_iter last_rend = n;
-		rnode_iter rend = ++n;
+		if (!last_i.page_ready() || m.input_map.empty())
+		{
+			n.set(make_node(last_i.index(), first));
+			last_rend = n;
+			rend = ++n;
+		}
 		// process the tree pages of higher-order nodes:
 		size_t depth = m.layout.size() - 1;
 		for (size_t k = 1; k < depth; ++k)
@@ -575,14 +582,18 @@ DEBUG_DX(last_i.index())
 				if (z.page_ready())
 				{
 					n.set(make_node(z.index(), (*z).start));
-					++n;
+					last_rend = rend;
+					rend = ++n;
 				}
 				last_z = z;
 				++z;
 			}
-			n.set(make_node(last_z.index(), (*last_z).start));
-			last_rend = rend;
-			rend = ++n;
+			if (!last_z.page_ready())
+			{
+				n.set(make_node(last_z.index(), (*last_z).start));
+				last_rend = rend;
+				rend = ++n;
+			}
 		}
 
 		// The level-end section must be put relative to the actual beginning
