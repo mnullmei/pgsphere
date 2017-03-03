@@ -294,8 +294,7 @@ moc_debug(PG_FUNCTION_ARGS)
 {
 	const char *c_str;
 	size_t x_size = get_moc_debug(&c_str, moc_error_out);
-	const char *x = (const char*) palloc(VARHDRSZ + x_size);
-	SET_VARSIZE(x, x_size);
+	const char *x = (const char*) palloc(x_size);
 	memmove((void*) x, (void*) c_str, x_size);
-	PG_RETURN_TEXT_P(x);
+	PG_RETURN_TEXT_P(cstring_to_text(x));
 }

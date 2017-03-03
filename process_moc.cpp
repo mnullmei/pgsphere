@@ -50,7 +50,7 @@ get_moc_debug(const char** c_str, pgs_error_handler error_out)
 	size_t size;
 	PGS_TRY
 		*c_str = log_string().c_str();
-		size = log_string().size(); // Postgres' TEXT is sane
+		size = 1 + log_string().size();
 	PGS_CATCH
 	return size;
 }
