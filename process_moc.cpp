@@ -11,7 +11,7 @@
 
 #include "pgs_process_moc.h"
 
-#define LAYDEB 0
+#define LAYDEB 1
 
 #define DEBUG_DX(name) do { if (LAYDEB) \
 		dx += to_string("*" #name " = ") + to_string(name)+ "; "; } while (0);
@@ -112,7 +112,6 @@ operator<(const moc_interval & x, const moc_interval & y)
 	return x.first < y.first;
 }
 
-
 typedef std::map<hpint64, hpint64>		moc_map;
 typedef moc_map::iterator				map_iterator;
 typedef moc_map::const_reverse_iterator	map_rev_iter;
@@ -122,6 +121,15 @@ std::ostream &
 operator<<(std::ostream & os, const moc_map_entry & x)
 {
 	os << "[" << x.first << ", " << x.second << ")";
+	return os;
+}
+
+std::ostream &
+operator<<(std::ostream & os, const moc_tree_entry & x)
+{
+	hpint64 start;
+	std::memmove(&start, x.start, HP64_SIZE);
+	os << "{" << start << " -> " << x.offset << "}";
 	return os;
 }
 
@@ -298,6 +306,13 @@ public:
 	int index() const
 	{
 		return offset;
+	}
+	friend std::ostream &
+	operator<<(std::ostream & os, const rpage_iter & x)
+	{
+		os << "/" << static_cast<const void*>(x.base) << "@: +" << x.offset
+			<< "/";
+		return os;
 	}
 };
 
@@ -543,6 +558,8 @@ DEBUG_DX(last_i.index())
 			{
 				// need to re-factor this into its own function:
 				n.set(make_node(i.index(), first));
+DEBUG_DX(n)
+DEBUG_DX((make_node(i.index(), first)))
 				last_rend = n;
 				rend = ++n;
 			}
@@ -559,6 +576,8 @@ DEBUG_DX(last_i.index())
 		if (!last_i.page_ready() || m.input_map.empty())
 		{
 			n.set(make_node(last_i.index(), first));
+DEBUG_DX(n)
+DEBUG_DX(((make_node(last_i.index(), first))))
 			last_rend = n;
 			rend = ++n;
 		}
@@ -569,11 +588,16 @@ DEBUG_DX(last_i.index())
 			rnode_iter z(moc_data, m.layout[k].level_end);
 			rnode_iter n(moc_data, m.layout[k + 1].level_end);
 			rnode_iter last_z;
+DEBUG_DX(rend)
 			for ( ; z != rend; ++z)
 			{
+DEBUG_DX(z)
+DEBUG_DX((*z))
 				if (z.page_ready())
 				{
 					n.set(make_node(z.index(), (*z).start));
+DEBUG_DX(n)
+DEBUG_DX((make_node(z.index(), (*z).start)))
 					last_rend = n;
 					rend = ++n;
 				}
@@ -583,6 +607,8 @@ DEBUG_DX(last_i.index())
 			if (!last_z.page_ready())
 			{
 				n.set(make_node(last_z.index(), (*last_z).start));
+DEBUG_DX(n)
+DEBUG_DX(((make_node(last_z.index(), (*last_z).start))))
 				last_rend = n;
 				rend = ++n;
 			}
