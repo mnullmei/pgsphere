@@ -11,7 +11,7 @@
 
 #include "pgs_process_moc.h"
 
-#define LAYDEB 1
+#define LAYDEB 0
 
 #define DEBUG_DX(name) do { if (LAYDEB) \
 		dx += to_string("*" #name " = ") + to_string(name)+ "; "; } while (0);
@@ -588,8 +588,9 @@ DEBUG_DX(((make_node(last_i.index(), first))))
 			rnode_iter z(moc_data, m.layout[k].level_end);
 			rnode_iter n(moc_data, m.layout[k + 1].level_end);
 			rnode_iter last_z;
-DEBUG_DX(rend)
-			for ( ; z != rend; ++z)
+			rnode_iter z_end = rend;
+DEBUG_DX(z_end)
+			for ( ; z != z_end; ++z)
 			{
 DEBUG_DX(z)
 DEBUG_DX((*z))
