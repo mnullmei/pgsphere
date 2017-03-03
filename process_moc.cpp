@@ -294,6 +294,8 @@ public:
 	}
 	bool page_ready() const
 	{
+		// this may, correctly, result in a fractional page with just a single
+		// entry:
 		return offset % page_size == 0;
 	}
 	rpage_iter & operator++()
@@ -529,7 +531,7 @@ std::string dx = m.s + "\n";
 		hpint64	order_log = 0;
 		rintv_iter	i(moc_data, m.layout[0].level_end);
 		rnode_iter	n(moc_data, m.layout[1].level_end);
-		// default for "empty" root node:
+		// default for "empty" root node, points past the intervals:
 		rintv_iter last_i(m.layout[0].level_end);
 DEBUG_DX(last_i.index())
 		hpint64	first = 0;
