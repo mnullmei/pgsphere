@@ -602,7 +602,6 @@ DEBUG_DX((make_node(z.index(), (*z).start)))
 					rend = ++n;
 				}
 				last_z = z;
-				++z;
 			}
 			if (!last_z.page_ready())
 			{
