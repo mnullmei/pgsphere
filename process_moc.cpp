@@ -426,7 +426,7 @@ std::string dx;
 			m.options_size = align_round(m.options_bytes, MOC_INDEX_ALIGN);
 			moc_size += m.options_size;
 		} else { // debug case
-			moc_size += 4000;
+			moc_size += 8000;
 		}
 		// Before doing the layout, calculate the maximal size that the B+-tree
 		// needs:
@@ -574,7 +574,7 @@ DEBUG_DX(last_i.index())
 				if (z.page_ready())
 				{
 					n.set(make_node(z.index(), (*z).start));
-					last_rend = rend;
+					last_rend = n;
 					rend = ++n;
 				}
 				last_z = z;
@@ -583,7 +583,7 @@ DEBUG_DX(last_i.index())
 			if (!last_z.page_ready())
 			{
 				n.set(make_node(last_z.index(), (*last_z).start));
-				last_rend = rend;
+				last_rend = n;
 				rend = ++n;
 			}
 		}
