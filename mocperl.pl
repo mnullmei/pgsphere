@@ -23,14 +23,14 @@ CREATE OR REPLACE FUNCTION mocd(bytea) RETURNS text AS $$
 	$pages_start = $tree_begin + $level_ends_size;
 	
 	$entry_size = 12;
-	$level_start = $pages_start; # "only correct for root node"
+	$level_begin = $pages_start; # "only correct for root node"
 	$out_str = "\n";
 
 	for ($i = $0; $i < $depth; ++$i)
 	{
-		$out_str .= sprintf("%u::%u..<%u: ", $i, $level_start, $level_ends[$i]);
-		$next_start = 0;
-		for ($j = $level_start; $j < $level_ends[$i]; $j += $entry_size)
+		$out_str .= sprintf("%u::%u..<%u: ", $i, $level_begin, $level_ends[$i]);
+		$next_begin = 0;
+		for ($j = $level_begin; $j < $level_ends[$i]; $j += $entry_size)
 		{
 			# page bump code
 				$mod = ($j + $entry_size) % $toast_page;
@@ -43,13 +43,13 @@ CREATE OR REPLACE FUNCTION mocd(bytea) RETURNS text AS $$
 			$node = substr($moc, $j, $entry_size);
 			($subnode, $start) = unpack("LQ", $node);
 			$out_str .= sprintf("%u:{%llu -> %u} ", $j, $start, $subnode);
-			if (! $next_start)
+			if (! $next_begin)
 			{
-				$next_start = $start;
+				$next_begin = $subnode;
 			}
 		}
 		$out_str .= "\n";
-		$level_start = $next_start;
+		$level_begin = $next_begin;
 	}
 	$entry_size = 16;
 	for ($j = $data_begin; $j < $len; $j += $entry_size)

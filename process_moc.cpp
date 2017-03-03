@@ -145,7 +145,7 @@ struct moc_tree_layout
 	moc_tree_layout(): entries(0), level_end(0) {}
 	moc_tree_layout(size_t len): entries(len), level_end(0) {}
 std::string // void
-	layout_level(size_t & moc_size, size_t entry_size, bool in_tree = true)
+	layout_level(size_t & moc_size, size_t entry_size)
 	{
 std::string dx = "layout_level(): ";
 DEBUG_DX(moc_size)
@@ -190,11 +190,6 @@ DEBUG_DX(last_page)
 		if (full_pages || last_page)
 			this_page_entries = this_page;
 DEBUG_DX(this_page_entries)
-
-/// ???
-///		if (!in_tree)
-///			this_page = this_page_entries;
-///DEBUG_DX(this_page)
 
 		size_t full_pages_space = PG_TOAST_PAGE_FRAGMENT * full_pages;
 		// special case: end of entries at end of page
@@ -476,7 +471,7 @@ DEBUG_DX(moc_size)
 		moc_size = align_round(moc_size, HP64_SIZE);		// fix up alignment
 DEBUG_DX(moc_size)
 dx +=
-		m.layout[0].layout_level(moc_size, MOC_INTERVAL_SIZE, false);
+		m.layout[0].layout_level(moc_size, MOC_INTERVAL_SIZE);
 DEBUG_DX(m.layout[0].level_end)
 DEBUG_DX(moc_size)
 
