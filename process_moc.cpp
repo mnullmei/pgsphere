@@ -12,8 +12,8 @@
 #include "pgs_process_moc.h"
 
 #define LAYDEB 2
-#define MOC_DEBUG_SPACE 8056
 
+#define DEBUG_(code) do { if (LAYDEB) { code; } } while (0);
 #define DEBUG_DX(name) do { if (LAYDEB) log_string() += to_string( \
 						"*" #name " = ") + to_string(name)+ "; "; } while (0);
 #define DEBUG_MA(name) m.addln(to_string("_" #name " = ") + to_string(name));
@@ -175,7 +175,7 @@ struct moc_tree_layout
 	void
 	layout_level(size_t & moc_size, size_t entry_size)
 	{
-log_string() += "layout_level(): ";
+DEBUG_(log_string() += "layout_level(): ";)
 DEBUG_DX(moc_size)
 DEBUG_DX(entries)
 
@@ -233,7 +233,7 @@ DEBUG_DX(full_pages_space)
 		level_end = moc_size;
 DEBUG_DX(level_end)
 DEBUG_DX(moc_size)
-log_string() += " ~~layout_level() ";
+DEBUG_(log_string() += " ~~layout_level() ";)
 	}
 };
 
@@ -449,24 +449,22 @@ get_moc_size(void* moc_in_context, pgs_error_handler error_out)
 	PGS_TRY
 		moc_input & m = *p;
 
-		log_string().clear();
+DEBUG_(log_string().clear();)
+
 // put the debug string squarely into the moc options header.
 		m.s.clear();
-		if (LAYDEB != 1) {
-			m.dump();
-			m.options_bytes = m.s.size() + 1;
-			m.options_size = align_round(m.options_bytes, MOC_INDEX_ALIGN);
-			moc_size += m.options_size;
-		} else if (LAYDEB == 1) {
-			moc_size += MOC_DEBUG_SPACE;
-		}
+		m.dump();
+		m.options_bytes = m.s.size() + 1;
+		m.options_size = align_round(m.options_bytes, MOC_INDEX_ALIGN);
+		moc_size += m.options_size;
+
 		// Before doing the layout, calculate the maximal size that the B+-tree
 		// needs:
 		// first, calculate the maximal size the interval pages take
 		size_t len = m.input_map.size();
 DEBUG_DX(len)
 		m.layout.push_back(len);
-log_string() += "tree:\n";
+DEBUG_(log_string() += "tree:\n";)
 
 		next_level(len, MOC_INTERVAL_SIZE);
 DEBUG_DX(len)
@@ -482,7 +480,7 @@ DEBUG_DX( len )
 		}
 		while (not_root);
 		
-log_string() += "layout:\n";
+DEBUG_(log_string() += "layout:\n";)
 		// layout: start with the section of the ends of each B+-tree level
 		size_t depth = m.layout.size() - 1;
 DEBUG_DX(moc_size)
@@ -507,15 +505,6 @@ DEBUG_DX(moc_size)
 DEBUG_DX(m.layout[0].level_end)
 DEBUG_DX(moc_size)
 
-		if (LAYDEB != 1) {
-		} else { // debug case
-			m.addln(log_string());
-			m.dump();
-			m.options_bytes = m.s.size() + 1;
-			m.options_size = m.options_bytes + MOC_INDEX_ALIGN; // worst case OK
-			moc_size += m.options_size;
-		}
-
 		moc_size = std::max(MIN_MOC_SIZE, moc_size);
 	PGS_CATCH
 	return moc_size;
@@ -534,7 +523,7 @@ create_moc_release_context(void* moc_in_context, Smoc* moc,
 	int ret = 1;
 	PGS_TRY
 		const moc_input & m = *p;
-log_string() += m.s + "\n";
+DEBUG_(log_string() += m.s + "\n";)
 
 		moc->version = 0;
 
@@ -543,7 +532,6 @@ log_string() += m.s + "\n";
 		std::memmove(data_as_char(moc), m.s.c_str(), m.options_bytes);
 
 		hpint64	area = 0;
-/////area = 9223372036854775807; /* 2^63 - 1 */
 
 		// this guards against  
 		char* moc_data = detoasted_offset(moc, 0);
