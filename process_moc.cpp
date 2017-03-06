@@ -520,10 +520,7 @@ create_moc_release_context(void* moc_in_context, Smoc* moc,
 DEBUG_(log_string() += m.s + "\n";)
 
 		moc->version = 0;
-
-		moc->version |= 1; // flag indicating options
-		// put the debug string squarely into the moc options header.
-		std::memmove(data_as_char(moc), m.s.c_str(), m.options_bytes);
+		// moc->version |= 1; // flag indicating options
 
 		hpint64	area = 0;
 
