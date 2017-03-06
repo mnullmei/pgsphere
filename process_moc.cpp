@@ -354,59 +354,62 @@ release_moc_in_context(void* moc_in_context, pgs_error_handler error_out)
 }
 
 void
+add_to_map(moc_map & input_map, hpint64 first, hpint64 last)
+{
+	map_iterator lower = input_map.lower_bound(first);
+	map_iterator upper = input_map.upper_bound(last);
+
+	if (lower != input_map.begin())
+	{
+		map_iterator before = lower;
+		--before;
+		if (before->second >= first)
+		{
+			if (before->second >= last)
+				return; // [first, last) \subset [before]
+			lower = before;
+			first = lower->first;
+		}
+	}
+	if (upper != input_map.begin())
+	{
+		map_iterator after = upper;
+		--after;
+		if (after->second > last)
+			last = after->second;
+	}
+	// Skip erase if it would do nothing in order to be able to use
+	// an input hint for set::insert().
+	// This path would be superflous with C++11's erase(), as that returns
+	// the correct hint for the insert() of the general case down below.
+	// The input hint lower == upper always refers the interval completely
+	// past the one to insert, or to input_map.end()
+	moc_map_entry input(first, last);
+	if (lower == upper)
+	{
+		input_map.insert(lower, input);
+		return;
+	}
+	if (lower->first == first)
+	{
+		lower->second = last;
+		input_map.erase(++lower, upper);
+		return;
+	}
+	input_map.erase(lower, upper);
+	input_map.insert(input);
+};
+
+void
 add_to_moc(void* moc_in_context, long order, hpint64 first, hpint64 last,
 												pgs_error_handler error_out)
 {
 	moc_input* p = static_cast<moc_input*>(moc_in_context);
 	PGS_TRY
 		moc_input & m = *p;
-
 		healpix_convert(first, order); // convert to order 29
 		healpix_convert(last, order);
-
-		// a refactored, C++-interal version of add_to_moc() should start here:
-		map_iterator lower = m.input_map.lower_bound(first);
-		map_iterator upper = m.input_map.upper_bound(last);
-
-		if (lower != m.input_map.begin())
-		{
-			map_iterator before = lower;
-			--before;
-			if (before->second >= first)
-			{
-				if (before->second >= last)
-					break; // [first, last) \subset [before]
-				lower = before;
-				first = lower->first;
-			}
-		}
-		if (upper != m.input_map.begin())
-		{
-			map_iterator after = upper;
-			--after;
-			if (after->second > last)
-				last = after->second;
-		}
-		// Skip erase if it would do nothing in order to be able to use
-		// an input hint for set::insert().
-		// This path would be superflous with C++11's erase(), as that returns
-		// the correct hint for the insert() of the general case down below.
-		// The input hint lower == upper always refers the interval completely
-		// past the one to insert, or to input_map.end()
-		moc_map_entry input(first, last);
-		if (lower == upper)
-		{
-			m.input_map.insert(lower, input);
-			break;
-		}
-		if (lower->first == first)
-		{
-			lower->second = last;
-			m.input_map.erase(++lower, upper);
-			break;
-		}
-		m.input_map.erase(lower, upper);
-		m.input_map.insert(input);
+		add_to_map(m.input_map, first, last);
 	PGS_CATCH
 };
 
