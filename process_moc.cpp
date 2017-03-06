@@ -77,7 +77,6 @@ release_context(void* context, pgs_error_handler error_out)
 	}
 }
 
-static
 char* data_as_char(Smoc* moc, size_t offset = 0)
 {
 	return offset + reinterpret_cast<char*>(&((moc->data)[0]));
@@ -135,6 +134,7 @@ operator<(const moc_interval & x, const moc_interval & y)
 
 typedef std::map<hpint64, hpint64>		moc_map;
 typedef moc_map::iterator				map_iterator;
+typedef moc_map::const_iterator			map_const_iter;
 typedef moc_map::const_reverse_iterator	map_rev_iter;
 typedef moc_map::value_type				moc_map_entry;
 
@@ -657,12 +657,85 @@ DEBUG_DX(m.layout[k].level_end)
 	return ret;
 };
 
-
 static
 moc_interval* interval_ptr(Smoc* moc, int32 offset)
 {
 	return data_as<moc_interval>(detoasted_offset(moc, offset));
 }
+
+typedef std::vector<moc_map> output_map;
+
+void
+order_break(output_map & outputs, const moc_interval & x, int max_order)
+{
+	int order;
+	hpint64 mask = 0;
+	mask = ~mask ^ 3;
+	hpint64 first	= x.first >> 2 * (29 - max_order);
+	hpint64 second = x.second >> 2 * (29 - max_order);
+	for (order = max_order; order > 0; --order, first >>= 2, second >>= 2)
+	{
+		moc_map & output = outputs[order];
+		if (second - first < 4)
+		{
+			add_to_map(output, first, second);
+			continue;
+		}
+		// the follwing is sort of inefficient in case the two fragments are
+		// adjacent, but who cares...
+		if (first & 3)
+			add_to_map(output, first, second & mask);
+		if (second & 3)
+			add_to_map(output, first & mask, second);
+	}
+}
+
+void
+ascii_out(std::string & m_s, char* s, Smoc* moc, int32 begin, int32 end,
+															int32 entry_size)
+{	
+	if (moc->first == moc->last)
+	{
+		m_s = "0/";
+		return;
+	}
+	// moc output fiddling:
+	int order = moc->order;
+	m_s.reserve(end); // rough guess
+	output_map outputs(1 + order);
+
+	for (int32 j = begin; j < end; j += entry_size)
+	{
+		// page bumps
+		int32 mod = (j + entry_size) % PG_TOAST_PAGE_FRAGMENT;
+		if (mod > 0 && mod < entry_size)
+			j += entry_size - mod;
+		order_break(outputs, *interval_ptr(moc, j), order);
+	}
+	for (int k = 0; k <= order; ++k)
+	{
+		const moc_map & output = outputs[k];
+		if (output.size())
+		{
+			sprintf(s, "%d/", k);
+			m_s.append(s);
+		}
+		for (map_const_iter i = output.begin(); i != output.end(); ++i)
+		{
+				hpint64 first	= i->first;
+				hpint64 last	= i->second - 1;
+				if (first == last)
+					sprintf(s, "%llu,", first);
+				else
+					sprintf(s, "%llu-%llu,", first, last);
+				m_s.append(s);
+		}
+		if (output.size())
+			*m_s.rbegin() = ' ';
+	}
+	m_s.resize(m_s.size() - 1);
+}
+
 
 moc_out_data
 create_moc_out_context(Smoc* moc, int32 end, pgs_error_handler error_out)
@@ -677,31 +750,9 @@ create_moc_out_context(Smoc* moc, int32 end, pgs_error_handler error_out)
 		int32 entry_size = MOC_INTERVAL_SIZE;
 		switch (smoc_output_type)
 		{
-//SELECT smoc('2/0,1,2,3,7 4/17,21-33,111');
 			case 0:
 				// output type MOC-ASCII
-				// moc output fiddling:
-				m.s.reserve(end); // rough guess
-
-sprintf(s, "order = %u", moc->order);
-m.s.append(s);
-
-if (0)
-{
-				for (int32 j = begin; j < end; j += entry_size)
-				{
-					// page bumps
-					int32 mod = (j + entry_size) % PG_TOAST_PAGE_FRAGMENT;
-					if (mod > 0 && mod < entry_size)
-						j += entry_size - mod;
-					moc_interval & x = *interval_ptr(moc, j);
-
-
-					m.s.append(s);
-				}
-
-				////sprintf(s, "[%llu, %llu) ", x.first, x.second);
-}
+				ascii_out(m.s, s, moc, begin, end, entry_size);
 				break;
 			case 1:
 				// output type MOC intervals
