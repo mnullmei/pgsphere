@@ -788,7 +788,7 @@ DEBUG_DX((*interval_ptr(moc, j)))
 		if (output.size())
 			*m_s.rbegin() = ' ';
 	}
-/////	m_s.resize(m_s.size() - 1);
+	m_s.resize(m_s.size() - 1);
 }
 
 moc_out_data
