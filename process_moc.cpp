@@ -12,7 +12,7 @@
 
 #include "pgs_process_moc.h"
 
-#define LAYDEB 2
+#define LAYDEB 0
 
 #define DEBUG_(code) do { if (LAYDEB) { code; } } while (0);
 #define DEBUG_LOG(msg) DEBUG_(log_string() += msg)
