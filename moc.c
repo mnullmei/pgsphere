@@ -7,6 +7,7 @@ PG_FUNCTION_INFO_V1(smoc_in);
 PG_FUNCTION_INFO_V1(smoc_out);
 PG_FUNCTION_INFO_V1(moc_debug);
 PG_FUNCTION_INFO_V1(set_smoc_output_type);
+PG_FUNCTION_INFO_V1(smoc_order);
 
 int32 smoc_output_type = 0;
 
@@ -328,6 +329,15 @@ set_smoc_output_type(PG_FUNCTION_ARGS)
 			moc_error_out("set_smoc_output_type()", 0);
 	}
 	PG_RETURN_CSTRING(buffer);
+}
+
+Datum
+smoc_order(PG_FUNCTION_ARGS)
+{
+	/* get just the MOC header: */
+	Smoc *moc = (Smoc *) PG_DETOAST_DATUM_SLICE(PG_GETARG_DATUM(0), 0,
+															MOC_HEADER_VARSIZE);
+	PG_RETURN_INT32(moc->order);
 }
 
 Datum

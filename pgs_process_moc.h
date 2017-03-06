@@ -70,7 +70,8 @@ typedef struct
 	int32		data[1];	/* no need to optimise for empty MOCs */
 } Smoc;
 
-#define MOC_HEADER_SIZE (offsetof(Smoc, data) - VARHDRSZ)
+#define MOC_HEADER_VARSIZE (offsetof(Smoc, data))
+#define MOC_HEADER_SIZE (MOC_HEADER_VARSIZE - VARHDRSZ)
 #define MIN_MOC_SIZE (sizeof(Smoc) - VARHDRSZ)
 
 void*
