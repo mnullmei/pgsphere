@@ -111,7 +111,7 @@ LINE 1: SELECT smoc('abc');
                     ^
 HINT:  Expected syntax: '{healpix_order}/{healpix_index}[,...] ...', where {healpix_order} is between 0 and 29. Example: '1/0 2/3,5-10'.
 SELECT smoc('-1/');         -- expected: error
-ERROR:  [c.127] Healpix order must not be negative.
+ERROR:  [c.2] Healpix order must not be negative.
 LINE 1: SELECT smoc('-1/');
                     ^
 HINT:  Expected syntax: '{healpix_order}/{healpix_index}[,...] ...', where {healpix_order} is between 0 and 29. Example: '1/0 2/3,5-10'.
@@ -150,7 +150,7 @@ LINE 1: SELECT 'abc'::smoc;
                ^
 HINT:  Expected syntax: '{healpix_order}/{healpix_index}[,...] ...', where {healpix_order} is between 0 and 29. Example: '1/0 2/3,5-10'.
 SELECT '-1/'::smoc;         -- expected: error
-ERROR:  [c.127] Healpix order must not be negative.
+ERROR:  [c.2] Healpix order must not be negative.
 LINE 1: SELECT '-1/'::smoc;
                ^
 HINT:  Expected syntax: '{healpix_order}/{healpix_index}[,...] ...', where {healpix_order} is between 0 and 29. Example: '1/0 2/3,5-10'.
@@ -188,3 +188,62 @@ ERROR:  [c.16] Incorrect Healpix index 17.
 LINE 1: SELECT smoc('2/0,1,2,3,7 0/17,21-33,111');
                     ^
 HINT:  At order 0, a Healpix index must be an integer between 0 and 11.
+SELECT max_order(smoc(''));
+ max_order 
+-----------
+         0
+(1 row)
+
+SELECT max_order(smoc('1/'));
+ max_order 
+-----------
+         0
+(1 row)
+
+SELECT max_order(smoc('1/1'));
+ max_order 
+-----------
+         1
+(1 row)
+
+SELECT max_order(smoc('1/10-3'));
+ERROR:  [c.5] Incorrect Healpix range 10-3.
+LINE 1: SELECT max_order(smoc('1/10-3'));
+                              ^
+HINT:  The first value of a range (here 10) must be less than the second one (here 3).
+SELECT max_order(smoc('1/0-3'));
+ max_order 
+-----------
+         0
+(1 row)
+
+SELECT max_order(smoc('1/0-1'));
+ max_order 
+-----------
+         1
+(1 row)
+
+SELECT max_order(smoc('29/0-1'));
+ max_order 
+-----------
+        29
+(1 row)
+
+SELECT max_order(smoc('29/0-3'));
+ max_order 
+-----------
+        28
+(1 row)
+
+SELECT max_order(smoc('29/0-7'));
+ max_order 
+-----------
+        28
+(1 row)
+
+SELECT max_order(smoc('29/0-15'));
+ max_order 
+-----------
+        27
+(1 row)
+

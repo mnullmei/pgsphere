@@ -52,3 +52,13 @@ SELECT smoc('2/0,1,2,3,7 4/17,21-33,111');
 
 SELECT smoc('2/0,1,2,3,7 0/17,21-33,111');
 
+SELECT max_order(smoc(''));
+SELECT max_order(smoc('1/'));
+SELECT max_order(smoc('1/1'));
+SELECT max_order(smoc('1/10-3'));
+SELECT max_order(smoc('1/0-3'));
+SELECT max_order(smoc('1/0-1'));
+SELECT max_order(smoc('29/0-1'));
+SELECT max_order(smoc('29/0-3'));
+SELECT max_order(smoc('29/0-7'));
+SELECT max_order(smoc('29/0-15'));

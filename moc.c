@@ -120,8 +120,8 @@ smoc_in(PG_FUNCTION_ARGS)
 			{
 				release_moc_in_context(moc_in_context, moc_error_out);
 				ereport(ERROR, (errcode(ERRCODE_NUMERIC_VALUE_OUT_OF_RANGE),
-							errmsg("[c.%d] Healpix order must not be negative."
-							),
+							errmsg("[c.%d] Healpix order must not be negative.",
+							ind - 1),
 							errhint("Expected syntax: '{healpix_order}/"
 								"{healpix_index}[,...] ...', where "
 								"{healpix_order} is between 0 and 29. Example: "
