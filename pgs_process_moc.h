@@ -70,9 +70,8 @@ typedef struct
 	int32		data[1];	/* no need to optimise for empty MOCs */
 } Smoc;
 
-#define PG_VL_LEN_SIZE 4
-#define MOC_HEADER_SIZE (offsetof(Smoc, data) - PG_VL_LEN_SIZE)
-#define MIN_MOC_SIZE (sizeof(Smoc) - PG_VL_LEN_SIZE)
+#define MOC_HEADER_SIZE (offsetof(Smoc, data) - VARHDRSZ)
+#define MIN_MOC_SIZE (sizeof(Smoc) - VARHDRSZ)
 
 void*
 create_moc_in_context(pgs_error_handler);
@@ -96,7 +95,7 @@ typedef struct
 } moc_out_data;
 
 moc_out_data
-create_moc_out_context(Smoc*, pgs_error_handler);
+create_moc_out_context(Smoc*, int32, pgs_error_handler);
 
 /* for the final smoc_out() using a proper Postgres memory context */
 void 

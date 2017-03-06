@@ -183,7 +183,7 @@ smoc_in(PG_FUNCTION_ARGS)
 		}
 	}
 
-	moc_size = PG_VL_LEN_SIZE + get_moc_size(moc_in_context, moc_error_out);
+	moc_size = VARHDRSZ + get_moc_size(moc_in_context, moc_error_out);
 	/* palloc() will leak the moc_in_context if it fails :-/ */
 	moc = (Smoc*) palloc0(moc_size);
 	SET_VARSIZE(moc, moc_size);
@@ -306,7 +306,8 @@ Datum
 smoc_out(PG_FUNCTION_ARGS)
 {
 	Smoc *moc = (Smoc *) PG_DETOAST_DATUM(PG_GETARG_DATUM(0));
-	moc_out_data out_context = create_moc_out_context(moc, moc_error_out);
+	moc_out_data out_context
+		= create_moc_out_context(moc, VARSIZE(moc) - VARHDRSZ, moc_error_out);
 	/* palloc() will leak the out_context if it fails :-/ */
 	char *buf = (char *) palloc(out_context.out_size);
 	print_moc_release_context(out_context, buf, moc_error_out);

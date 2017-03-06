@@ -1,5 +1,6 @@
 #include <cstddef>
 #include <cstring>
+#include <cstdio>
 #include <exception>
 #include <map>
 #include <vector>
@@ -660,25 +661,50 @@ DEBUG_DX(m.layout[k].level_end)
 	return ret;
 };
 
+
+static
+moc_interval* interval_ptr(Smoc* moc, int32 offset)
+{
+	return data_as<moc_interval>(detoasted_offset(moc, offset));
+}
+
 moc_out_data
-create_moc_out_context(Smoc* moc, pgs_error_handler error_out)
+create_moc_out_context(Smoc* moc, int32 end, pgs_error_handler error_out)
 {
 	moc_output* p = 0;
 	size_t out_size = 0;
 	PGS_TRY
 		p = new moc_output;
 		moc_output & m = *p;
-
-		// There must be an option to output pure intervals as well!
-
-		// moc output fiddling:
-
-		if (moc->version & 1)
+		char s[60];
+		int32 begin	= moc->data_begin;
+		int32 entry_size = MOC_INTERVAL_SIZE;
+		switch (smoc_output_type)
 		{
-			/* assume a raw C string within the MOC options for now */
-			m.s.append(data_as_char(moc));
-		}
+			case 0:
+				// output type MOC-ASCII
+				// moc output fiddling:
 
+				break;
+			case 1:
+				// output type MOC intervals
+				m.s.reserve(end); // rough guess
+				m.s.append(begin != end ? "{" : "{ ");
+				for (int32 j = begin; j < end; j += entry_size)
+				{
+					// page bumps
+					int32 mod = (j + entry_size) % PG_TOAST_PAGE_FRAGMENT;
+					if (mod > 0 && mod < entry_size)
+						j += entry_size - mod;
+					moc_interval & x = *interval_ptr(moc, j);
+					sprintf(s, "[%llu, %llu) ", x.first, x.second);
+					m.s.append(s);
+				}
+				*m.s.rbegin() = '}';
+				break;
+			default:
+				error_out("create_moc_out_context()", 0);
+		}
 		out_size = m.s.length() + 1;
 	PGS_CATCH
 	moc_out_data ret;

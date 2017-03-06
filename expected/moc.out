@@ -1,5 +1,11 @@
 SET client_min_messages = 'notice';
 -- SET client_min_messages = 'warning';
+select set_smoc_output_type(1);
+         set_smoc_output_type          
+---------------------------------------
+ Set output type to MOC intervals (1).
+(1 row)
+
 SELECT '29/0-3,7'::smoc;
       smoc       
 -----------------

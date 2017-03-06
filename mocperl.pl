@@ -62,7 +62,7 @@ CREATE OR REPLACE FUNCTION mocd(bytea) RETURNS text AS $$
 			}
 		$interval = substr($moc, $j, $entry_size);
 		($first, $second) = unpack("QQ", $interval);
-		$out_str .= sprintf("%u:[%llu, %u) ", $j, $first, $second);
+		$out_str .= sprintf("%u:[%llu, %llu) ", $j, $first, $second);
 	}
 
 #$gap="";  $tree_hex="";

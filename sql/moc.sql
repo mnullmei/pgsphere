@@ -1,6 +1,8 @@
 SET client_min_messages = 'notice';
 -- SET client_min_messages = 'warning';
 
+select set_smoc_output_type(1);
+
 SELECT '29/0-3,7'::smoc;
 SELECT '29/0,1,2,3,7'::smoc;
 
