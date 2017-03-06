@@ -15,8 +15,10 @@
 #define LAYDEB 2
 
 #define DEBUG_(code) do { if (LAYDEB) { code; } } while (0);
-#define DEBUG_DX(name) do { if (LAYDEB) log_string() += to_string( \
-						"*" #name " = ") + to_string(name)+ "; "; } while (0);
+#define DEBUG_LOG(msg) DEBUG_(log_string() += msg)
+#define DEBUG_LF DEBUG_LOG("\n")
+#define DEBUG_SHOW(name) (to_string(#name " = ") + to_string(name) + "; ")
+#define DEBUG_DX(name) DEBUG_LOG(DEBUG_SHOW(name))
 #define DEBUG_MA(name) m.addln(to_string("_" #name " = ") + to_string(name));
 
 // PGS_TRY / PGS_CATCH: use an additional 'do {} while (0);' to allow for
@@ -138,11 +140,24 @@ typedef moc_map::const_iterator			map_const_iter;
 typedef moc_map::const_reverse_iterator	map_rev_iter;
 typedef moc_map::value_type				moc_map_entry;
 
+template<class X>
 std::ostream &
-operator<<(std::ostream & os, const moc_map_entry & x)
+interval_out(std::ostream & os, const X & x)
 {
 	os << "[" << x.first << ", " << x.second << ")";
 	return os;
+}
+
+std::ostream &
+operator<<(std::ostream & os, const moc_interval & x)
+{
+	return interval_out(os, x);
+}
+
+std::ostream &
+operator<<(std::ostream & os, const moc_map_entry & x)
+{
+	return interval_out(os, x);
 }
 
 std::ostream &
@@ -671,29 +686,67 @@ order_break(output_map & outputs, const moc_interval & x, int max_order)
 	int order;
 	hpint64 mask = 0;
 	mask = ~mask ^ 3;
+char mask_x[88];
+sprintf(mask_x, "%016llx", mask);
+DEBUG_LF
+DEBUG_DX(mask_x)
+DEBUG_DX(max_order)
 	hpint64 first	= x.first >> 2 * (29 - max_order);
 	hpint64 second = x.second >> 2 * (29 - max_order);
+DEBUG_DX(first)
+DEBUG_DX(second)
 	for (order = max_order; order > 0; --order, first >>= 2, second >>= 2)
 	{
+DEBUG_LOG("\n")
+DEBUG_DX(1*order*1)
+DEBUG_DX(first)
+DEBUG_DX(second)
+		if (second == first)
+			break;
 		moc_map & output = outputs[order];
 		if (second - first < 4)
 		{
+DEBUG_LOG("\n__<4__")
 			add_to_map(output, first, second);
+DEBUG_DX(1*first)
+DEBUG_DX(1*second)
 			continue;
 		}
 		// the follwing is sort of inefficient in case the two fragments are
 		// adjacent, but who cares...
 		if (first & 3)
-			add_to_map(output, first, second & mask);
+{
+DEBUG_LOG("\n__first & 3__")
+DEBUG_DX(first)
+DEBUG_DX(second)
+			add_to_map(output, first, (first + 4) & mask);
+DEBUG_DX(1*first)
+DEBUG_DX(1*(first + 4) & mask)
+			first += 4;
+}
 		if (second & 3)
-			add_to_map(output, first & mask, second);
+{
+DEBUG_LOG("\n__second & 3__")
+DEBUG_DX(first)
+DEBUG_DX(second)
+			add_to_map(output, second & mask, second);
+DEBUG_DX(1*first & mask)
+DEBUG_DX(1*second)
+}
+
 	}
+DEBUG_DX(first*1)
+DEBUG_DX(second*1)
+	if (first != second)
+		add_to_map(outputs[0], first, second);
 }
 
 void
 ascii_out(std::string & m_s, char* s, Smoc* moc, int32 begin, int32 end,
 															int32 entry_size)
 {	
+DEBUG_LOG("aaaooo");
+
 	if (moc->first == moc->last)
 	{
 		m_s = "0/";
@@ -701,6 +754,7 @@ ascii_out(std::string & m_s, char* s, Smoc* moc, int32 begin, int32 end,
 	}
 	// moc output fiddling:
 	int order = moc->order;
+DEBUG_DX(order)
 	m_s.reserve(end); // rough guess
 	output_map outputs(1 + order);
 
@@ -710,6 +764,7 @@ ascii_out(std::string & m_s, char* s, Smoc* moc, int32 begin, int32 end,
 		int32 mod = (j + entry_size) % PG_TOAST_PAGE_FRAGMENT;
 		if (mod > 0 && mod < entry_size)
 			j += entry_size - mod;
+DEBUG_DX((*interval_ptr(moc, j)))
 		order_break(outputs, *interval_ptr(moc, j), order);
 	}
 	for (int k = 0; k <= order; ++k)
@@ -733,9 +788,8 @@ ascii_out(std::string & m_s, char* s, Smoc* moc, int32 begin, int32 end,
 		if (output.size())
 			*m_s.rbegin() = ' ';
 	}
-	m_s.resize(m_s.size() - 1);
+/////	m_s.resize(m_s.size() - 1);
 }
-
 
 moc_out_data
 create_moc_out_context(Smoc* moc, int32 end, pgs_error_handler error_out)
