@@ -637,10 +637,13 @@ DEBUG_DX(m.layout[k].level_end)
 		// because of padding at the end of the pages.
 
 		moc->tree_begin	= tree_begin;	// start of level-end section
-
 		moc->area	= area;
-////XXX simple stupid linear search shift loop on order_log to get da order
-		moc->order	= 0 /* ... */;
+		// simple linear search shift loop to calculate the moc order
+		int order;
+		for (order = 29; order > 0; --order, order_log >>= 2)
+			if (order_log & 3)
+				break;
+		moc->order	= order;
 		moc->first	= 0; // first Healpix index in set
 		moc->last	= 0; // 1 + (last Healpix index in set)
 		if (m.input_map.size())
@@ -674,10 +677,30 @@ create_moc_out_context(Smoc* moc, int32 end, pgs_error_handler error_out)
 		int32 entry_size = MOC_INTERVAL_SIZE;
 		switch (smoc_output_type)
 		{
+//SELECT smoc('2/0,1,2,3,7 4/17,21-33,111');
 			case 0:
 				// output type MOC-ASCII
 				// moc output fiddling:
+				m.s.reserve(end); // rough guess
 
+sprintf(s, "order = %u", moc->order);
+
+if (0)
+{
+				for (int32 j = begin; j < end; j += entry_size)
+				{
+					// page bumps
+					int32 mod = (j + entry_size) % PG_TOAST_PAGE_FRAGMENT;
+					if (mod > 0 && mod < entry_size)
+						j += entry_size - mod;
+					moc_interval & x = *interval_ptr(moc, j);
+
+
+					m.s.append(s);
+				}
+
+				////sprintf(s, "[%llu, %llu) ", x.first, x.second);
+}
 				break;
 			case 1:
 				// output type MOC intervals

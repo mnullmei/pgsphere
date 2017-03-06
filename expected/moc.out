@@ -109,12 +109,12 @@ SELECT smoc('abc');         -- expected: error
 ERROR:  [c.0] Incorrect MOC syntax: unsupported character 'a'.
 LINE 1: SELECT smoc('abc');
                     ^
-HINT:  Expected syntax: 'MOC {healpix_order}/{healpix_index}[,...] ...', where {healpix_order} is between 0 and 29. Example: '1/0 2/3,5-10'.
+HINT:  Expected syntax: '{healpix_order}/{healpix_index}[,...] ...', where {healpix_order} is between 0 and 29. Example: '1/0 2/3,5-10'.
 SELECT smoc('-1/');         -- expected: error
-ERROR:  [c.2] Incorrect Healpix range -1-1.
+ERROR:  [c.127] Healpix order must not be negative.
 LINE 1: SELECT smoc('-1/');
                     ^
-HINT:  The first value of a range (here -1) must be less than the second one (here 1). At order -1, a Healpix index must be an integer between 0 and 29.
+HINT:  Expected syntax: '{healpix_order}/{healpix_index}[,...] ...', where {healpix_order} is between 0 and 29. Example: '1/0 2/3,5-10'.
 SELECT smoc('30/');         -- expected: error
 ERROR:  [c.2] Incorrect Healpix order 30.
 LINE 1: SELECT smoc('30/');
@@ -148,12 +148,12 @@ SELECT 'abc'::smoc;         -- expected: error
 ERROR:  [c.0] Incorrect MOC syntax: unsupported character 'a'.
 LINE 1: SELECT 'abc'::smoc;
                ^
-HINT:  Expected syntax: 'MOC {healpix_order}/{healpix_index}[,...] ...', where {healpix_order} is between 0 and 29. Example: '1/0 2/3,5-10'.
+HINT:  Expected syntax: '{healpix_order}/{healpix_index}[,...] ...', where {healpix_order} is between 0 and 29. Example: '1/0 2/3,5-10'.
 SELECT '-1/'::smoc;         -- expected: error
-ERROR:  [c.2] Incorrect Healpix range -1-1.
+ERROR:  [c.127] Healpix order must not be negative.
 LINE 1: SELECT '-1/'::smoc;
                ^
-HINT:  The first value of a range (here -1) must be less than the second one (here 1). At order -1, a Healpix index must be an integer between 0 and 29.
+HINT:  Expected syntax: '{healpix_order}/{healpix_index}[,...] ...', where {healpix_order} is between 0 and 29. Example: '1/0 2/3,5-10'.
 SELECT '30/'::smoc;         -- expected: error
 ERROR:  [c.2] Incorrect Healpix order 30.
 LINE 1: SELECT '30/'::smoc;

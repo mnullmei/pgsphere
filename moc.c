@@ -103,7 +103,7 @@ smoc_in(PG_FUNCTION_ARGS)
 						errmsg("[c.%d] Incorrect MOC syntax: a second Healpix "
 								"index is expected after a '-' character.",
 								(ind - 1)),
-						errhint("Expected syntax: 'MOC {healpix_order}/"
+						errhint("Expected syntax: '{healpix_order}/"
 								"{healpix_index}[,...] ...', where "
 								"{healpix_order} is between 0 and 29. Example: "
 								"'1/0 2/3,5-10'.")));
@@ -115,17 +115,46 @@ smoc_in(PG_FUNCTION_ARGS)
 				ind--;
 			}
 
-			if (index_invalid(npix, nb2) || nb >= nb2)
+			if (nb == -1)
+			{
+				release_moc_in_context(moc_in_context, moc_error_out);
+				ereport(ERROR, (errcode(ERRCODE_NUMERIC_VALUE_OUT_OF_RANGE),
+							errmsg("[c.%d] Healpix order must not be negative."
+							),
+							errhint("Expected syntax: '{healpix_order}/"
+								"{healpix_index}[,...] ...', where "
+								"{healpix_order} is between 0 and 29. Example: "
+								"'1/0 2/3,5-10'.")));
+			}
+			if (index_invalid(npix, nb))
+			{
+				release_moc_in_context(moc_in_context, moc_error_out);
+				ereport(ERROR, (errcode(ERRCODE_NUMERIC_VALUE_OUT_OF_RANGE),
+							errmsg("[c.%d] Incorrect Healpix index %lld.",
+																ind - 1, nb),
+							errhint("At order %ld, a Healpix index must be "
+									"an integer between 0 and %lld.", order,
+									 								npix - 1)));
+			}
+			if (index_invalid(npix, nb2))
+			{
+				release_moc_in_context(moc_in_context, moc_error_out);
+				ereport(ERROR, (errcode(ERRCODE_NUMERIC_VALUE_OUT_OF_RANGE),
+							errmsg("[c.%d] Incorrect Healpix index %lld.",
+																ind - 1, nb2),
+							errhint("At order %ld, a Healpix index must be "
+									"an integer between 0 and %lld.", order,
+									 								npix - 1)));
+			}
+			if (nb >= nb2)
 			{
 				release_moc_in_context(moc_in_context, moc_error_out);
 				ereport(ERROR, (errcode(ERRCODE_NUMERIC_VALUE_OUT_OF_RANGE),
 						errmsg("[c.%d] Incorrect Healpix range %lld-%lld.",
 															ind - 1 , nb, nb2),
 						errhint("The first value of a range (here %lld) must be"
-								" less than the second one (here %lld). At "
-								"order %ld, a Healpix index must be an integer "
-								"between 0 and 29.", nb, nb2, order)));
-
+								" less than the second one (here %lld).",
+								nb, nb2)));
 			}
 			dbg_to_moc(2, moc_in_context, order, nb, nb2 + 1, moc_error_out);
 		}
@@ -176,7 +205,7 @@ smoc_in(PG_FUNCTION_ARGS)
 			ereport(ERROR, (errcode(ERRCODE_INVALID_TEXT_REPRESENTATION),
 					errmsg("[c.%d] Incorrect MOC syntax: unsupported character "
 							"'%c'.", ind - 1, c),
-					errhint("Expected syntax: 'MOC {healpix_order}/"
+					errhint("Expected syntax: '{healpix_order}/"
 							"{healpix_index}[,...] ...', where {healpix_order} "
 							"is between 0 and 29. Example: '1/0 2/3,5-10'.")));
 		}
