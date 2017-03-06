@@ -684,6 +684,7 @@ create_moc_out_context(Smoc* moc, int32 end, pgs_error_handler error_out)
 				m.s.reserve(end); // rough guess
 
 sprintf(s, "order = %u", moc->order);
+m.s.append(s);
 
 if (0)
 {
