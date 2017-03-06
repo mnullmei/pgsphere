@@ -702,7 +702,7 @@ DEBUG_DX(1*order*1)
 DEBUG_DX(first)
 DEBUG_DX(second)
 		if (second == first)
-			break;
+			return;
 		moc_map & output = outputs[order];
 		if (second - first < 4)
 		{
@@ -710,7 +710,7 @@ DEBUG_LOG("\n__<4__")
 			add_to_map(output, first, second);
 DEBUG_DX(1*first)
 DEBUG_DX(1*second)
-			continue;
+			return;
 		}
 		// the follwing is sort of inefficient in case the two fragments are
 		// adjacent, but who cares...
