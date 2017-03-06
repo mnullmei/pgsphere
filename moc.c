@@ -27,7 +27,6 @@ static int
 dbg_to_moc(int pos, void* moc_in_context, long order, hpint64 first, hpint64 last,
 												pgs_error_handler error_out)
 {
-	/* char* x = */
 	add_to_moc(moc_in_context, order, first, last, error_out);
 	return 0;
 }

@@ -79,7 +79,7 @@ create_moc_in_context(pgs_error_handler);
 void
 release_moc_in_context(void*, pgs_error_handler);
 
-char*
+void
 add_to_moc(void*, long, hpint64, hpint64, pgs_error_handler);
 
 int

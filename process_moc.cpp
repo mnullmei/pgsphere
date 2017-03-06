@@ -248,11 +248,9 @@ struct moc_input
 	layout_vec	layout;
 
 	std::string s;
-	char x[99999];
 	moc_input() : options_bytes(0), options_size(0)
 	{
 		layout.reserve(5);
-		x[0] = '\0';
 	}
 	void dump()
 	{
@@ -355,7 +353,7 @@ release_moc_in_context(void* moc_in_context, pgs_error_handler error_out)
 	release_context<moc_input>(moc_in_context, error_out);
 }
 
-char*
+void
 add_to_moc(void* moc_in_context, long order, hpint64 first, hpint64 last,
 												pgs_error_handler error_out)
 {
@@ -410,7 +408,6 @@ add_to_moc(void* moc_in_context, long order, hpint64 first, hpint64 last,
 		m.input_map.erase(lower, upper);
 		m.input_map.insert(input);
 	PGS_CATCH
-	return p->x;
 };
 
 // get_moc_size() prepares creation of MOC
@@ -452,11 +449,7 @@ get_moc_size(void* moc_in_context, pgs_error_handler error_out)
 
 DEBUG_(log_string().clear();)
 
-// put the debug string squarely into the moc options header.
-		m.s.clear();
-		m.dump();
-		m.options_bytes = m.s.size() + 1;
-		m.options_size = align_round(m.options_bytes, MOC_INDEX_ALIGN);
+		m.options_size = 0; // align_round(m.options_bytes, MOC_INDEX_ALIGN);
 		moc_size += m.options_size;
 
 		// Before doing the layout, calculate the maximal size that the B+-tree
