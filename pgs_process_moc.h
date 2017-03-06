@@ -18,6 +18,8 @@ extern "C" {
 
 #include <chealpix.h>
 
+extern int32 smoc_output_type;
+
 typedef void (*pgs_error_handler)(const char*, int);
 
 #define HP64_SIZE (sizeof(hpint64))

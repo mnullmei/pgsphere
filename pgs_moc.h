@@ -52,6 +52,7 @@ exactly PG_TOAST_PAGE_FRAGMENT...
 Datum smoc_in(PG_FUNCTION_ARGS);
 Datum smoc_out(PG_FUNCTION_ARGS);
 Datum moc_debug(PG_FUNCTION_ARGS);
+Datum set_smoc_output_type(PG_FUNCTION_ARGS);
 
 /* parsing subroutines */
 hpint64 readNumber(const char*, int*);

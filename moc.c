@@ -6,6 +6,9 @@
 PG_FUNCTION_INFO_V1(smoc_in);
 PG_FUNCTION_INFO_V1(smoc_out);
 PG_FUNCTION_INFO_V1(moc_debug);
+PG_FUNCTION_INFO_V1(set_smoc_output_type);
+
+int32 smoc_output_type = 0;
 
 static void
 moc_error_out(const char *message, int type)
@@ -275,8 +278,29 @@ char readChar(const char* mocAscii, int* start)
     return mocAscii[(*start)++];
 }
 
-	void*	context;
-	size_t	out_size;
+Datum
+set_smoc_output_type(PG_FUNCTION_ARGS)
+{
+	int32	out_type = PG_GETARG_INT32(0);
+	char	*buffer	= (char *) palloc(80);
+	if (out_type < 0)
+		out_type = 0;
+	if (out_type > 1)
+		out_type = 1;
+	smoc_output_type = out_type;
+	switch (smoc_output_type)
+	{
+		case 0:
+			sprintf(buffer, "Set output type to MOC-ASCII (0).");
+			break;
+		case 1:
+			sprintf(buffer, "Set output type to MOC intervals (1).");
+			break;
+		default:
+			moc_error_out("set_smoc_output_type()", 0);
+	}
+	PG_RETURN_CSTRING(buffer);
+}
 
 Datum
 smoc_out(PG_FUNCTION_ARGS)
