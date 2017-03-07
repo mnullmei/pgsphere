@@ -64,6 +64,11 @@ Datum spoint_not_subset_smoc(PG_FUNCTION_ARGS);
 Datum smoc_superset_spoint(PG_FUNCTION_ARGS);
 Datum smoc_not_superset_spoint(PG_FUNCTION_ARGS);
 
+Datum healpix_subset_smoc_c(hpint64, Datum);
+Datum healpix_not_subset_smoc_c(hpint64, Datum); 
+Datum spoint_subset_smoc_c(SPoint*, Datum);
+Datum spoint_not_subset_smoc_c(SPoint*, Datum); 
+
 /* parsing subroutines */
 hpint64 readNumber(const char*, int*);
 char readChar(const char*, int*);

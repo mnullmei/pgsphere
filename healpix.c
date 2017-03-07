@@ -200,14 +200,20 @@ static double conv_theta(double x)
 	return y;
 }
 
+hpint64
+healpix_nest_c(int32 order, SPoint* p)
+{
+	hpint64 i;
+	ang2pix_nest64(c_nside(order), conv_theta(p->lat), p->lng, &i);
+	return i;
+}
+
 Datum healpix_nest(PG_FUNCTION_ARGS)
 {
 	int32 order = PG_GETARG_INT32(0);
 	SPoint* p = (SPoint*) PG_GETARG_POINTER(1);
-	hpint64 i;
 	check_order(order);
-	ang2pix_nest64(c_nside(order), conv_theta(p->lat), p->lng, &i);
-	PG_RETURN_INT64(i);
+	PG_RETURN_INT64(healpix_nest_c(order, p));
 }
 
 Datum healpix_ring(PG_FUNCTION_ARGS)

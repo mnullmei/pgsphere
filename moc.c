@@ -372,49 +372,89 @@ moc_debug(PG_FUNCTION_ARGS)
 }
 
 Datum
-healpix_subset_smoc(PG_FUNCTION_ARGS)
+healpix_subset_smoc_c(hpint64 x, Datum y)
 {
 	PG_RETURN_BOOL(false);
+}
+
+Datum
+healpix_not_subset_smoc_c(hpint64 x, Datum y) 
+{
+	PG_RETURN_BOOL(!healpix_subset_smoc_c(x, y));
+}
+
+Datum
+spoint_subset_smoc_c(SPoint *x, Datum y)
+{
+	PG_RETURN_BOOL(healpix_subset_smoc_c(healpix_nest_c(29, x), y));
+}
+
+Datum
+spoint_not_subset_smoc_c(SPoint *x, Datum y) 
+{
+	PG_RETURN_BOOL(!spoint_subset_smoc_c(x, y));
+}
+
+Datum
+healpix_subset_smoc(PG_FUNCTION_ARGS)
+{
+	hpint64	x = PG_GETARG_INT64(0);
+	Datum	y = PG_GETARG_DATUM(1);
+	return healpix_subset_smoc_c(x, y);
 }
 
 Datum
 healpix_not_subset_smoc(PG_FUNCTION_ARGS)
 {
-	PG_RETURN_BOOL(false);
+	hpint64	x = PG_GETARG_INT64(0);
+	Datum	y = PG_GETARG_DATUM(1);
+	return healpix_not_subset_smoc_c(x, y);
 }
 
 Datum
 smoc_superset_healpix(PG_FUNCTION_ARGS)
 {
-	PG_RETURN_BOOL(false);
+	Datum	x = PG_GETARG_DATUM(0);
+	hpint64	y = PG_GETARG_INT64(1);
+	return healpix_subset_smoc_c(y, x);
 }
 
 Datum
 smoc_not_superset_healpix(PG_FUNCTION_ARGS)
 {
-	PG_RETURN_BOOL(false);
+	Datum	x = PG_GETARG_DATUM(0);
+	hpint64	y = PG_GETARG_INT64(1);
+	return healpix_not_subset_smoc_c(y, x);
 }
 
 Datum
 spoint_subset_smoc(PG_FUNCTION_ARGS)
 {
-	PG_RETURN_BOOL(false);
+	SPoint *x = (SPoint *) PG_GETARG_POINTER(0);
+	Datum	y = PG_GETARG_DATUM(1);
+	return spoint_subset_smoc_c(x, y);
 }
 
 Datum
 spoint_not_subset_smoc(PG_FUNCTION_ARGS)
 {
-	PG_RETURN_BOOL(false);
+	SPoint *x = (SPoint *) PG_GETARG_POINTER(0);
+	Datum	y = PG_GETARG_DATUM(1);
+	return spoint_not_subset_smoc_c(x, y);
 }
 
 Datum
 smoc_superset_spoint(PG_FUNCTION_ARGS)
 {
-	PG_RETURN_BOOL(false);
+	Datum	x = PG_GETARG_DATUM(0);
+	SPoint *y = (SPoint *) PG_GETARG_POINTER(1);
+	return spoint_subset_smoc_c(y, x);
 }
 
 Datum
 smoc_not_superset_spoint(PG_FUNCTION_ARGS)
 {
-	PG_RETURN_BOOL(false);
+	Datum	x = PG_GETARG_DATUM(0);
+	SPoint *y = (SPoint *) PG_GETARG_POINTER(1);
+	return spoint_not_subset_smoc_c(y, x);
 }
