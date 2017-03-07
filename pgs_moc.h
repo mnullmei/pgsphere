@@ -4,6 +4,7 @@
 #include <postgres.h>
 #include <fmgr.h>
 #include <catalog/pg_type.h>
+#include <access/tuptoaster.h>
 
 #include "point.h" /* SPoint */
 #include "pgs_healpix.h"

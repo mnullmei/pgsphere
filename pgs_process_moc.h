@@ -74,6 +74,11 @@ typedef struct
 #define MOC_HEADER_SIZE (MOC_HEADER_VARSIZE - VARHDRSZ)
 #define MIN_MOC_SIZE (sizeof(Smoc) - VARHDRSZ)
 
+#define MOC_HEADER_PAGE  ((PG_TOAST_PAGE_FRAGMENT) > (MOC_HEADER_VARSIZE) \
+						? (PG_TOAST_PAGE_FRAGMENT) : (MOC_HEADER_VARSIZE))
+
+#define MOC_BASE(moc) ((char*) &(moc->version))
+
 void*
 create_moc_in_context(pgs_error_handler);
 
