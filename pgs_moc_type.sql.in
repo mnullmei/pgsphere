@@ -38,3 +38,132 @@ CREATE FUNCTION max_order(smoc)
 	AS 'MODULE_PATHNAME', 'smoc_order'
 	LANGUAGE C
 	IMMUTABLE STRICT;
+
+CREATE FUNCTION healpix_subset_smoc(bigint, smoc)
+	RETURNS bool
+	AS 'MODULE_PATHNAME'
+	LANGUAGE C
+	STRICT;
+
+CREATE FUNCTION healpix_not_subset_smoc(bigint, smoc)
+	RETURNS bool
+	AS 'MODULE_PATHNAME'
+	LANGUAGE C
+	STRICT;
+
+CREATE FUNCTION smoc_superset_healpix(smoc, bigint)
+	RETURNS bool
+	AS 'MODULE_PATHNAME'
+	LANGUAGE C
+	STRICT;
+
+CREATE FUNCTION smoc_not_superset_healpix(smoc, bigint)
+	RETURNS bool
+	AS 'MODULE_PATHNAME'
+	LANGUAGE C
+	STRICT;
+
+CREATE FUNCTION spoint_subset_smoc(spoint, smoc)
+	RETURNS bool
+	AS 'MODULE_PATHNAME'
+	LANGUAGE C
+	STRICT;
+
+CREATE FUNCTION spoint_not_subset_smoc(spoint, smoc)
+	RETURNS bool
+	AS 'MODULE_PATHNAME'
+	LANGUAGE C
+	STRICT;
+
+CREATE FUNCTION smoc_superset_spoint(smoc, spoint)
+	RETURNS bool
+	AS 'MODULE_PATHNAME'
+	LANGUAGE C
+	STRICT;
+
+CREATE FUNCTION smoc_not_superset_spoint(smoc, spoint)
+	RETURNS bool
+	AS 'MODULE_PATHNAME'
+	LANGUAGE C
+	STRICT;
+
+CREATE OPERATOR <@ (
+   LEFTARG    = bigint,
+   RIGHTARG   = smoc,
+   PROCEDURE  = healpix_subset_smoc,
+   COMMUTATOR = '@>',
+   NEGATOR    = '!<@',
+   RESTRICT   = contsel,
+   JOIN       = contjoinsel
+);
+
+CREATE OPERATOR !<@ (
+   LEFTARG    = bigint,
+   RIGHTARG   = smoc,
+   PROCEDURE  = healpix_not_subset_smoc,
+   COMMUTATOR = '!@>',
+   NEGATOR    = '<@',
+   RESTRICT   = contsel,
+   JOIN       = contjoinsel
+);
+
+CREATE OPERATOR @> (
+   LEFTARG    = smoc,
+   RIGHTARG   = bigint,
+   PROCEDURE  = smoc_superset_healpix,
+   COMMUTATOR = '<@',
+   NEGATOR    = '!@>',
+   RESTRICT   = contsel,
+   JOIN       = contjoinsel
+);
+
+CREATE OPERATOR !@> (
+   LEFTARG    = smoc,
+   RIGHTARG   = bigint,
+   PROCEDURE  = smoc_not_superset_healpix,
+   COMMUTATOR = '!<@',
+   NEGATOR    = '@>',
+   RESTRICT   = contsel,
+   JOIN       = contjoinsel
+);
+
+CREATE OPERATOR <@ (
+   LEFTARG    = spoint,
+   RIGHTARG   = smoc,
+   PROCEDURE  = spoint_subset_smoc,
+   COMMUTATOR = '@>',
+   NEGATOR    = '!<@',
+   RESTRICT   = contsel,
+   JOIN       = contjoinsel
+);
+
+CREATE OPERATOR !<@ (
+   LEFTARG    = spoint,
+   RIGHTARG   = smoc,
+   PROCEDURE  = spoint_not_subset_smoc,
+   COMMUTATOR = '!@>',
+   NEGATOR    = '<@',
+   RESTRICT   = contsel,
+   JOIN       = contjoinsel
+);
+
+CREATE OPERATOR @> (
+   LEFTARG    = smoc,
+   RIGHTARG   = spoint,
+   PROCEDURE  = smoc_superset_spoint,
+   COMMUTATOR = '<@',
+   NEGATOR    = '!@>',
+   RESTRICT   = contsel,
+   JOIN       = contjoinsel
+);
+
+CREATE OPERATOR !@> (
+   LEFTARG    = smoc,
+   RIGHTARG   = spoint,
+   PROCEDURE  = smoc_not_superset_spoint,
+   COMMUTATOR = '!<@',
+   NEGATOR    = '@>',
+   RESTRICT   = contsel,
+   JOIN       = contjoinsel
+);
+

@@ -55,6 +55,15 @@ Datum moc_debug(PG_FUNCTION_ARGS);
 Datum set_smoc_output_type(PG_FUNCTION_ARGS);
 Datum smoc_order(PG_FUNCTION_ARGS);
 
+Datum healpix_subset_smoc(PG_FUNCTION_ARGS);
+Datum healpix_not_subset_smoc(PG_FUNCTION_ARGS);
+Datum smoc_superset_healpix(PG_FUNCTION_ARGS);
+Datum smoc_not_superset_healpix(PG_FUNCTION_ARGS);
+Datum spoint_subset_smoc(PG_FUNCTION_ARGS);
+Datum spoint_not_subset_smoc(PG_FUNCTION_ARGS);
+Datum smoc_superset_spoint(PG_FUNCTION_ARGS);
+Datum smoc_not_superset_spoint(PG_FUNCTION_ARGS);
+
 /* parsing subroutines */
 hpint64 readNumber(const char*, int*);
 char readChar(const char*, int*);

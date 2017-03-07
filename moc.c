@@ -9,6 +9,15 @@ PG_FUNCTION_INFO_V1(moc_debug);
 PG_FUNCTION_INFO_V1(set_smoc_output_type);
 PG_FUNCTION_INFO_V1(smoc_order);
 
+PG_FUNCTION_INFO_V1(healpix_subset_smoc);
+PG_FUNCTION_INFO_V1(healpix_not_subset_smoc);
+PG_FUNCTION_INFO_V1(smoc_superset_healpix);
+PG_FUNCTION_INFO_V1(smoc_not_superset_healpix);
+PG_FUNCTION_INFO_V1(spoint_subset_smoc);
+PG_FUNCTION_INFO_V1(spoint_not_subset_smoc);
+PG_FUNCTION_INFO_V1(smoc_superset_spoint);
+PG_FUNCTION_INFO_V1(smoc_not_superset_spoint);
+
 int32 smoc_output_type = 0;
 
 static void
@@ -360,4 +369,52 @@ moc_debug(PG_FUNCTION_ARGS)
 	const char *x = (const char*) palloc(x_size);
 	memmove((void*) x, (void*) c_str, x_size);
 	PG_RETURN_TEXT_P(cstring_to_text(x));
+}
+
+Datum
+healpix_subset_smoc(PG_FUNCTION_ARGS)
+{
+	PG_RETURN_BOOL(false);
+}
+
+Datum
+healpix_not_subset_smoc(PG_FUNCTION_ARGS)
+{
+	PG_RETURN_BOOL(false);
+}
+
+Datum
+smoc_superset_healpix(PG_FUNCTION_ARGS)
+{
+	PG_RETURN_BOOL(false);
+}
+
+Datum
+smoc_not_superset_healpix(PG_FUNCTION_ARGS)
+{
+	PG_RETURN_BOOL(false);
+}
+
+Datum
+spoint_subset_smoc(PG_FUNCTION_ARGS)
+{
+	PG_RETURN_BOOL(false);
+}
+
+Datum
+spoint_not_subset_smoc(PG_FUNCTION_ARGS)
+{
+	PG_RETURN_BOOL(false);
+}
+
+Datum
+smoc_superset_spoint(PG_FUNCTION_ARGS)
+{
+	PG_RETURN_BOOL(false);
+}
+
+Datum
+smoc_not_superset_spoint(PG_FUNCTION_ARGS)
+{
+	PG_RETURN_BOOL(false);
 }
