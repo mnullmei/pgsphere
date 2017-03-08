@@ -39,12 +39,6 @@ typedef struct
 	char	start[HP64_SIZE];
 } moc_tree_entry;
 
-typedef struct
-{
-	int32			next_begin;	/* counts in units of char, from start of MOC */
-	moc_tree_entry	nodes[1];
-} moc_tree_page;
-
 #define MOC_INDEX_ALIGN (sizeof(int32))
 
 #define MOC_INTERVAL_SIZE (sizeof(moc_interval))
@@ -112,6 +106,12 @@ print_moc_release_context(moc_out_data, char*, pgs_error_handler);
 
 size_t
 get_moc_debug(const char**, pgs_error_handler);
+
+moc_tree_entry*
+entry_lower_bound(moc_tree_entry*, moc_tree_entry*, hpint64);
+
+moc_interval*
+interval_lower_bound(moc_interval*, moc_interval*, hpint64);
 
 #ifdef __cplusplus
 }

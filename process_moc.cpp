@@ -852,3 +852,29 @@ print_moc_release_context(moc_out_data out_context, char* buffer,
 	PGS_CATCH
 	release_moc_out_context(out_context, error_out);
 }
+
+static
+bool entry_cmp(const moc_tree_entry & a, hpint64 y)
+{
+	hpint64 x;
+	std::memmove(&x, a.start, HP64_SIZE);
+	return x < y;
+}
+ 
+static
+bool interval_cmp(const moc_interval & x, hpint64 y)
+{
+	return x.first < y;
+}
+
+moc_tree_entry*
+entry_lower_bound(moc_tree_entry* first, moc_tree_entry* last, hpint64 value)
+{
+	return std::lower_bound(first, last, value, entry_cmp);
+}
+
+moc_interval*
+interval_lower_bound(moc_interval* first, moc_interval* last, hpint64 value);
+{
+	return std::lower_bound(first, last, value, interval_cmp);
+}
