@@ -20,6 +20,15 @@ PG_FUNCTION_INFO_V1(smoc_not_superset_spoint);
 
 int32 smoc_output_type = 0;
 
+#define LAYDEB 2
+
+#define DEBUG_(code) do { if (LAYDEB) { code; } } while (0);
+#define DEBUG_PRINT(name, fmt) DEBUG_(moc_debug_log(#name " = " fmt "; ", name))
+#define DEBUG_INT(name) DEBUG_PRINT(name, "%d")
+#define DEBUG_64(name) DEBUG_PRINT(name, "%lld")
+// #define DEBUG_(name) DEBUG_PRINT(name, "%")
+
+
 int32
 moc_mod_floor(int32 x, int32 mod)
 {
@@ -425,6 +434,7 @@ healpix_subset_smoc_impl(hpint64 x, Datum y)
 	moc_interval *last_i;
 	moc_interval *v;
 	int32 count;
+DEBUG_64(x)
 
 	if (end == MIN_MOC_SIZE) /* should include empty root node... */
 		return false;
