@@ -72,6 +72,7 @@ typedef struct
 						? (PG_TOAST_PAGE_FRAGMENT) : (MOC_HEADER_VARSIZE))
 
 #define MOC_BASE(moc) ((char*) &(moc->version))
+#define MOC_ENTRY(moc_base, offset) ((moc_tree_entry *)(moc_base + offset))
 
 void*
 create_moc_in_context(pgs_error_handler);

@@ -860,7 +860,7 @@ bool entry_cmp(const moc_tree_entry & a, hpint64 y)
 	std::memmove(&x, a.start, HP64_SIZE);
 	return x < y;
 }
- 
+
 static
 bool interval_cmp(const moc_interval & x, hpint64 y)
 {

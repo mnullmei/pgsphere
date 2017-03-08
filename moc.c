@@ -371,38 +371,72 @@ moc_debug(PG_FUNCTION_ARGS)
 	PG_RETURN_TEXT_P(cstring_to_text(x));
 }
 
-Datum
-healpix_subset_smoc_c(hpint64 x, Datum y)
+static
+bool entry_cmp(moc_tree_entry *a, hpint64 y)
 {
-	int32 end = tosast_raw_datum_size(y) - VARHDRSZ;
+	hpint64 x;
+	memmove(&x, a->start, HP64_SIZE);
+	return x < y;
+}
+
+bool
+healpix_subset_smoc_impl(hpint64 x, Datum y)
+{
+	int32 end = toast_raw_datum_size(y) - VARHDRSZ;
 	Smoc *moc;
 	char *moc_base;
 	int32 tree_begin;
 	int32 depth;
 	int32 *level_ends;
-	int32 i;
+	int32 k;
+	moc_tree_entry *first;
+	int32 d_begin = 0;
+	int32 d_end;
 
 	if (end == MIN_MOC_SIZE) /* should include empty root node... */
-		PG_RETURN_BOOL(false);
-	/* get the first two pages, they contain at least the root node */
-	Smoc *moc = (Smoc *) PG_DETOAST_DATUM_SLICE(y, 0, 2 * MOC_HEADER_PAGE);
-	if (moc->first == moc->last)
-		PG_RETURN_BOOL(false);
+		return false;
+	/* get the first page -- it contains at least the root node */
+	Smoc *moc = (Smoc *) PG_DETOAST_DATUM_SLICE(y, 0, MOC_HEADER_PAGE);
+	if (moc->first == moc->last || x < moc->first || x >= moc->last)
+		return false;
+	d_end = VARSIZE(moc) - VARHDRSZ;
 	moc_base = MOC_BASE(moc);
 	tree_begin = moc->tree_begin;
 	depth = moc->depth;
 	level_ends = (int32 *)(moc_base + tree_begin);
 
-	$pages_start = $tree_begin + $level_ends_size;
+	level_begin = tree_begin + 4 * depth; 
+	first =	(moc_tree_entry *)(moc_base + level_begin);
+	level_end = *level_ends;
 	
-	$entry_size = 12;
-
-	level_begin = tree_begin + 4 * 
+	for (k = 0; k < depth; ++k)
+	{
+		moc_tree_entry *last = MOC_ENTRY(moc_base, level_end - d_begin);
+		moc_tree_entry *w = entry_lower_bound(first, last, x);
+		if (w != last && entry_equal(w, x))
+			return true;
+		--w;
+		level_end = level_ends[k];
+		if (w->offset < d_end)
+		{
+			first = MOC_ENTRY(moc_base, w->offset - d_begin);
+		}
+		else
+		{
+			d_begin = w->offset;
+			% = %; // level_end
+			moc_base = (char *) PG_DETOAST_DATUM_SLICE(y, d_begin, %);
+			d_end = d_begin + VARSIZE(moc_base) - VARHDRSZ;
+			moc_base -= VARHDRSZ;
+			first = MOC_ENTRY(moc_base, 0);
+			
+			if (level_end > absolute_index_of_end_of_page)
+				level_end = absolute_index_of_end_of_page;
+		}
+	}
 	
-	for (i = 1; i < depth; ++i)
 	
 	
-
 
 	if (healpix_subset_smoc_level(x, y, moc, end, level_ends, ***, ))
 		PG_RETURN_BOOL(true);
@@ -416,21 +450,33 @@ healpix_subset_smoc_c(hpint64 x, Datum y)
 }
 
 Datum
+healpix_subset_smoc_c(hpint64 x, Datum y) 
+{
+	PG_RETURN_BOOL(healpix_subset_smoc_impl(x, y));
+}
+
+Datum
 healpix_not_subset_smoc_c(hpint64 x, Datum y) 
 {
-	PG_RETURN_BOOL(!healpix_subset_smoc_c(x, y));
+	PG_RETURN_BOOL(!healpix_subset_smoc_impl(x, y));
+}
+
+bool
+spoint_subset_smoc_impl(SPoint *x, Datum y)
+{
+	return healpix_subset_smoc_impl(healpix_nest_impl(29, x), y);
 }
 
 Datum
 spoint_subset_smoc_c(SPoint *x, Datum y)
 {
-	PG_RETURN_BOOL(healpix_subset_smoc_c(healpix_nest_c(29, x), y));
+	PG_RETURN_BOOL(spoint_subset_smoc_impl(x, y));
 }
 
 Datum
 spoint_not_subset_smoc_c(SPoint *x, Datum y) 
 {
-	PG_RETURN_BOOL(!spoint_subset_smoc_c(x, y));
+	PG_RETURN_BOOL(!spoint_subset_smoc_impl(x, y));
 }
 
 Datum
