@@ -20,6 +20,24 @@ PG_FUNCTION_INFO_V1(smoc_not_superset_spoint);
 
 int32 smoc_output_type = 0;
 
+int32
+moc_mod_floor(int32 x, int32 mod)
+{
+	return x - x % mod;
+}
+
+int32
+moc_tree_entry_floor(int32 x)
+{
+	return moc_mod_floor(x, MOC_TREE_ENTRY_SIZE);
+}
+
+int32
+moc_interval_floor(int32 x);
+{
+	return moc_mod_floor(x, MOC_INTERVAL_SIZE);
+}
+
 static void
 moc_error_out(const char *message, int type)
 {

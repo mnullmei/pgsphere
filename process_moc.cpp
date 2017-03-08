@@ -1,7 +1,7 @@
 #include <cstddef>
 #include <cstring>
 #include <cstdio>
-#include <exception>
+#include <cmath>
 #include <map>
 #include <vector>
 #include <algorithm>
@@ -9,6 +9,8 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <exception>
+#include <stdexcept>
 
 #include "pgs_process_moc.h"
 
@@ -469,11 +471,21 @@ DEBUG_(log_string().clear();)
 
 		m.options_size = 0; // align_round(m.options_bytes, MOC_INDEX_ALIGN);
 		moc_size += m.options_size;
+		if (m.options_size > MOC_MAX_OPTIONS_SIZE)
+			throw std::logic_error("options larger than MOC_MAX_OPTIONS_SIZE");
 
 		// Before doing the layout, calculate the maximal size that the B+-tree
 		// needs:
 		// first, calculate the maximal size the interval pages take
 		size_t len = m.input_map.size();
+		// take upper bound of depth into account for space of level ends
+		size_t moc_root_page_rest = moc_tree_entry_floor(std::ceil(
+				moc_mod_floor(PG_TOAST_PAGE_FRAGMENT - moc_size, 4)
+				- 3 * MOC_TREE_ENTRY_SIZE
+				- 4 * (1 + std::log(1 + (1 + len /
+									moc_interval_floor(PG_TOAST_PAGE_FRAGMENT)
+													* PG_TOAST_PAGE_FRAGMENT))
+							/ std::log(MOC_TREE_PAGE_LEN - 2))));
 DEBUG_DX(len)
 		m.layout.push_back(len);
 DEBUG_(log_string() += "tree:\n";)
@@ -484,7 +496,7 @@ DEBUG_DX(len)
 		bool not_root;
 		do
 		{
-			not_root = len > MOC_TREE_PAGE_LEN;
+			not_root = len > moc_root_page_rest;
 			m.layout.push_back(len);
 DEBUG_DX( len )
 
@@ -507,6 +519,9 @@ DEBUG_DX(m.layout[k].level_end)
 DEBUG_DX(moc_size)
 }
 DEBUG_DX(moc_size)
+		if (m.layout[depth].level_end
+								> moc_tree_entry_floor(PG_TOAST_PAGE_FRAGMENT))
+			throw std::logic_error("MOC root node spilled into second page");
 
 		// layout: intervals
 

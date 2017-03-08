@@ -74,6 +74,15 @@ typedef struct
 #define MOC_BASE(moc) ((char*) &(moc->version))
 #define MOC_ENTRY(moc_base, offset) ((moc_tree_entry *)(moc_base + offset))
 
+#define MOC_MAX_OPTIONS_SIZE 0 /* no options yet */
+
+int32
+moc_mod_floor(int32, int32);
+int32
+moc_tree_entry_floor(int32);
+int32
+moc_interval_floor(int32);
+
 void*
 create_moc_in_context(pgs_error_handler);
 
