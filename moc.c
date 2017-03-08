@@ -418,7 +418,7 @@ healpix_subset_smoc_impl(hpint64 x, Datum y)
 
 	if (end == MIN_MOC_SIZE) /* should include empty root node... */
 		return false;
-	/* get the first page -- it contains at least the root node */
+	/* get the first page -- it contains at least the full root node */
 	Smoc *moc = (Smoc *) PG_DETOAST_DATUM_SLICE(y, 0, MOC_HEADER_PAGE);
 	d_end = VARSIZE(moc) - VARHDRSZ;
 	if (moc->first == moc->last || x < moc->first || x >= moc->last)
@@ -436,8 +436,7 @@ healpix_subset_smoc_impl(hpint64 x, Datum y)
 		if (level_end > d_end)
 		{
 			int32 len = d_end - level_begin;
-			level_end = level_begin
-							+ (len / MOC_TREE_ENTRY_SIZE) * MOC_TREE_ENTRY_SIZE;
+			level_end = level_begin + moc_mod_floor(len, MOC_TREE_ENTRY_SIZE);
 		}
 		first =	MOC_ENTRY(moc_base, level_begin	- d_begin);
 		last =	MOC_ENTRY(moc_base, level_end	- d_begin);
