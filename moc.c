@@ -378,28 +378,40 @@ healpix_subset_smoc_c(hpint64 x, Datum y)
 	Smoc *moc;
 	char *moc_base;
 	int32 tree_begin;
-	int32 level_ends_size;
+	int32 depth;
 	int32 *level_ends;
-	int32 root_end_a;
+	int32 i;
 
 	if (end == MIN_MOC_SIZE) /* should include empty root node... */
 		PG_RETURN_BOOL(false);
-	/* get the whole page containing the MOC header */
-	Smoc *moc = (Smoc *) PG_DETOAST_DATUM_SLICE(y, 0, MOC_HEADER_PAGE);
+	/* get the first two pages, they contain at least the root node */
+	Smoc *moc = (Smoc *) PG_DETOAST_DATUM_SLICE(y, 0, 2 * MOC_HEADER_PAGE);
 	if (moc->first == moc->last)
 		PG_RETURN_BOOL(false);
-	moc_base = (char*) &(moc->version);
+	moc_base = MOC_BASE(moc);
 	tree_begin = moc->tree_begin;
-	level_ends_size = 4 * moc->depth;
-	level_ends = (int32 *)(MOC_BASE(moc) + moc->tree_begin);
-	root_end_a = *level_ends <= MOC_HEADER_PAGE ? level_ends : MOC_HEADER_PAGE;
-	/* search in first part of root node */
-	healpix_subset_smoc_root(x, y, moc, end, )
+	depth = moc->depth;
+	level_ends = (int32 *)(moc_base + tree_begin);
 
+	$pages_start = $tree_begin + $level_ends_size;
+	
+	$entry_size = 12;
+
+	level_begin = tree_begin + 4 * 
+	
+	for (i = 1; i < depth; ++i)
+	
+	
+
+
+	if (healpix_subset_smoc_level(x, y, moc, end, level_ends, ***, ))
+		PG_RETURN_BOOL(true);
 	/* search in second part of root node */
 	if (root_end_a < *level_ends)
-
-
+	{
+		//detoast...
+		PG_RETURN_BOOL(healpix_subset_smoc_root(...));
+	}
 	PG_RETURN_BOOL(false);
 }
 
