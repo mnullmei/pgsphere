@@ -389,50 +389,56 @@ healpix_subset_smoc_impl(hpint64 x, Datum y)
 	int32 depth;
 	int32 *level_ends;
 	int32 k;
-	moc_tree_entry *first;
 	int32 d_begin = 0;
 	int32 d_end;
 	int32 level_begin;
 	int32 level_end;
+	moc_tree_entry *first;
+	moc_tree_entry *last;
+	moc_tree_entry *w;
 	int32 count;
 
 	if (end == MIN_MOC_SIZE) /* should include empty root node... */
 		return false;
 	/* get the first page -- it contains at least the root node */
 	Smoc *moc = (Smoc *) PG_DETOAST_DATUM_SLICE(y, 0, MOC_HEADER_PAGE);
+	d_end = VARSIZE(moc) - VARHDRSZ;
 	if (moc->first == moc->last || x < moc->first || x >= moc->last)
 		return false;
-	d_end = VARSIZE(moc) - VARHDRSZ;
+
 	moc_base = MOC_BASE(moc);
 	tree_begin = moc->tree_begin;
 	depth = moc->depth;
 	level_ends = (int32 *)(moc_base + tree_begin);
-
 	level_begin = tree_begin + 4 * depth; 
-	level_end = *level_ends;
-	
+
 	for (k = 0; k < depth; ++k)
 	{
-		moc_tree_entry *first =	MOC_ENTRY(moc_base, level_begin	- d_begin);
-		moc_tree_entry *last =	MOC_ENTRY(moc_base, level_end	- d_begin);
-		moc_tree_entry *w = entry_lower_bound(first, last, x);
+		level_end = level_ends[k];
+		if (level_end > d_end)
+		{
+			int32 len = d_end - level_begin;
+			level_end = level_begin
+							+ (len / MOC_TREE_ENTRY_SIZE) * MOC_TREE_ENTRY_SIZE;
+		}
+		first =	MOC_ENTRY(moc_base, level_begin	- d_begin);
+		last =	MOC_ENTRY(moc_base, level_end	- d_begin);
+		w = entry_lower_bound(first, last, x);
 		if (w != last && entry_equal(w, x))
 			return true;
 		--w;
 		level_begin = w->offset;
-		if (level_begin >= d_end)
-		{
-			d_begin = level_begin;
-			count = PG_TOAST_PAGE_FRAGMENT - d_begin % PG_TOAST_PAGE_FRAGMENT;
-			moc_base = (char *) PG_DETOAST_DATUM_SLICE(y, d_begin, count);
-			d_end = d_begin + VARSIZE(moc_base) - VARHDRSZ;
-			moc_base -= VARHDRSZ;
-		}
-		level_end = level_ends[k];
-		if (level_end > d_end)
-			level_end = d_end;
+		if (level_begin < d_end)
+			continue;
+		d_begin = level_begin;
+		count = PG_TOAST_PAGE_FRAGMENT - d_begin % PG_TOAST_PAGE_FRAGMENT;
+		moc_base = (char *) PG_DETOAST_DATUM_SLICE(y, d_begin, count);
+		d_end = d_begin + VARSIZE(moc_base) - VARHDRSZ;
+		moc_base -= VARHDRSZ;
 	}
 /////search in interval page...
+//	moc_base, level_begin are now what they should be...
+	//re-factor that level_end > d_end thing for interval_end ...
 	
 	
 	return false;
