@@ -2,6 +2,7 @@
 #include <cstring>
 #include <cstdio>
 #include <cmath>
+#include <cstdarg>
 #include <map>
 #include <vector>
 #include <algorithm>
@@ -58,6 +59,17 @@ get_moc_debug(const char** c_str, pgs_error_handler error_out)
 		size = 1 + log_string().size();
 	PGS_CATCH
 	return size;
+}
+
+void
+moc_debug_log(const char *fm, ...)
+{
+	char buffer[2048];
+	va_list arguments;
+	va_start(arguments, fm);
+	vsprintf(buffer, fm, arguments);
+	va_end(arguments);
+	log_string().append(buffer);
 }
 
 // Throwing expections from destructors is not strictly forbidden, it is just
