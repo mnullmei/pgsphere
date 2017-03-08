@@ -519,8 +519,8 @@ DEBUG_DX(m.layout[k].level_end)
 DEBUG_DX(moc_size)
 }
 DEBUG_DX(moc_size)
-		if (m.layout[depth].level_end
-								> moc_tree_entry_floor(PG_TOAST_PAGE_FRAGMENT))
+		if (m.layout[depth].level_end > static_cast<size_t>(
+								moc_tree_entry_floor(PG_TOAST_PAGE_FRAGMENT)))
 			throw std::logic_error("MOC root node spilled into second page");
 
 		// layout: intervals
@@ -889,7 +889,7 @@ entry_lower_bound(moc_tree_entry* first, moc_tree_entry* last, hpint64 value)
 }
 
 moc_interval*
-interval_lower_bound(moc_interval* first, moc_interval* last, hpint64 value);
+interval_lower_bound(moc_interval* first, moc_interval* last, hpint64 value)
 {
 	return std::lower_bound(first, last, value, interval_cmp);
 }

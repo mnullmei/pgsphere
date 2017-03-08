@@ -6,6 +6,8 @@
 
 #include <chealpix.h>
 
+#include "point.h" /* SPoint */
+
 int order_invalid(int);
 hpint64 c_npix(int);
 
@@ -23,5 +25,7 @@ Datum healpix_nest(PG_FUNCTION_ARGS);
 Datum healpix_ring(PG_FUNCTION_ARGS);
 Datum inv_healpix_nest(PG_FUNCTION_ARGS);
 Datum inv_healpix_ring(PG_FUNCTION_ARGS);
+
+hpint64 healpix_nest_c(int32, SPoint*);
 
 #endif

@@ -33,7 +33,7 @@ moc_tree_entry_floor(int32 x)
 }
 
 int32
-moc_interval_floor(int32 x);
+moc_interval_floor(int32 x)
 {
 	return moc_mod_floor(x, MOC_INTERVAL_SIZE);
 }
@@ -429,7 +429,7 @@ healpix_subset_smoc_impl(hpint64 x, Datum y)
 	if (end == MIN_MOC_SIZE) /* should include empty root node... */
 		return false;
 	/* get the first page -- it contains at least the full root node */
-	Smoc *moc = (Smoc *) PG_DETOAST_DATUM_SLICE(y, 0, MOC_HEADER_PAGE);
+	moc = (Smoc *) PG_DETOAST_DATUM_SLICE(y, 0, MOC_HEADER_PAGE);
 	d_end = VARSIZE(moc) - VARHDRSZ;
 	if (moc->first == moc->last || x < moc->first || x >= moc->last)
 		return false;
@@ -464,7 +464,7 @@ healpix_subset_smoc_impl(hpint64 x, Datum y)
 	first_i	= MOC_INTERVAL(moc_base, level_begin - d_begin);
 	last_i	= MOC_INTERVAL(moc_base, end - d_begin);
 	v = interval_lower_bound(first_i, last_i, x);
-	if (v != last && v->first == x)
+	if (v != last_i && v->first == x)
 		return true;
 	--v;
 	return v->first < x && x < v->second;
@@ -485,7 +485,7 @@ healpix_not_subset_smoc_c(hpint64 x, Datum y)
 bool
 spoint_subset_smoc_impl(SPoint *x, Datum y)
 {
-	return healpix_subset_smoc_impl(healpix_nest_impl(29, x), y);
+	return healpix_subset_smoc_impl(healpix_nest_c(29, x), y);
 }
 
 Datum

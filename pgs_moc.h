@@ -65,6 +65,8 @@ Datum spoint_not_subset_smoc(PG_FUNCTION_ARGS);
 Datum smoc_superset_spoint(PG_FUNCTION_ARGS);
 Datum smoc_not_superset_spoint(PG_FUNCTION_ARGS);
 
+bool healpix_subset_smoc_impl(hpint64, Datum);
+bool spoint_subset_smoc_impl(SPoint*, Datum);
 Datum healpix_subset_smoc_c(hpint64, Datum);
 Datum healpix_not_subset_smoc_c(hpint64, Datum); 
 Datum spoint_subset_smoc_c(SPoint*, Datum);
