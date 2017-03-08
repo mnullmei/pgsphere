@@ -14,7 +14,7 @@
 
 #include "pgs_process_moc.h"
 
-#define LAYDEB 0
+#define LAYDEB 2
 
 #define DEBUG_(code) do { if (LAYDEB) { code; } } while (0);
 #define DEBUG_LOG(msg) DEBUG_(log_string() += msg)
@@ -479,13 +479,18 @@ DEBUG_(log_string().clear();)
 		// first, calculate the maximal size the interval pages take
 		size_t len = m.input_map.size();
 		// take upper bound of depth into account for space of level ends
-		size_t moc_root_page_rest = moc_tree_entry_floor(std::ceil(
+		int32 moc_root_page_calc = moc_tree_entry_floor(std::ceil(
 				moc_mod_floor(PG_TOAST_PAGE_FRAGMENT - moc_size, 4)
 				- 3 * MOC_TREE_ENTRY_SIZE
 				- 4 * (1 + std::log(1 + (1 + len /
 									moc_interval_floor(PG_TOAST_PAGE_FRAGMENT)
 													* PG_TOAST_PAGE_FRAGMENT))
 							/ std::log(MOC_TREE_PAGE_LEN - 2))));
+DEBUG_DX(moc_root_page_calc)
+		size_t moc_root_page_rest = moc_root_page_calc;
+		if (moc_root_page_calc < 0
+								|| moc_root_page_rest < 2 * MOC_TREE_ENTRY_SIZE)
+			throw std::logic_error("PG_TOAST_PAGE_FRAGMENT too small for MOCs");
 DEBUG_DX(len)
 		m.layout.push_back(len);
 DEBUG_(log_string() += "tree:\n";)
