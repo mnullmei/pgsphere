@@ -389,12 +389,19 @@ moc_debug(PG_FUNCTION_ARGS)
 	PG_RETURN_TEXT_P(cstring_to_text(x));
 }
 
-static
-bool entry_equal(moc_tree_entry *a, hpint64 y)
+static bool
+entry_equal(moc_tree_entry *a, hpint64 y)
 {
 	hpint64 x;
 	memmove(&x, a->start, HP64_SIZE);
 	return x == y;
+}
+
+static void
+fit_level_end_to(int32 d_end, int32 *level_end, int32 level_begin, int32 mod)
+{
+	if (*level_end > d_end)
+		*level_end = level_begin + moc_mod_floor(d_end - level_begin, mod);
 }
 
 bool
@@ -414,6 +421,9 @@ healpix_subset_smoc_impl(hpint64 x, Datum y)
 	moc_tree_entry *first;
 	moc_tree_entry *last;
 	moc_tree_entry *w;
+	moc_interval *first_i;
+	moc_interval *last_i;
+	moc_interval *v;
 	int32 count;
 
 	if (end == MIN_MOC_SIZE) /* should include empty root node... */
@@ -433,11 +443,7 @@ healpix_subset_smoc_impl(hpint64 x, Datum y)
 	for (k = 0; k < depth; ++k)
 	{
 		level_end = level_ends[k];
-		if (level_end > d_end)
-		{
-			int32 len = d_end - level_begin;
-			level_end = level_begin + moc_mod_floor(len, MOC_TREE_ENTRY_SIZE);
-		}
+		fit_level_end_to(d_end, &level_end, level_begin, MOC_TREE_ENTRY_SIZE);
 		first =	MOC_ENTRY(moc_base, level_begin	- d_begin);
 		last =	MOC_ENTRY(moc_base, level_end	- d_begin);
 		w = entry_lower_bound(first, last, x);
@@ -453,12 +459,15 @@ healpix_subset_smoc_impl(hpint64 x, Datum y)
 		d_end = d_begin + VARSIZE(moc_base) - VARHDRSZ;
 		moc_base -= VARHDRSZ;
 	}
-/////search in interval page...
-//	moc_base, level_begin are now what they should be...
-	//re-factor that level_end > d_end thing for interval_end ...
-	
-	
-	return false;
+	// search in interval page defined by (moc_base, level_begin, d_end)
+	fit_level_end_to(d_end, &end, level_begin, MOC_INTERVAL_SIZE);
+	first_i	= MOC_INTERVAL(moc_base, level_begin - d_begin);
+	last_i	= MOC_INTERVAL(moc_base, end - d_begin);
+	v = interval_lower_bound(first_i, last_i, x);
+	if (v != last && v->first == x)
+		return true;
+	--v;
+	return v->first < x && x < v->second;
 }
 
 Datum

@@ -73,6 +73,7 @@ typedef struct
 
 #define MOC_BASE(moc) ((char*) &(moc->version))
 #define MOC_ENTRY(moc_base, offset) ((moc_tree_entry *)(moc_base + offset))
+#define MOC_INTERVAL(moc_base, offset) ((moc_interval *)(moc_base + offset))
 
 #define MOC_MAX_OPTIONS_SIZE 0 /* no options yet */
 
