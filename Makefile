@@ -5,18 +5,19 @@ OBJS       = sscan.o sparse.o sbuffer.o vector3d.o point.o \
              gnomo.o healpix.o moc.o process_moc.o
 
 EXTENSION   = pg_sphere
-RELEASE_SQL = $(EXTENSION)--1.1.5beta0gavo.sql
+RELEASE_SQL = $(EXTENSION)--1.1.5beta2gavo.sql
 DATA_built  = $(RELEASE_SQL) \
 			  pg_sphere--unpackaged--1.1.5beta0gavo.sql \
 			  pg_sphere--unpackaged_gavo--1.1.5beta0gavo.sql \
 			  pg_sphere--1.0--1.0_gavo.sql \
-			  pg_sphere--1.0_gavo--1.1.5beta0gavo.sql
+			  pg_sphere--1.0_gavo--1.1.5beta0gavo.sql \
+			  pg_sphere--1.1.5beta0gavo--1.1.5beta2gavo.sql
 
 DOCS        = README.pg_sphere COPYRIGHT.pg_sphere
-#REGRESS     = init tables points euler circle line ellipse poly path box index \
-#			  contains_ops contains_ops_compat bounding_box_gist gnomo healpix \
-#			  moc
-REGRESS     = init moc
+REGRESS     = init tables points euler circle line ellipse poly path box index \
+			  contains_ops contains_ops_compat bounding_box_gist gnomo healpix \
+			  moc
+
 REGRESS_9_5 = index_9.5 # experimental for spoint3
 
 TESTS       = init_test tables points euler circle line ellipse poly path box index \
@@ -163,6 +164,9 @@ pg_sphere--1.0--1.0_gavo.sql: # dummy upgrade to allow for descriptive names
 pg_sphere--1.0_gavo--1.1.5beta0gavo.sql: $(addsuffix .in, \
 		$(AUGMENT_1_0_115B0G) \
 		$(addprefix upgrade_scripts/, $(UPGRADE_1_0_115B0G)))
+	cat upgrade_scripts/$@.in $^ > $@
+
+pg_sphere--1.1.5beta0gavo--1.1.5beta2gavo.sql: pgs_moc_type.sql.in
 	cat upgrade_scripts/$@.in $^ > $@
 
 # end of local stuff

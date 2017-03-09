@@ -20,7 +20,7 @@ PG_FUNCTION_INFO_V1(smoc_not_superset_spoint);
 
 int32 smoc_output_type = 0;
 
-#define LAYDEB 2
+#define LAYDEB 0
 
 #define DEBUG_(code) do { if (LAYDEB) { code; } } while (0);
 #define DEBUG_CLEAR DEBUG_(moc_debug_clear(moc_error_out))
