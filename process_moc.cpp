@@ -217,49 +217,36 @@ struct moc_tree_layout
 	void
 	layout_level(size_t & moc_size, size_t entry_size)
 	{
-DEBUG_(log_string() += "layout_level(): ";)
-DEBUG_DX(moc_size)
-DEBUG_DX(entries)
 
 		// maximal # of entries in a page
 		size_t page_len = PG_TOAST_PAGE_FRAGMENT / entry_size;
-DEBUG_DX(page_len)
 		// # of remaining bytes of the current page
 		size_t page_rest = PG_TOAST_PAGE_FRAGMENT
 											- moc_size % PG_TOAST_PAGE_FRAGMENT;
-DEBUG_DX(page_rest)
 		// # of remaining entries within the current page
 		size_t rest_entries = page_rest / entry_size;
-DEBUG_DX(rest_entries)
 		size_t rest_level = 4022250974;	// # of entries beyond the current page
 		size_t this_page = 3992890810;	// # of bytes used of the current page
 		if (entries >= rest_entries)
 		{
 			rest_level = entries - rest_entries;
 			this_page = page_rest;
-DEBUG_DX(rest_level)
-DEBUG_DX(this_page)
 		}			
 		else // there is only a single page fragment at this level
 		{
 			rest_level = 0;
 			this_page = entries * entry_size;
-DEBUG_DX(rest_level)
-DEBUG_DX(this_page)
 		}
 
 		// # of full pages the current level needs
 		size_t full_pages = rest_level / page_len;
 		// # of bytes that the last page, certainly fractionally, is used for
 		size_t last_page = (rest_level % page_len) * entry_size;
-DEBUG_DX(full_pages)
-DEBUG_DX(last_page)
 
 
 		size_t this_page_entries = entries * entry_size;
 		if (full_pages || last_page)
 			this_page_entries = this_page;
-DEBUG_DX(this_page_entries)
 
 		size_t full_pages_space = PG_TOAST_PAGE_FRAGMENT * full_pages;
 		// special case: end of entries at end of page
@@ -269,13 +256,9 @@ DEBUG_DX(this_page_entries)
 			if (full_pages > 1)
 				full_pages_space += PG_TOAST_PAGE_FRAGMENT * (full_pages - 1);
 		}
-DEBUG_DX(full_pages_space)
 
 		moc_size += this_page_entries + full_pages_space + last_page;
 		level_end = moc_size;
-DEBUG_DX(level_end)
-DEBUG_DX(moc_size)
-DEBUG_(log_string() += " ~~layout_level() ";)
 	}
 };
 
@@ -471,16 +454,12 @@ next_level(size_t & len, size_t entry_size)
 
 	// maximal # of entries in a page of the current level
 	size_t page_len = PG_TOAST_PAGE_FRAGMENT / entry_size;
-DEBUG_DX(page_len)
 	// # of full pages the current level needs
 	size_t full_pages = len / page_len;
-DEBUG_DX(full_pages)
 	// is there an additional fractional page?
 	bool frac_page = len % page_len;
-DEBUG_DX(frac_page)
 
 	len = full_pages + 1 + frac_page;
-DEBUG_DX(len*1)
 }
 
 int
@@ -491,7 +470,6 @@ get_moc_size(void* moc_in_context, pgs_error_handler error_out)
 	PGS_TRY
 		moc_input & m = *p;
 
-DEBUG_(log_string().clear();)
 
 		m.options_size = 0; // align_round(m.options_bytes, MOC_INDEX_ALIGN);
 		moc_size += m.options_size;
@@ -510,50 +488,34 @@ DEBUG_(log_string().clear();)
 									moc_interval_floor(PG_TOAST_PAGE_FRAGMENT)
 													* PG_TOAST_PAGE_FRAGMENT))
 							/ std::log(MOC_TREE_PAGE_LEN - 2))));
-DEBUG_DX(moc_root_page_calc)
 		size_t moc_root_page_rest = moc_root_page_calc;
 		if (moc_root_page_calc < 0
 								|| moc_root_page_rest < 2 * MOC_TREE_ENTRY_SIZE)
 			throw std::logic_error("PG_TOAST_PAGE_FRAGMENT too small for MOCs");
-DEBUG_DX(len)
 		m.layout.push_back(len);
-DEBUG_(log_string() += "tree:\n";)
 
 		next_level(len, MOC_INTERVAL_SIZE);
-DEBUG_DX(len)
 		// add the maximal sizes of each tree level
 		int check;
 		const int b_tree_inf = 100;
 		for (check = 0; check < b_tree_inf; ++check)
 		{
-DEBUG_(log_string() += " --- ";)
 			m.layout.push_back(len);
-DEBUG_DX(len*1*1*1)
 			if (len * MOC_TREE_ENTRY_SIZE <= moc_root_page_rest)
 				break;
 			next_level(len, MOC_TREE_ENTRY_SIZE);
-DEBUG_DX(1*len*1)
 		}
 		if (check == b_tree_inf)
 			throw std::logic_error("infinite loop for MOC B-tree depth");
 		
-DEBUG_(log_string() += "layout:\n";)
 		// layout: start with the section of the ends of each B+-tree level
 		size_t depth = m.layout.size() - 1;
-DEBUG_DX(depth)
-DEBUG_DX(moc_size)
 		moc_size += depth * MOC_INDEX_ALIGN;
 		// layout: B+-tree layout, starting at root node
-DEBUG_DX(moc_size)
 		for (unsigned k = depth; k >= 1; --k)
 {		
-DEBUG_DX(k)
 			m.layout[k].layout_level(moc_size, MOC_TREE_ENTRY_SIZE);
-DEBUG_DX(k*1)
-DEBUG_DX(m.layout[k].level_end)
-DEBUG_DX(moc_size)
 }
-DEBUG_DX(moc_size)
 		if (m.layout[depth].level_end > static_cast<size_t>(
 								moc_tree_entry_floor(PG_TOAST_PAGE_FRAGMENT)))
 			throw std::logic_error("MOC root node spilled into second page");
@@ -561,11 +523,8 @@ DEBUG_DX(moc_size)
 		// layout: intervals
 
 		moc_size = align_round(moc_size, HP64_SIZE);		// fix up alignment
-DEBUG_DX(moc_size)
 
 		m.layout[0].layout_level(moc_size, MOC_INTERVAL_SIZE);
-DEBUG_DX(m.layout[0].level_end)
-DEBUG_DX(moc_size)
 
 		moc_size = std::max(MIN_MOC_SIZE, moc_size);
 	PGS_CATCH
@@ -585,7 +544,6 @@ create_moc_release_context(void* moc_in_context, Smoc* moc,
 	int ret = 1;
 	PGS_TRY
 		const moc_input & m = *p;
-DEBUG_(log_string() += m.s + "\n";)
 
 		moc->version = 0;
 		// moc->version |= 1; // flag indicating options
@@ -604,7 +562,6 @@ DEBUG_(log_string() += m.s + "\n";)
 		rnode_iter	n(moc_data, m.layout[1].level_end);
 		// default for "empty" root node, points past the intervals:
 		rintv_iter last_i(m.layout[0].level_end);
-DEBUG_DX(last_i.index())
 		hpint64	first = 0;
 		hpint64	last = 0;
 		// intervals and next-level node:
@@ -622,8 +579,6 @@ DEBUG_DX(last_i.index())
 			{
 				// need to re-factor this into its own function:
 				n.set(make_node(i.index(), first));
-DEBUG_DX(n)
-DEBUG_DX((make_node(i.index(), first)))
 				last_rend = n;
 				rend = ++n;
 			}
@@ -640,8 +595,6 @@ DEBUG_DX((make_node(i.index(), first)))
 		if (!last_i.page_ready() || m.input_map.empty())
 		{
 			n.set(make_node(last_i.index(), first));
-DEBUG_DX(n)
-DEBUG_DX(((make_node(last_i.index(), first))))
 			last_rend = n;
 			rend = ++n;
 		}
@@ -653,16 +606,11 @@ DEBUG_DX(((make_node(last_i.index(), first))))
 			rnode_iter n(moc_data, m.layout[k + 1].level_end);
 			rnode_iter last_z;
 			rnode_iter z_end = rend;
-DEBUG_DX(z_end)
 			for ( ; z != z_end; ++z)
 			{
-DEBUG_DX(z)
-DEBUG_DX((*z))
 				if (z.page_ready())
 				{
 					n.set(make_node(z.index(), (*z).start));
-DEBUG_DX(n)
-DEBUG_DX((make_node(z.index(), (*z).start)))
 					last_rend = n;
 					rend = ++n;
 				}
@@ -671,8 +619,6 @@ DEBUG_DX((make_node(z.index(), (*z).start)))
 			if (!last_z.page_ready())
 			{
 				n.set(make_node(last_z.index(), (*last_z).start));
-DEBUG_DX(n)
-DEBUG_DX(((make_node(last_z.index(), (*last_z).start))))
 				last_rend = n;
 				rend = ++n;
 			}
@@ -683,19 +629,11 @@ DEBUG_DX(((make_node(last_z.index(), (*last_z).start))))
 		int32 tree_begin = last_rend.index() - depth * MOC_INDEX_ALIGN;
 		
 		// fill out level-end section
-DEBUG_DX(moc)
-DEBUG_DX(static_cast<void*>(detoasted_offset(moc, 0)))
 		int32* level_ends = data_as<int32>(detoasted_offset(moc, tree_begin));
 		moc->depth	= depth;
-DEBUG_DX(tree_begin)
-DEBUG_DX(depth)
-DEBUG_DX(level_ends)
 		for (int k = depth; k >= 1; --k)
 {
-DEBUG_DX(k)
-DEBUG_DX(level_ends + depth - k)
 			*(level_ends + depth - k) = m.layout[k].level_end;
-DEBUG_DX(m.layout[k].level_end)
 }
 		// There may be some space between the end of the options and
 		// moc->tree_begin, but simple relocation of the tree is not an option
@@ -738,55 +676,31 @@ order_break(output_map & outputs, const moc_interval & x, int max_order)
 	mask = ~mask ^ 3;
 char mask_x[88];
 sprintf(mask_x, "%016llx", mask);
-DEBUG_LF
-DEBUG_DX(mask_x)
-DEBUG_DX(max_order)
 	hpint64 first	= x.first >> 2 * (29 - max_order);
 	hpint64 second = x.second >> 2 * (29 - max_order);
-DEBUG_DX(first)
-DEBUG_DX(second)
 	for (order = max_order; order > 0; --order, first >>= 2, second >>= 2)
 	{
-DEBUG_LOG("\n")
-DEBUG_DX(1*order*1)
-DEBUG_DX(first)
-DEBUG_DX(second)
 		if (second == first)
 			return;
 		moc_map & output = outputs[order];
 		if (second - first < 4)
 		{
-DEBUG_LOG("\n__<4__")
 			add_to_map(output, first, second);
-DEBUG_DX(1*first)
-DEBUG_DX(1*second)
 			return;
 		}
 		// the follwing is sort of inefficient in case the two fragments are
 		// adjacent, but who cares...
 		if (first & 3)
 {
-DEBUG_LOG("\n__first & 3__")
-DEBUG_DX(first)
-DEBUG_DX(second)
 			add_to_map(output, first, (first + 4) & mask);
-DEBUG_DX(1*first)
-DEBUG_DX(1*(first + 4) & mask)
 			first += 4;
 }
 		if (second & 3)
 {
-DEBUG_LOG("\n__second & 3__")
-DEBUG_DX(first)
-DEBUG_DX(second)
 			add_to_map(output, second & mask, second);
-DEBUG_DX(1*first & mask)
-DEBUG_DX(1*second)
 }
 
 	}
-DEBUG_DX(first*1)
-DEBUG_DX(second*1)
 	if (first != second)
 		add_to_map(outputs[0], first, second);
 }
@@ -795,7 +709,6 @@ void
 ascii_out(std::string & m_s, char* s, Smoc* moc, int32 begin, int32 end,
 															int32 entry_size)
 {	
-DEBUG_LOG("aaaooo");
 
 	if (moc->first == moc->last)
 	{
@@ -804,7 +717,6 @@ DEBUG_LOG("aaaooo");
 	}
 	// moc output fiddling:
 	int order = moc->order;
-DEBUG_DX(order)
 	m_s.reserve(end); // rough guess
 	output_map outputs(1 + order);
 
@@ -814,7 +726,6 @@ DEBUG_DX(order)
 		int32 mod = (j + entry_size) % PG_TOAST_PAGE_FRAGMENT;
 		if (mod > 0 && mod < entry_size)
 			j += entry_size - mod;
-DEBUG_DX((*interval_ptr(moc, j)))
 		order_break(outputs, *interval_ptr(moc, j), order);
 	}
 	for (int k = 0; k <= order; ++k)
