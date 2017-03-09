@@ -10,7 +10,7 @@ PgSphere work properly! Let us assume your database is named
 
    -- if this outputs a line starting with ' pg_sphere',
       then please run the command
-            psql gavo -c "ALTER EXTENSION pg_sphere UPDATE TO '1.1.5beta0gavo';"
+            psql gavo -c "ALTER EXTENSION pg_sphere UPDATE TO '1.1.5beta2gavo';"
       to upgrade your database to this latest version of PgSphere.
 
    -- else, if nothing is output from the first command, then
