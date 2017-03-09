@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION mocd(bytea) RETURNS text AS $$
-	$toast_page = 50;
+	$toast_page = 108;
 
 	($in) = @_;
 	$moc = pack("H*", substr($in, 2));
