@@ -23,12 +23,22 @@ int32 smoc_output_type = 0;
 #define LAYDEB 2
 
 #define DEBUG_(code) do { if (LAYDEB) { code; } } while (0);
-#define DEBUG_PRINT(name, fmt) DEBUG_(moc_debug_log(#name " = " fmt "; ", name))
+#define DEBUG_CLEAR DEBUG_(moc_debug_clear(moc_error_out))
+#define DEBUG_OUT(str) DEBUG_(moc_debug_log(moc_error_out, str))
+#define DEBUG_LN DEBUG_OUT("\n")
+#define DEBUG_PRINT(name, fmt) DEBUG_(moc_debug_log(moc_error_out, \
+													#name " = " fmt "; ", name))
 #define DEBUG_INT(name) DEBUG_PRINT(name, "%d")
 #define DEBUG_64(name) DEBUG_PRINT(name, "%lld")
 // #define DEBUG_(name) DEBUG_PRINT(name, "%")
 
-
+#define DEBUG_ENTRY(name) DEBUG_(hpint64 x; \
+									memmove(&x, name->start, HP64_SIZE); \
+									moc_debug_log(moc_error_out, "*" #name \
+										" = {%lld -> %d}; ", x, name->offset))
+#define DEBUG_INTERVAL(name) DEBUG_(moc_debug_log(moc_error_out, "*" #name \
+													" = [%lld, %lld); ", \
+													name->first, name->second))
 int32
 moc_mod_floor(int32 x, int32 mod)
 {
@@ -434,7 +444,9 @@ healpix_subset_smoc_impl(hpint64 x, Datum y)
 	moc_interval *last_i;
 	moc_interval *v;
 	int32 count;
+DEBUG_CLEAR
 DEBUG_64(x)
+DEBUG_INT(end)
 
 	if (end == MIN_MOC_SIZE) /* should include empty root node... */
 		return false;
@@ -446,37 +458,76 @@ DEBUG_64(x)
 
 	moc_base = MOC_BASE(moc);
 	tree_begin = moc->tree_begin;
+DEBUG_INT(tree_begin)
+
 	depth = moc->depth;
+DEBUG_INT(depth)
 	level_ends = (int32 *)(moc_base + tree_begin);
 	level_begin = tree_begin + 4 * depth; 
+DEBUG_INT(level_begin)
 
 	for (k = 0; k < depth; ++k)
 	{
+DEBUG_LN
+DEBUG_INT(d_begin)
+DEBUG_INT(d_end)
+DEBUG_INT(k)
+DEBUG_LN
 		level_end = level_ends[k];
+DEBUG_INT(level_begin)
+DEBUG_INT(level_end)
 		fit_level_end_to(d_end, &level_end, level_begin, MOC_TREE_ENTRY_SIZE);
+DEBUG_INT(level_end*1)
 		first =	MOC_ENTRY(moc_base, level_begin	- d_begin);
+DEBUG_INT(level_begin	- d_begin)
+DEBUG_ENTRY(first)
 		last =	MOC_ENTRY(moc_base, level_end	- d_begin);
+DEBUG_INT(level_begin	- d_begin)
+
 		w = entry_lower_bound(first, last, x);
+DEBUG_INT(w != last)
+if (w != last)
+	DEBUG_ENTRY(w)
+
 		if (w != last && entry_equal(w, x))
 			return true;
 		--w;
+DEBUG_ENTRY(w)
 		level_begin = w->offset;
 		if (level_begin < d_end)
 			continue;
+		/* get the (potentially fractional) page the entry points to */
 		d_begin = level_begin;
+DEBUG_INT(d_begin)
 		count = PG_TOAST_PAGE_FRAGMENT - d_begin % PG_TOAST_PAGE_FRAGMENT;
+DEBUG_INT(count)
 		moc_base = (char *) PG_DETOAST_DATUM_SLICE(y, d_begin, count);
 		d_end = d_begin + VARSIZE(moc_base) - VARHDRSZ;
-		moc_base -= VARHDRSZ;
+DEBUG_INT(d_end)
+		moc_base += VARHDRSZ;
 	}
 	// search in interval page defined by (moc_base, level_begin, d_end)
+DEBUG_LN
+DEBUG_INT(d_end)
+DEBUG_INT(end)
 	fit_level_end_to(d_end, &end, level_begin, MOC_INTERVAL_SIZE);
+DEBUG_INT(end*1)
 	first_i	= MOC_INTERVAL(moc_base, level_begin - d_begin);
+DEBUG_INT(level_begin - d_begin)
+DEBUG_INTERVAL(first_i)
 	last_i	= MOC_INTERVAL(moc_base, end - d_begin);
+DEBUG_INT(end - d_begin)
+
+//debug: print out the whole of [*first_i, *last_i) -- also for nodes!!!
 	v = interval_lower_bound(first_i, last_i, x);
+if (v != last_i)
+	DEBUG_INTERVAL(v)
+	
 	if (v != last_i && v->first == x)
 		return true;
 	--v;
+DEBUG_OUT("\n__ ")
+DEBUG_INTERVAL(v)
 	return v->first < x && x < v->second;
 }
 

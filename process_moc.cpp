@@ -62,14 +62,26 @@ get_moc_debug(const char** c_str, pgs_error_handler error_out)
 }
 
 void
-moc_debug_log(const char *fm, ...)
+moc_debug_log(pgs_error_handler error_out, const char *fm, ...)
 {
+	int* p = 0;
 	char buffer[2048];
-	va_list arguments;
-	va_start(arguments, fm);
-	vsprintf(buffer, fm, arguments);
-	va_end(arguments);
-	log_string().append(buffer);
+	PGS_TRY
+		va_list arguments;
+		va_start(arguments, fm);
+		vsprintf(buffer, fm, arguments);
+		va_end(arguments);
+		log_string().append(buffer);
+	PGS_CATCH
+}
+
+void
+moc_debug_clear(pgs_error_handler error_out)
+{
+	int* p = 0;
+	PGS_TRY
+		log_string().clear();
+	PGS_CATCH
 }
 
 // Throwing expections from destructors is not strictly forbidden, it is just

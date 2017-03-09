@@ -119,11 +119,14 @@ size_t
 get_moc_debug(const char**, pgs_error_handler);
 
 void
-moc_debug_log(const char *, ...)
+moc_debug_log(pgs_error_handler, const char *, ...)
 #ifdef __GNUC__
-__attribute__((format(printf, 1, 2)))
+__attribute__((format(printf, 2, 3)))
 #endif
 ;
+
+void
+moc_debug_clear(pgs_error_handler);
 
 moc_tree_entry*
 entry_lower_bound(moc_tree_entry*, moc_tree_entry*, hpint64);
