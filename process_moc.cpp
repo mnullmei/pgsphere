@@ -15,7 +15,7 @@
 
 #include "pgs_process_moc.h"
 
-#define LAYDEB 0
+#define LAYDEB 2
 
 #define DEBUG_(code) do { if (LAYDEB) { code; } } while (0);
 #define DEBUG_LOG(msg) DEBUG_(log_string() += msg)
@@ -522,28 +522,31 @@ DEBUG_(log_string() += "tree:\n";)
 		next_level(len, MOC_INTERVAL_SIZE);
 DEBUG_DX(len)
 		// add the maximal sizes of each tree level
-		bool not_root;
 		do
 		{
-			not_root = len > moc_root_page_rest;
+DEBUG_(log_string() += " --- ";)
 			m.layout.push_back(len);
-DEBUG_DX( len )
-
+DEBUG_DX(len*1*1*1)
+			if (len * MOC_TREE_ENTRY_SIZE <= moc_root_page_rest)
+				break;
 			next_level(len, MOC_TREE_ENTRY_SIZE);
+DEBUG_DX(1*len*1)
 		}
-		while (not_root);
+		while (true);
 		
 DEBUG_(log_string() += "layout:\n";)
 		// layout: start with the section of the ends of each B+-tree level
 		size_t depth = m.layout.size() - 1;
+DEBUG_DX(depth)
 DEBUG_DX(moc_size)
 		moc_size += depth * MOC_INDEX_ALIGN;
 		// layout: B+-tree layout, starting at root node
 DEBUG_DX(moc_size)
 		for (unsigned k = depth; k >= 1; --k)
 {		
-			m.layout[k].layout_level(moc_size, MOC_TREE_ENTRY_SIZE);
 DEBUG_DX(k)
+			m.layout[k].layout_level(moc_size, MOC_TREE_ENTRY_SIZE);
+DEBUG_DX(k*1)
 DEBUG_DX(m.layout[k].level_end)
 DEBUG_DX(moc_size)
 }

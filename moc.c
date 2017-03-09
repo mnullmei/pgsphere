@@ -486,8 +486,7 @@ DEBUG_INT(level_begin	- d_begin)
 
 		w = entry_lower_bound(first, last, x);
 DEBUG_INT(w != last)
-if (w != last)
-	DEBUG_ENTRY(w)
+DEBUG_(if (w != last) DEBUG_ENTRY(w))
 
 		if (w != last && entry_equal(w, x))
 			return true;
@@ -520,8 +519,8 @@ DEBUG_INT(end - d_begin)
 
 //debug: print out the whole of [*first_i, *last_i) -- also for nodes!!!
 	v = interval_lower_bound(first_i, last_i, x);
-if (v != last_i)
-	DEBUG_INTERVAL(v)
+
+DEBUG_(if (v != last_i) DEBUG_INTERVAL(v))
 	
 	if (v != last_i && v->first == x)
 		return true;
