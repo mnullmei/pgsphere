@@ -522,7 +522,9 @@ DEBUG_(log_string() += "tree:\n";)
 		next_level(len, MOC_INTERVAL_SIZE);
 DEBUG_DX(len)
 		// add the maximal sizes of each tree level
-		do
+		int check;
+		const int b_tree_inf = 100;
+		for (check = 0; check < b_tree_inf; ++check)
 		{
 DEBUG_(log_string() += " --- ";)
 			m.layout.push_back(len);
@@ -532,7 +534,8 @@ DEBUG_DX(len*1*1*1)
 			next_level(len, MOC_TREE_ENTRY_SIZE);
 DEBUG_DX(1*len*1)
 		}
-		while (true);
+		if (check == b_tree_inf)
+			throw std::logic_error("infinite loop for MOC B-tree depth");
 		
 DEBUG_(log_string() += "layout:\n";)
 		// layout: start with the section of the ends of each B+-tree level

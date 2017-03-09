@@ -1,6 +1,90 @@
 SET client_min_messages = 'notice';
 -- SET client_min_messages = 'warning';
-select set_smoc_output_type(1);
+SELECT smoc('');            -- expected: '0/'
+ smoc 
+------
+ 0/
+(1 row)
+
+SELECT '0/'::smoc;          -- expected: '0/'
+ smoc 
+------
+ 0/
+(1 row)
+
+SELECT '29/'::smoc;         -- expected: '0/'
+ smoc 
+------
+ 0/
+(1 row)
+
+SELECT '0/0-3,7'::smoc;     -- expected: '0/0-3,7'
+  smoc   
+---------
+ 0/0-3,7
+(1 row)
+
+SELECT '0/0,1,2,3,7'::smoc; -- expected: '0/0-3,7'
+  smoc   
+---------
+ 0/0-3,7
+(1 row)
+
+SELECT '(0.78, 0.81)'::spoint <@ '7/123-456,10000-20000'::smoc;
+ ?column? 
+----------
+ t
+(1 row)
+
+SELECT '(0.78, 0.81)'::spoint <@ '7/123-456,1000-2000'::smoc;
+ ?column? 
+----------
+ f
+(1 row)
+
+SELECT 1 <@ (smoc('29/2-5,20-29,123,444,17-21,33-39,332-339,0-1'));
+ ?column? 
+----------
+ t
+(1 row)
+
+SELECT 1 <@ (smoc('29/2-5,20-29,123,444,17-21,33-39,332-339'));
+ ?column? 
+----------
+ f
+(1 row)
+
+SELECT 2 <@ (smoc('29/2-5,20-29,123,444,17-21,33-39,332-339'));
+ ?column? 
+----------
+ t
+(1 row)
+
+SELECT 6 <@ (smoc('29/2-5,20-29,123,444,17-21,33-39,332-339'));
+ ?column? 
+----------
+ f
+(1 row)
+
+SELECT 29 <@ (smoc('29/2-5,20-29,123,444,17-21,33-39,332-339'));
+ ?column? 
+----------
+ t
+(1 row)
+
+SELECT 333 <@ (smoc('29/2-5,20-29,123,444,17-21,33-39,332-339'));
+ ?column? 
+----------
+ t
+(1 row)
+
+SELECT 555 <@ (smoc('29/2-5,20-29,123,444,17-21,33-39,332-339'));
+ ?column? 
+----------
+ f
+(1 row)
+
+SELECT set_smoc_output_type(1);
          set_smoc_output_type          
 ---------------------------------------
  Set output type to MOC intervals (1).
@@ -99,7 +183,7 @@ ERROR:  function smoc(integer) does not exist
 LINE 1: SELECT smoc(0);
                ^
 HINT:  No function matches the given name and argument types. You might need to add explicit type casts.
-SELECT smoc('');            -- expected: error
+SELECT smoc('');
  smoc 
 ------
  {}
@@ -120,28 +204,34 @@ ERROR:  [c.2] Incorrect Healpix order 30.
 LINE 1: SELECT smoc('30/');
                     ^
 HINT:  A valid Healpix order must be an integer between 0 and 29.
-SELECT smoc('0/');          -- expected: '0/'
+SELECT smoc('0/');
  smoc 
 ------
  {}
 (1 row)
 
-SELECT smoc('0/0-3,7');     -- expected: '0/0-3,7'
+SELECT smoc('0/0-3,7');
                                  smoc                                  
 -----------------------------------------------------------------------
  {[0, 1152921504606846976) [2017612633061982208, 2305843009213693952)}
 (1 row)
 
-SELECT smoc('0/0,1,2,3,7'); -- expected: '0/0-3,7'
+SELECT smoc('0/0,1,2,3,7');
                                  smoc                                  
 -----------------------------------------------------------------------
  {[0, 1152921504606846976) [2017612633061982208, 2305843009213693952)}
 (1 row)
 
-SELECT ''::smoc;            -- expected: error
+select set_smoc_output_type(0);
+       set_smoc_output_type        
+-----------------------------------
+ Set output type to MOC-ASCII (0).
+(1 row)
+
+SELECT ''::smoc;
  smoc 
 ------
- {}
+ 0/
 (1 row)
 
 SELECT 'abc'::smoc;         -- expected: error
@@ -162,19 +252,25 @@ HINT:  A valid Healpix order must be an integer between 0 and 29.
 SELECT '0/'::smoc;          -- expected: '0/'
  smoc 
 ------
- {}
+ 0/
 (1 row)
 
 SELECT '0/0-3,7'::smoc;     -- expected: '0/0-3,7'
-                                 smoc                                  
------------------------------------------------------------------------
- {[0, 1152921504606846976) [2017612633061982208, 2305843009213693952)}
+  smoc   
+---------
+ 0/0-3,7
 (1 row)
 
 SELECT '0/0,1,2,3,7'::smoc; -- expected: '0/0-3,7'
-                                 smoc                                  
------------------------------------------------------------------------
- {[0, 1152921504606846976) [2017612633061982208, 2305843009213693952)}
+  smoc   
+---------
+ 0/0-3,7
+(1 row)
+
+select set_smoc_output_type(1);
+         set_smoc_output_type          
+---------------------------------------
+ Set output type to MOC intervals (1).
 (1 row)
 
 SELECT smoc('2/0,1,2,3,7 4/17,21-33,111');

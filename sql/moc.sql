@@ -1,7 +1,23 @@
 SET client_min_messages = 'notice';
 -- SET client_min_messages = 'warning';
 
-select set_smoc_output_type(1);
+SELECT smoc('');            -- expected: '0/'
+SELECT '0/'::smoc;          -- expected: '0/'
+SELECT '29/'::smoc;         -- expected: '0/'
+SELECT '0/0-3,7'::smoc;     -- expected: '0/0-3,7'
+SELECT '0/0,1,2,3,7'::smoc; -- expected: '0/0-3,7'
+SELECT '(0.78, 0.81)'::spoint <@ '7/123-456,10000-20000'::smoc;
+SELECT '(0.78, 0.81)'::spoint <@ '7/123-456,1000-2000'::smoc;
+
+SELECT 1 <@ (smoc('29/2-5,20-29,123,444,17-21,33-39,332-339,0-1'));
+SELECT 1 <@ (smoc('29/2-5,20-29,123,444,17-21,33-39,332-339'));
+SELECT 2 <@ (smoc('29/2-5,20-29,123,444,17-21,33-39,332-339'));
+SELECT 6 <@ (smoc('29/2-5,20-29,123,444,17-21,33-39,332-339'));
+SELECT 29 <@ (smoc('29/2-5,20-29,123,444,17-21,33-39,332-339'));
+SELECT 333 <@ (smoc('29/2-5,20-29,123,444,17-21,33-39,332-339'));
+SELECT 555 <@ (smoc('29/2-5,20-29,123,444,17-21,33-39,332-339'));
+
+SELECT set_smoc_output_type(1);
 
 SELECT '29/0-3,7'::smoc;
 SELECT '29/0,1,2,3,7'::smoc;
@@ -32,21 +48,25 @@ SELECT smoc(-1); -- expected: error
 SELECT smoc(15); -- expected: error
 SELECT smoc(0);  -- expected: '0/'
 
-SELECT smoc('');            -- expected: error
+SELECT smoc('');
 SELECT smoc('abc');         -- expected: error
 SELECT smoc('-1/');         -- expected: error
 SELECT smoc('30/');         -- expected: error
-SELECT smoc('0/');          -- expected: '0/'
-SELECT smoc('0/0-3,7');     -- expected: '0/0-3,7'
-SELECT smoc('0/0,1,2,3,7'); -- expected: '0/0-3,7'
+SELECT smoc('0/');
+SELECT smoc('0/0-3,7');
+SELECT smoc('0/0,1,2,3,7');
 
-SELECT ''::smoc;            -- expected: error
+select set_smoc_output_type(0);
+
+SELECT ''::smoc;
 SELECT 'abc'::smoc;         -- expected: error
 SELECT '-1/'::smoc;         -- expected: error
 SELECT '30/'::smoc;         -- expected: error
 SELECT '0/'::smoc;          -- expected: '0/'
 SELECT '0/0-3,7'::smoc;     -- expected: '0/0-3,7'
 SELECT '0/0,1,2,3,7'::smoc; -- expected: '0/0-3,7'
+
+select set_smoc_output_type(1);
 
 SELECT smoc('2/0,1,2,3,7 4/17,21-33,111');
 
@@ -90,4 +110,3 @@ SELECT smoc('1/6-7 2/22-23,32-33 11/1 24/1 29/1,3');
 SELECT smoc('5/1-127,999-1103');
 SELECT smoc('5/1024-1103');
 SELECT smoc('28/1101-1103');
-
