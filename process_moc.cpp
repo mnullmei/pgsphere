@@ -675,7 +675,7 @@ order_break(output_map & outputs, const moc_interval & x, int max_order)
 	hpint64 mask = 0;
 	mask = ~mask ^ 3;
 char mask_x[88];
-sprintf(mask_x, "%016llx", mask);
+sprintf(mask_x, "%016" MOC_FORMAT_64X, mask);
 	hpint64 first	= x.first >> 2 * (29 - max_order);
 	hpint64 second = x.second >> 2 * (29 - max_order);
 	for (order = max_order; order > 0; --order, first >>= 2, second >>= 2)
@@ -741,9 +741,9 @@ ascii_out(std::string & m_s, char* s, Smoc* moc, int32 begin, int32 end,
 				hpint64 first	= i->first;
 				hpint64 last	= i->second - 1;
 				if (first == last)
-					sprintf(s, "%llu,", first);
+					sprintf(s, "" MOC_FORMAT_64U ",", first);
 				else
-					sprintf(s, "%llu-%llu,", first, last);
+					sprintf(s, "" MOC_FORMAT_64U "-" MOC_FORMAT_64U ",", first, last);
 				m_s.append(s);
 		}
 		if (output.size())
@@ -780,7 +780,7 @@ create_moc_out_context(Smoc* moc, int32 end, pgs_error_handler error_out)
 					if (mod > 0 && mod < entry_size)
 						j += entry_size - mod;
 					moc_interval & x = *interval_ptr(moc, j);
-					sprintf(s, "[%llu, %llu) ", x.first, x.second);
+					sprintf(s, "[" MOC_FORMAT_64U ", " MOC_FORMAT_64U ") ", x.first, x.second);
 					m.s.append(s);
 				}
 				*m.s.rbegin() = '}';

@@ -1,7 +1,8 @@
+/* this goes in front to detect the chealpix API break */
+#include "pgs_moc.h"
+
 #include <stddef.h>
 #include <string.h>
-#include "pgs_healpix.h"
-#include "pgs_moc.h"
 
 PG_FUNCTION_INFO_V1(smoc_in);
 PG_FUNCTION_INFO_V1(smoc_out);
@@ -29,15 +30,17 @@ int32 smoc_output_type = 0;
 #define DEBUG_PRINT(name, fmt) DEBUG_(moc_debug_log(moc_error_out, \
 													#name " = " fmt "; ", name))
 #define DEBUG_INT(name) DEBUG_PRINT(name, "%d")
-#define DEBUG_64(name) DEBUG_PRINT(name, "%lld")
+#define DEBUG_64(name) DEBUG_PRINT(name, MOC_FORMAT_64)
 // #define DEBUG_(name) DEBUG_PRINT(name, "%")
 
 #define DEBUG_ENTRY(name) DEBUG_(hpint64 x; \
 									memmove(&x, name->start, HP64_SIZE); \
 									moc_debug_log(moc_error_out, "*" #name \
-										" = {%lld -> %d}; ", x, name->offset))
+										" = {" MOC_FORMAT_64 " -> %d}; ", \
+										x, name->offset))
 #define DEBUG_INTERVAL(name) DEBUG_(moc_debug_log(moc_error_out, "*" #name \
-													" = [%lld, %lld); ", \
+													" = [" MOC_FORMAT_64 ", \
+													" MOC_FORMAT_64 "); ", \
 													name->first, name->second))
 int32
 moc_mod_floor(int32 x, int32 mod)
@@ -118,8 +121,8 @@ smoc_in(PG_FUNCTION_ARGS)
 			{
 				release_moc_in_context(moc_in_context, moc_error_out);
 				ereport(ERROR, (errcode(ERRCODE_NUMERIC_VALUE_OUT_OF_RANGE),
-						errmsg("[c.%d] Incorrect Healpix order %lld.", ind - 1,
-																			nb),
+						errmsg("[c.%d] Incorrect Healpix order " MOC_FORMAT_64
+															".", ind - 1, nb),
 						errhint("A valid Healpix order must be an integer "
 								"between 0 and 29.")));
 			}
@@ -132,10 +135,10 @@ smoc_in(PG_FUNCTION_ARGS)
 			{
 				release_moc_in_context(moc_in_context, moc_error_out);
 				ereport(ERROR, (errcode(ERRCODE_NUMERIC_VALUE_OUT_OF_RANGE),
-							errmsg("[c.%d] Incorrect Healpix index %lld.",
+							errmsg("[c.%d] Incorrect Healpix index " MOC_FORMAT_64 ".",
 																ind - 1, nb),
 							errhint("At order %ld, a Healpix index must be "
-									"an integer between 0 and %lld.", order,
+									"an integer between 0 and " MOC_FORMAT_64 ".", order,
 									 								npix - 1)));
 			}
 			dbg_to_moc(1, moc_in_context, order, nb, nb + 1, moc_error_out);
@@ -177,30 +180,30 @@ smoc_in(PG_FUNCTION_ARGS)
 			{
 				release_moc_in_context(moc_in_context, moc_error_out);
 				ereport(ERROR, (errcode(ERRCODE_NUMERIC_VALUE_OUT_OF_RANGE),
-							errmsg("[c.%d] Incorrect Healpix index %lld.",
+							errmsg("[c.%d] Incorrect Healpix index " MOC_FORMAT_64 ".",
 																ind - 1, nb),
 							errhint("At order %ld, a Healpix index must be "
-									"an integer between 0 and %lld.", order,
+									"an integer between 0 and " MOC_FORMAT_64 ".", order,
 									 								npix - 1)));
 			}
 			if (index_invalid(npix, nb2))
 			{
 				release_moc_in_context(moc_in_context, moc_error_out);
 				ereport(ERROR, (errcode(ERRCODE_NUMERIC_VALUE_OUT_OF_RANGE),
-							errmsg("[c.%d] Incorrect Healpix index %lld.",
+							errmsg("[c.%d] Incorrect Healpix index " MOC_FORMAT_64 ".",
 																ind - 1, nb2),
 							errhint("At order %ld, a Healpix index must be "
-									"an integer between 0 and %lld.", order,
+									"an integer between 0 and " MOC_FORMAT_64 ".", order,
 									 								npix - 1)));
 			}
 			if (nb >= nb2)
 			{
 				release_moc_in_context(moc_in_context, moc_error_out);
 				ereport(ERROR, (errcode(ERRCODE_NUMERIC_VALUE_OUT_OF_RANGE),
-						errmsg("[c.%d] Incorrect Healpix range %lld-%lld.",
+						errmsg("[c.%d] Incorrect Healpix range " MOC_FORMAT_64 "-" MOC_FORMAT_64 ".",
 															ind - 1 , nb, nb2),
-						errhint("The first value of a range (here %lld) must be"
-								" less than the second one (here %lld).",
+						errhint("The first value of a range (here " MOC_FORMAT_64 ") must be"
+								" less than the second one (here " MOC_FORMAT_64 ").",
 								nb, nb2)));
 			}
 			dbg_to_moc(2, moc_in_context, order, nb, nb2 + 1, moc_error_out);
@@ -211,10 +214,10 @@ smoc_in(PG_FUNCTION_ARGS)
 			{
 				release_moc_in_context(moc_in_context, moc_error_out);
 				ereport(ERROR, (errcode(ERRCODE_NUMERIC_VALUE_OUT_OF_RANGE),
-							errmsg("[c.%d] Incorrect Healpix index %lld.",
+							errmsg("[c.%d] Incorrect Healpix index " MOC_FORMAT_64 ".",
 																ind - 1, nb),
 							errhint("At order %ld, a Healpix index must be "
-									"an integer between 0 and %lld.", order,
+									"an integer between 0 and " MOC_FORMAT_64 ".", order,
 									 								npix - 1)));
 			}
 			ind--; /* Nothing else to do in this function */
@@ -235,10 +238,10 @@ smoc_in(PG_FUNCTION_ARGS)
 			{
 				release_moc_in_context(moc_in_context, moc_error_out);
 				ereport(ERROR, (errcode(ERRCODE_NUMERIC_VALUE_OUT_OF_RANGE),
-							errmsg("[c.%d] Incorrect Healpix index %lld.",
+							errmsg("[c.%d] Incorrect Healpix index " MOC_FORMAT_64 ".",
 																ind - 1, nb),
 							errhint("At order %ld, a Healpix index must be "
-									"an integer between 0 and %lld.", order,
+									"an integer between 0 and " MOC_FORMAT_64 ".", order,
 									 								npix - 1)));
 			}
 			else

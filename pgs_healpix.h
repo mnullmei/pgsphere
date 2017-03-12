@@ -1,10 +1,11 @@
 #ifndef __PGS_HEALPIX_H__
 #define __PGS_HEALPIX_H__
 
+/* this goes in front to detect the chealpix API break */
+#include "pgs_chealpix.h"
+
 #include <postgres.h>
 #include <fmgr.h>
-
-#include <chealpix.h>
 
 #include "point.h" /* SPoint */
 

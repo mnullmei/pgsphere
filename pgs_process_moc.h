@@ -5,6 +5,9 @@
 extern "C" {
 #endif
 
+/* this goes in front to detect the chealpix API break */
+#include "pgs_chealpix.h"
+
 #include <c.h>					/* PostgreSQL type definitions */
 
 /*
@@ -15,8 +18,6 @@ extern "C" {
  * #include <postgres.h>
  * #include <access/tuptoaster.h>	// for TOAST_MAX_CHUNK_SIZE
  */
-
-#include <chealpix.h>
 
 extern int32 smoc_output_type;
 

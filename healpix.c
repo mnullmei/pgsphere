@@ -1,11 +1,10 @@
+/* this goes in front to detect the chealpix API break */
+#include "pgs_healpix.h"
+
 #include <postgres.h>
 #include <fmgr.h>
 #include <catalog/pg_type.h>
-
-#include <point.h> /* SPoint */
-#include <pgs_healpix.h>
-
-#include <chealpix.h>
+#include "point.h" /* SPoint */
 #include <math.h>
 
 PG_FUNCTION_INFO_V1(pg_nest2ring);

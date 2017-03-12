@@ -1,15 +1,16 @@
 #ifndef __PGS_MOC_H__
 #define __PGS_MOC_H__
 
+/* these go in front to detect the chealpix API break */
+#include "pgs_healpix.h"
+#include "pgs_process_moc.h"
+
 #include <postgres.h>
 #include <fmgr.h>
 #include <catalog/pg_type.h>
 #include <access/tuptoaster.h>
 
 #include "point.h" /* SPoint */
-#include "pgs_healpix.h"
-#include "pgs_process_moc.h"
-
 
 /*
  * MOC data type(s)
