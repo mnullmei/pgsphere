@@ -5,13 +5,13 @@ OBJS       = sscan.o sparse.o sbuffer.o vector3d.o point.o \
              gnomo.o healpix.o moc.o process_moc.o
 
 EXTENSION   = pg_sphere
-RELEASE_SQL = $(EXTENSION)--1.1.5beta2gavo.sql
+RELEASE_SQL = $(EXTENSION)--1.1.5beta4gavo.sql
 DATA_built  = $(RELEASE_SQL) \
 			  pg_sphere--unpackaged--1.1.5beta0gavo.sql \
-			  pg_sphere--unpackaged_gavo--1.1.5beta0gavo.sql \
 			  pg_sphere--1.0--1.0_gavo.sql \
 			  pg_sphere--1.0_gavo--1.1.5beta0gavo.sql \
-			  pg_sphere--1.1.5beta0gavo--1.1.5beta2gavo.sql
+			  pg_sphere--1.1.5beta0gavo--1.1.5beta2gavo.sql \
+			  pg_sphere--1.1.5beta2gavo--1.1.5beta4gavo.sql
 
 DOCS        = README.pg_sphere COPYRIGHT.pg_sphere
 REGRESS     = init tables points euler circle line ellipse poly path box index \
@@ -38,7 +38,7 @@ PGS_SQL     = pgs_types.sql pgs_point.sql pgs_euler.sql pgs_circle.sql \
    pgs_line.sql pgs_ellipse.sql pgs_polygon.sql pgs_path.sql \
    pgs_box.sql pgs_contains_ops.sql pgs_contains_ops_compat.sql \
    pgs_gist.sql gnomo.sql pgs_gist_pointkey.sql \
-   healpix.sql pgs_gist_spoint3.sql pgs_moc_type.sql
+   healpix.sql pgs_gist_spoint3.sql pgs_moc_type.sql pgs_moc_compat.sql
 PGS_SQL_9_5 = pgs_9.5.sql # experimental for spoint3
 
 ifdef USE_PGXS
@@ -152,13 +152,9 @@ pg_sphere--unpackaged--1.1.5beta0gavo.sql: $(addsuffix .in, \
 		$(addprefix upgrade_scripts/, $(UPGRADE_GAVO_111)))
 	cat upgrade_scripts/$@.in $^ > $@
 
-# test installation A
-pg_sphere--unpackaged_gavo--1.1.5beta0gavo.sql: $(addsuffix .in, \
-		$(AUGMENT_UNP_115B0G) \
-		$(addprefix upgrade_scripts/, $(UPGRADE_UNP_115B0G)))
-	cat upgrade_scripts/$@.in $^ > $@
+# (The upgrade of test installation A has been completed.)
 
-# test installation B
+# test installation B (generic)
 pg_sphere--1.0--1.0_gavo.sql: # dummy upgrade to allow for descriptive names
 	cat upgrade_scripts/$@.in > $@
 pg_sphere--1.0_gavo--1.1.5beta0gavo.sql: $(addsuffix .in, \
@@ -167,6 +163,9 @@ pg_sphere--1.0_gavo--1.1.5beta0gavo.sql: $(addsuffix .in, \
 	cat upgrade_scripts/$@.in $^ > $@
 
 pg_sphere--1.1.5beta0gavo--1.1.5beta2gavo.sql: pgs_moc_type.sql.in
+	cat upgrade_scripts/$@.in $^ > $@
+
+pg_sphere--1.1.5beta2gavo--1.1.5beta4gavo.sql: pgs_moc_compat.sql.in
 	cat upgrade_scripts/$@.in $^ > $@
 
 # end of local stuff
