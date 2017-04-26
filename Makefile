@@ -94,11 +94,11 @@ $(RELEASE_SQL): $(addsuffix .in, $(RELEASE_SQL) $(PGS_SQL)) pgs_link
 
 UPGRADE_UNP_COMMON =  pgs_types.sql pgs_point.sql pgs_euler.sql pgs_circle.sql \
 	pgs_line.sql pgs_ellipse.sql pgs_polygon.sql pgs_path.sql \
-    pgs_box.sql pgs_contains_ops_compat.sql pgs_gist.sql \
+	pgs_box.sql pgs_contains_ops_compat.sql pgs_gist.sql \
 	pgs_gist_contains_ops.sql contains-ops-fixes-1.sql
 
 AUGMENT_UNP_COMMON = upgrade_scripts/pgs_pre111.sql pgs_contains_ops.sql \
-																	gnomo.sql
+	gnomo.sql
 # for vanilla 1.1.1 users
 AUGMENT_UNP_111 = $(AUGMENT_UNP_COMMON) pgs_gist_pointkey.sql
 

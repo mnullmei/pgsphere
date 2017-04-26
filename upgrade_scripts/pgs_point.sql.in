@@ -1,4 +1,3 @@
-ALTER EXTENSION pg_sphere ADD FUNCTION pg_sphere_version();
 ALTER EXTENSION pg_sphere ADD FUNCTION spoint(FLOAT8, FLOAT8);
 ALTER EXTENSION pg_sphere ADD FUNCTION set_sphere_output_precision(INT4);
 ALTER EXTENSION pg_sphere ADD FUNCTION set_sphere_output(CSTRING);
